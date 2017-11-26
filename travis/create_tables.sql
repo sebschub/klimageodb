@@ -6,7 +6,7 @@ CREATE TABLE site (
     site_altitude real CHECK (site_altitude >= -500. AND site_altitude <= 10000.),
     site_comment  varchar(50),
     CONSTRAINT site_latlon_consistency_check
-      CHECK( (site_lat IS NULL AND site_lon IS NULL) | (site_lat IS NOT NULL AND site_lon IS NOT NULL) )
+      CHECK( (site_lat IS NULL AND site_lon IS NULL) OR (site_lat IS NOT NULL AND site_lon IS NOT NULL) )
     );
   COMMENT ON TABLE  site               IS 'measurement site or campaign';
   COMMENT ON COLUMN site.site_id       IS 'ID';
