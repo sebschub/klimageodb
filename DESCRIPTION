@@ -6,10 +6,11 @@ Author: Sebastian Schubert
 Maintainer: Sebastian Schubert <sebastian.schubert@geo.hu-berlin.de>
 Description: This package provides commands to easily store and retrieve
     data from the Klimageographie database.
-Depends: 
+Depends:
     R (>= 3.1.0),
     DBI
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports: odbc
+Suggests: testthat

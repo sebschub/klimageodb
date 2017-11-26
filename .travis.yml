@@ -1,0 +1,19 @@
+# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
+
+language: R
+sudo: false
+cache: packages
+env:
+  - MAKEFLAGS = -j2 ODBCSYSINI=${TRAVIS_BUILD_DIR}/travis/odbc INCLUDE_DIR=/usr/include LIB_DIR=/usr/lib/x86_64-linux-gnu/
+addons:
+  postgresql: "9.4"
+  apt:
+    packages:
+      - unixodbc-dev
+      - odbc-postgresql
+services:
+  - postgresql
+before_script:
+  - sudo -u postgres psql -U postgres -c 'CREATE DATABASE klimageo;'
+  - sudo -u postgres psql -U postgres -c "ALTER USER postgres WITH PASSWORD 'password';"
+  - sudo -u postgres psql -U postgres -f ${TRAVIS_BUILD_DIR}/travis/create_tables.sql

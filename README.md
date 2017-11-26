@@ -1,3 +1,5 @@
+[![Travis-CI Build Status](https://travis-ci.org/sebschub/klimageodb.svg?branch=master)](https://travis-ci.org/sebschub/klimageodb)
+
 # klimageodb
 
 The goal of klimageodb is to ...
