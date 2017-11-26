@@ -13,7 +13,7 @@
 #'
 #' @examples
 dbConnect_klimageo <- function(dsn = "klimageo") {
-  dbConnect(odbc::odbc(), dsn = dsn, timezone = "Europe/Berlin")
+  DBI::dbConnect(odbc::odbc(), dsn = dsn, timezone = "Europe/Berlin")
 }
 
 
@@ -24,7 +24,7 @@ write_table <- function(name, arg_list) {
   df <- arg_list[-1]
   df <- do.call(cbind.data.frame, df[!sapply(df, is.null)])
   # write the table
-  dbWriteTable(conn, name = name, value = df, append = TRUE)
+  DBI::dbWriteTable(conn, name = name, value = df, append = TRUE)
 }
 
 dbWriteTable_site <- function(conn, site_name,
