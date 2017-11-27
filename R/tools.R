@@ -12,11 +12,21 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
+#' con <- dbConnect_klimageo()
+#' dbDisconnect(con)
+#' }
 dbConnect_klimageo <- function(dsn = "klimageodb") {
   DBI::dbConnect(odbc::odbc(), dsn = dsn, timezone = "Europe/Berlin")
 }
 
 
+#' Write table to database
+#'
+#' @param name Name of the table.
+#' @param arg_list List with first element being DBIConnection to the target
+#'   database and rest being columns of same length to be put into the table.
+#'
 write_table <- function(name, arg_list) {
   # conn is first in list
   conn <- arg_list[[1]]
@@ -27,6 +37,24 @@ write_table <- function(name, arg_list) {
   DBI::dbWriteTable(conn, name = name, value = df, append = TRUE)
 }
 
+#' Insert data into \code{site} table
+#'
+#' @param conn Database connection.
+#' @param site_name String vector of name of site or name of campaign.
+#' @param site_lat Numeric vector of geographical latitude WGS84.
+#' @param site_lon Numeric vector of geographical longitude WGS84.
+#' @param site_altitude Numeric vector of height above sea level of surface in
+#'   m.
+#' @param site_comment String vector of height above sea level of surface in m.
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' con <- dbConnect_klimageo()
+#' dbWriteTable_site(con, "Adlershof", site_lon = 14., site_lat = 53.)
+#' dbDisconnect(conn)
+#' }
 dbWriteTable_site <- function(conn, site_name,
                               site_lat = NULL, site_lon = NULL, site_altitude = NULL,
                               site_comment = NULL) {
