@@ -12,7 +12,7 @@
 #' @export
 #'
 #' @examples
-dbConnect_klimageo <- function(dsn = "klimageo") {
+dbConnect_klimageo <- function(dsn = "klimageodb") {
   DBI::dbConnect(odbc::odbc(), dsn = dsn, timezone = "Europe/Berlin")
 }
 

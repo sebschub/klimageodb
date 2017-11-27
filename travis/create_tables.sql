@@ -1,9 +1,9 @@
 CREATE TABLE site (
     site_id       serial PRIMARY KEY,
     site_name     varchar(20) NOT NULL UNIQUE,
-    site_lat      real CHECK (site_lat      >=  -90. AND site_lat      <=    90.),
-    site_lon      real CHECK (site_lon      >= -180. AND site_lat      <=   180.),
-    site_altitude real CHECK (site_altitude >= -500. AND site_altitude <= 10000.),
+    site_lat      double precision CHECK (site_lat      >=  -90. AND site_lat      <=    90.),
+    site_lon      double precision CHECK (site_lon      >= -180. AND site_lat      <=   180.),
+    site_altitude double precision CHECK (site_altitude >= -500. AND site_altitude <= 10000.),
     site_comment  varchar(50),
     CONSTRAINT site_latlon_consistency_check
       CHECK( (site_lat IS NULL AND site_lon IS NULL) OR (site_lat IS NOT NULL AND site_lon IS NOT NULL) )
@@ -113,9 +113,9 @@ CREATE TABLE integration_type (
 CREATE TABLE integration (
     int_id                   serial PRIMARY KEY,
     inttype_id               integer NOT NULL REFERENCES integration_type(inttype_id),
-    int_measurement_interval real NOT NULL
+    int_measurement_interval double precision NOT NULL
       CHECK (int_measurement_interval > 0. AND int_measurement_interval <= 86400.),
-    int_interval             real NOT NULL,
+    int_interval             double precision NOT NULL,
       CHECK (int_interval             > 0. AND int_interval             <= 86400.),
     int_comment              varchar(50),
     UNIQUE (inttype_id, int_measurement_interval, int_interval),
@@ -150,7 +150,7 @@ CREATE TABLE measurand (
     pq_id             integer NOT NULL REFERENCES physical_quantity(pq_id),
     site_id           integer NOT NULL REFERENCES site(site_id),
     caldev_id         integer NOT NULL REFERENCES calibrated_device(caldev_id),
-    md_height         real CHECK (md_height >= -10. AND md_height <= 10000.),
+    md_height         double precision CHECK (md_height >= -10. AND md_height <= 10000.),
     int_id            integer NOT NULL REFERENCES integration(int_id),
     pers_id           integer REFERENCES person(pers_id),
     md_comment        varchar(50),
@@ -178,6 +178,7 @@ CREATE TABLE stationadlershof_measurement_raw (
       CHECK (statadmr_datetime >= '2000-01-01' AND statadmr_datetime < NOW()),
     md_id             integer NOT NULL REFERENCES measurand(md_id),
     statadmr_value    double precision,
+    statadmr_qc_pass  boolean,
     UNIQUE (statadmr_datetime, md_id)
     );
   COMMENT ON TABLE  stationadlershof_measurement_raw                   IS 'unchecked measurements at Adlershof sites';
@@ -185,29 +186,35 @@ CREATE TABLE stationadlershof_measurement_raw (
   COMMENT ON COLUMN stationadlershof_measurement_raw.statadmr_datetime IS 'date and time (with time zone) of measurement';
   COMMENT ON COLUMN stationadlershof_measurement_raw.md_id             IS 'reference to measurand that was measured';
   COMMENT ON COLUMN stationadlershof_measurement_raw.statadmr_value    IS 'actual value of measurement';
+  COMMENT ON COLUMN stationadlershof_measurement_raw.statadmr_qc_pass  IS 'quality control passed (TRUE), failed (FALSE), not done (NULL)';
 
 
 CREATE VIEW device_model_detail AS
   SELECT devmod_id, devmod_name, devtype_name, devman_name, devmod_comment FROM device_model
-    LEFT OUTER JOIN device_type         ON (device_model.devtype_id  = device_type.devtype_id)
-    LEFT OUTER JOIN device_manufacturer ON (device_model.devman_id   = device_manufacturer.devman_id);
+    LEFT OUTER JOIN device_type         USING (devtype_id)
+    LEFT OUTER JOIN device_manufacturer USING (devman_id);
+  COMMENT ON VIEW device_model_detail IS 'measurement device model with joined details';
 
 CREATE VIEW device_detail AS
   SELECT dev_id, dev_name, devtype_name, devmod_name, devman_name, dev_comment FROM device
-    LEFT OUTER JOIN device_model_detail ON (device.devmod_id         = device_model_detail.devmod_id);
+    LEFT OUTER JOIN device_model_detail USING (devmod_id);
+  COMMENT ON VIEW device_detail IS 'measurement device with joined details';
 
 CREATE VIEW calibrated_device_detail AS
   SELECT caldev_id, dev_name, devtype_name, devmod_name, devman_name, caldev_datetime, caldev_parameter, caldev_comment FROM calibrated_device
-    LEFT OUTER JOIN device_detail ON (calibrated_device.dev_id = device_detail.dev_id);
+    LEFT OUTER JOIN device_detail USING (dev_id);
+  COMMENT ON VIEW calibrated_device_detail IS 'calibrated measurement device with joined details';
 
 CREATE VIEW integration_detail AS
   SELECT int_id, inttype_name, int_measurement_interval, int_interval, int_comment FROM integration
-    LEFT OUTER JOIN integration_type ON (integration.inttype_id = integration_type.inttype_id);
+    LEFT OUTER JOIN integration_type USING (inttype_id);
+  COMMENT ON VIEW integration_detail IS 'integration with joined details';
 
 CREATE VIEW measurand_detail AS
   SELECT md_id, md_name, md_setup_datetime, pq_name, pq_unit, site_name, dev_name, devmod_name, caldev_datetime, md_height, inttype_name, int_measurement_interval, int_interval, pers_name, md_comment FROM measurand
-    LEFT OUTER JOIN physical_quantity        ON (measurand.pq_id = physical_quantity.pq_id)
-    LEFT OUTER JOIN site                     ON (measurand.site_id = site.site_id)
-    LEFT OUTER JOIN calibrated_device_detail ON (measurand.caldev_id = calibrated_device_detail.caldev_id)
-    LEFT OUTER JOIN integration_detail       ON (measurand.int_id = integration_detail.int_id)
-    LEFT OUTER JOIN person                   ON (measurand.pers_id = person.pers_id);
+    LEFT OUTER JOIN physical_quantity        USING (pq_id)
+    LEFT OUTER JOIN site                     USING (site_id)
+    LEFT OUTER JOIN calibrated_device_detail USING (caldev_id)
+    LEFT OUTER JOIN integration_detail       USING (int_id)
+    LEFT OUTER JOIN person                   USING (pers_id);
+  COMMENT ON VIEW measurand_detail IS 'measurand with joined details';
