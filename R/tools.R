@@ -45,7 +45,7 @@ write_table <- function(name, arg_list) {
 #' @param site_lon Numeric vector of geographical longitude WGS84.
 #' @param site_altitude Numeric vector of height above sea level of surface in
 #'   m.
-#' @param site_comment String vector of height above sea level of surface in m.
+#' @param site_comment String vector of additional comment.
 #'
 #' @export
 #'
@@ -59,4 +59,43 @@ dbWriteTable_site <- function(conn, site_name,
                               site_lat = NULL, site_lon = NULL, site_altitude = NULL,
                               site_comment = NULL) {
   write_table(name = "site", as.list(environment()))
+}
+
+
+#' Insert data into \code{device_manufacturer} table
+#'
+#' @param conn Database connection.
+#' @param devman_name String vector of name of device manufacturer.
+#' @param devman_comment String vector of additional comment.
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' con <- dbConnect_klimageo()
+#' dbWriteTable_device_manufacturer(con, "TSI")
+#' dbDisconnect(conn)
+#' }
+dbWriteTable_site <- function(conn, devman_name,
+                              devman_comment = NULL) {
+  write_table(name = "device_manufacturer", as.list(environment()))
+}
+
+#' Insert data into \code{device_type} table
+#'
+#' @param conn Database connection.
+#' @param devtype_name String vector of name of device type.
+#' @param devtype_comment String vector of additional comment.
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' con <- dbConnect_klimageo()
+#' dbWriteTable_device_type(con, "thermometer")
+#' dbDisconnect(conn)
+#' }
+dbWriteTable_site <- function(conn, devtype_name,
+                              devtype_comment = NULL) {
+  write_table(name = "device_type", as.list(environment()))
 }
