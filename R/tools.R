@@ -120,8 +120,8 @@ dbWriteTable_device_type <- function(conn, devtype_name,
 #' dbWriteTable_device_model(con, "THERMO1000", 1, 1)
 #' dbDisconnect(conn)
 #' }
-dbWriteTable_model <- function(conn, devmod_name,
-                               devtype_id,
-                               devman_id = NULL) {
+dbWriteTable_device_model <- function(conn, devmod_name,
+                                      devtype_id,
+                                      devman_id = NULL) {
   write_table(name = "device_model", as.list(environment()))
 }

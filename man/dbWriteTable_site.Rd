@@ -19,7 +19,7 @@ dbWriteTable_site(conn, site_name, site_lat = NULL, site_lon = NULL,
 \item{site_altitude}{Numeric vector of height above sea level of surface in
 m.}
 
-\item{site_comment}{String vector of height above sea level of surface in m.}
+\item{site_comment}{String vector of additional comments.}
 }
 \description{
 Insert data into \code{site} table
