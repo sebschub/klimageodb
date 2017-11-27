@@ -45,7 +45,7 @@ write_table <- function(name, arg_list) {
 #' @param site_lon Numeric vector of geographical longitude WGS84.
 #' @param site_altitude Numeric vector of height above sea level of surface in
 #'   m.
-#' @param site_comment String vector of additional comment.
+#' @param site_comment String vector of additional comments.
 #'
 #' @export
 #'
@@ -66,7 +66,7 @@ dbWriteTable_site <- function(conn, site_name,
 #'
 #' @param conn Database connection.
 #' @param devman_name String vector of name of device manufacturer.
-#' @param devman_comment String vector of additional comment.
+#' @param devman_comment String vector of additional comments.
 #'
 #' @export
 #'
@@ -76,8 +76,8 @@ dbWriteTable_site <- function(conn, site_name,
 #' dbWriteTable_device_manufacturer(con, "TSI")
 #' dbDisconnect(conn)
 #' }
-dbWriteTable_site <- function(conn, devman_name,
-                              devman_comment = NULL) {
+dbWriteTable_device_manufacturer <- function(conn, devman_name,
+                                             devman_comment = NULL) {
   write_table(name = "device_manufacturer", as.list(environment()))
 }
 
@@ -85,7 +85,7 @@ dbWriteTable_site <- function(conn, devman_name,
 #'
 #' @param conn Database connection.
 #' @param devtype_name String vector of name of device type.
-#' @param devtype_comment String vector of additional comment.
+#' @param devtype_comment String vector of additional comments.
 #'
 #' @export
 #'
@@ -95,7 +95,33 @@ dbWriteTable_site <- function(conn, devman_name,
 #' dbWriteTable_device_type(con, "thermometer")
 #' dbDisconnect(conn)
 #' }
-dbWriteTable_site <- function(conn, devtype_name,
-                              devtype_comment = NULL) {
+dbWriteTable_device_type <- function(conn, devtype_name,
+                                     devtype_comment = NULL) {
   write_table(name = "device_type", as.list(environment()))
+}
+
+
+#' Insert data into \code{device_model} table
+#'
+#' @param conn Database connection.
+#' @param devmod_name String vector of name of model.
+#' @param devtype_id Integer vector of IDs from \code{device_type}.
+#' @param devman_id Integer vector of IDs from \code{device_manufacturer}.
+#' @param devmod_comment String vector of additional comments.
+#'
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' con <- dbConnect_klimageo()
+#' dbWriteTable_device_manufacturer(con, "TSI")
+#' dbWriteTable_device_type(con, "thermometer")
+#' dbWriteTable_device_model(con, "THERMO1000", 1, 1)
+#' dbDisconnect(conn)
+#' }
+dbWriteTable_model <- function(conn, devmod_name,
+                               devtype_id,
+                               devman_id = NULL) {
+  write_table(name = "device_model", as.list(environment()))
 }

@@ -42,15 +42,15 @@ CREATE TABLE device_type (
 CREATE TABLE device_model (
     devmod_id      serial PRIMARY KEY,
     devmod_name    varchar(20) NOT NULL UNIQUE,
-    devman_id      integer REFERENCES device_manufacturer(devman_id),
     devtype_id     integer NOT NULL REFERENCES device_type(devtype_id),
+    devman_id      integer REFERENCES device_manufacturer(devman_id),
     devmod_comment varchar(50)
     );
   COMMENT ON TABLE  device_model                IS 'measurement device model';
   COMMENT ON COLUMN device_model.devmod_id      IS 'ID';
   COMMENT ON COLUMN device_model.devmod_name    IS 'name of model';
-  COMMENT ON COLUMN device_model.devman_id      IS 'references device manufacturer';
   COMMENT ON COLUMN device_model.devtype_id     IS 'references type of device';
+  COMMENT ON COLUMN device_model.devman_id      IS 'references device manufacturer';
   COMMENT ON COLUMN device_model.devmod_comment IS 'additional information';
 
 

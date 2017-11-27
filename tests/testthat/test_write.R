@@ -36,5 +36,17 @@ test_that("dbWriteTable_device_type", {
   expect_true(identical(device_type_df, df[c("devtype_name")]))
 })
 
+device_model_df <- data.frame(devmod_name = "THERMO1000",
+                              devtype_id = 1,
+                              devman_id = 1)
+test_that("dbWriteTable_device_model", {
+  dbWriteTable_device_model(con,
+                            devmod_name = device_model_df$devmod_name,
+                            devtype_id = device_model_df$devtype_id,
+                            devman_id = device_model_df$devman_id)
+  df <- dbReadTable(con, "device_model")
+  expect_true(identical(device_model_df, df[c("devmod_name", "devtype_id", "devman_id")]))
+})
+
 
 dbDisconnect(con)
