@@ -78,7 +78,7 @@ CREATE TABLE calibrated_device (
     UNIQUE (dev_id, caldev_datetime)
     );
   COMMENT ON TABLE  calibrated_device                  IS 'specific calibration of device';
-  COMMENT ON COLUMN calibrated_device.caldev_datetime  IS 'date of calibration';
+  COMMENT ON COLUMN calibrated_device.caldev_datetime  IS 'date and time of calibration';
   COMMENT ON COLUMN calibrated_device.caldev_parameter IS 'values of calibration parameters';
   COMMENT ON COLUMN calibrated_device.caldev_comment   IS 'additional information';
 

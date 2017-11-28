@@ -55,7 +55,8 @@ write_table <- function(name, arg_list) {
 #' dbWriteTable_site(con, "Adlershof", site_lon = 14., site_lat = 53.)
 #' dbDisconnect(conn)
 #' }
-dbWriteTable_site <- function(conn, site_name,
+dbWriteTable_site <- function(conn,
+                              site_name,
                               site_lat = NULL, site_lon = NULL, site_altitude = NULL,
                               site_comment = NULL) {
   write_table(name = "site", as.list(environment()))
@@ -76,7 +77,8 @@ dbWriteTable_site <- function(conn, site_name,
 #' dbWriteTable_device_manufacturer(con, "TSI")
 #' dbDisconnect(conn)
 #' }
-dbWriteTable_device_manufacturer <- function(conn, devman_name,
+dbWriteTable_device_manufacturer <- function(conn,
+                                             devman_name,
                                              devman_comment = NULL) {
   write_table(name = "device_manufacturer", as.list(environment()))
 }
@@ -95,7 +97,8 @@ dbWriteTable_device_manufacturer <- function(conn, devman_name,
 #' dbWriteTable_device_type(con, "thermometer")
 #' dbDisconnect(conn)
 #' }
-dbWriteTable_device_type <- function(conn, devtype_name,
+dbWriteTable_device_type <- function(conn,
+                                     devtype_name,
                                      devtype_comment = NULL) {
   write_table(name = "device_type", as.list(environment()))
 }
@@ -120,8 +123,74 @@ dbWriteTable_device_type <- function(conn, devtype_name,
 #' dbWriteTable_device_model(con, "THERMO1000", 1, 1)
 #' dbDisconnect(conn)
 #' }
-dbWriteTable_device_model <- function(conn, devmod_name,
+dbWriteTable_device_model <- function(conn,
+                                      devmod_name,
                                       devtype_id,
                                       devman_id = NULL) {
   write_table(name = "device_model", as.list(environment()))
+}
+
+
+#' Insert data into \code{device} table
+#'
+#' @param conn Database connection.
+#' @param dev_name String vector of name of device.
+#' @param devmod_id Integer vector of device_model ID.
+#' @param dev_identifier String vector of device identifiers, e.g. serial
+#'   numbers.
+#' @param dev_comment String vector of additional comments.
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' con <- dbConnect_klimageo()
+#' dbWriteTable_device_manufacturer(con, "TSI")
+#' dbWriteTable_device_type(con, "thermometer")
+#' dbWriteTable_device_model(con, "THERMO1000", 1, 1)
+#' dbWriteTable_device(con, "My first THERMO1000", 1, "NCC1701-T")
+#' dbDisconnect(conn)
+#' }
+dbWriteTable_device <- function(conn,
+                                dev_name,
+                                devmod_id,
+                                dev_identifier = NULL,
+                                dev_comment = NULL) {
+  write_table(name = "device", as.list(environment()))
+}
+
+
+#' Insert data into \code{calibrated_device} table
+#'
+#' @param conn Database connection.
+#' @param dev_id Integer vector of device ID.
+#' @param caldev_datetime POSIXct vector of date and time of calibration.
+#' @param caldev_parameter String vector of values of calibration parameters.'
+#' @param caldev_comment String vector of additional comments.
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' con <- dbConnect_klimageo()
+#' dbWriteTable_device_manufacturer(con, "TSI")
+#' dbWriteTable_device_type(con, "thermometer")
+#' dbWriteTable_device_model(con, "THERMO1000", 1, 1)
+#' dbWriteTable_device(con, "My first THERMO1000", 1, "NCC1701-T")
+#' dbWriteTable_calibrated_device(con,
+#'                                1,
+#'                                as.POSIXct("2012-01-01 12:15:12", tz = "GMT"),
+#'                                "a=10, b=99.12")
+#' dbDisconnect(conn)
+#' }
+dbWriteTable_calibrated_device <- function(conn,
+                                           dev_id,
+                                           caldev_datetime = NULL,
+                                           caldev_parameter = NULL,
+                                           caldev_comment = NULL) {
+  # we need caldev_datetime to be POSIXct for consistent time zone storage
+  if (!is.null(caldev_datetime) & !inherits(caldev_datetime, "POSIXct")) {
+    stop("caldev_datetime is used but not POSIXct")
+  }
+  write_table(name = "calibrated_device", as.list(environment()))
 }
