@@ -4,7 +4,8 @@
 \alias{dbWriteTable_device_model}
 \title{Insert data into \code{device_model} table}
 \usage{
-dbWriteTable_device_model(conn, devmod_name, devtype_id, devman_id = NULL)
+dbWriteTable_device_model(conn, devmod_name, devtype_id, devman_id = NULL,
+  devmod_comment = NULL)
 }
 \arguments{
 \item{conn}{Database connection.}

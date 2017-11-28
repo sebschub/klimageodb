@@ -126,7 +126,8 @@ dbWriteTable_device_type <- function(conn,
 dbWriteTable_device_model <- function(conn,
                                       devmod_name,
                                       devtype_id,
-                                      devman_id = NULL) {
+                                      devman_id = NULL,
+                                      devmod_comment = NULL) {
   write_table(name = "device_model", as.list(environment()))
 }
 
