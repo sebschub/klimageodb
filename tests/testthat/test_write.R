@@ -118,6 +118,51 @@ test_that("dbWriteTable_calibrated_device", {
   )
 })
 
+# add new entries to device and calibrated_device. CHECK IF NUMBER OF ROWS
+# MODIFIES ABOVE!
+uncalibrated_device_df <- data.frame(
+  dev_name = c("My second THERMO1000", "My third THERMO1000"),
+  devmod_id = c(1, 1),
+  dev_identifier = c("NCC1701-T1", "NCC1701-T2"))
+uncalibrated_device_dfnf <- uncalibrated_device_df
+uncalibrated_device_dfnf$dev_name <- as.character(uncalibrated_device_dfnf$dev_name)
+uncalibrated_device_dfnf$dev_identifier <- as.character(uncalibrated_device_dfnf$dev_identifier)
+dbWriteTable_uncalibrated_device(con,
+                                 dev_name = uncalibrated_device_df$dev_name,
+                                 devmod_id = uncalibrated_device_df$devmod_id,
+                                 dev_identifier = uncalibrated_device_df$dev_identifier)
+
+test_that("dbWriteTable_device", {
+  df <- dbReadTable(con, "device")
+  expect_true(all.equal(rbind(device_dfnf, uncalibrated_device_dfnf),
+                        df[c("dev_name", "devmod_id", "dev_identifier")]))
+  dfcd <- dbReadTable(con, "calibrated_device")
+  expect_true(all.equal(
+    rbind(calibrated_device_dfPctnf,
+          data.frame(dev_id = df$dev_id[-1],
+                     caldev_datetime = c(NA, NA),
+                     caldev_parameter = c(NA, NA))
+          ),
+    dfcd[c("dev_id", "caldev_datetime", "caldev_parameter")]))
+})
+
+
+
+
+physical_quantity_df <- data.frame(pq_name = "air temperature",
+                                   pq_unit = "degC")
+physical_quantity_dfnf <- physical_quantity_df
+physical_quantity_dfnf$pq_name <- as.character(physical_quantity_dfnf$pq_name)
+physical_quantity_dfnf$pq_unit <- as.character(physical_quantity_dfnf$pq_unit)
+dbWriteTable_physical_quantity(con,
+                               pq_name = physical_quantity_df$pq_name,
+                               pq_unit = physical_quantity_df$pq_unit)
+
+test_that("dbWriteTable_physical_quantity", {
+  df <- dbReadTable(con, "physical_quantity")
+  expect_true(identical(physical_quantity_dfnf, df[c("pq_name", "pq_unit")]))
+})
+
 
 
 

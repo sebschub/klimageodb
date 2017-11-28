@@ -195,3 +195,82 @@ dbWriteTable_calibrated_device <- function(conn,
   }
   write_table(name = "calibrated_device", as.list(environment()))
 }
+
+
+
+#' Insert data into \code{device} and \code{calibrated_device} table with
+#' calibration parameters \code{NULL}
+#'
+#' @description This function adds new devices to the database that do not
+#'   require any calibration. First, it adds the new devices into the
+#'   \code{device} table. It then uses the respective created
+#'   \code{device.dev_id} to add new entries in \code{calibrated_device} with both
+#'   \code{calibrated_device.caldev_datetime} and
+#'   \code{calibrated_device.caldev_parameter} being \code{NULL}.
+#'
+#' @param conn Database connection.
+#' @param dev_name String vector of name of device.
+#' @param devmod_id Integer vector of device_model ID.
+#' @param dev_identifier String vector of device identifiers, e.g. serial
+#'   numbers.
+#' @param dev_comment String vector of additional comments.
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' con <- dbConnect_klimageo()
+#' dbWriteTable_device_manufacturer(con, "TSI")
+#' dbWriteTable_device_type(con, "thermometer")
+#' dbWriteTable_device_model(con, "THERMO1000", 1, 1)
+#' dbWriteTable_device(con, "My first THERMO1000", 1, "NCC1701-T")
+#' dbDisconnect(conn)
+#' }
+dbWriteTable_uncalibrated_device <- function(conn,
+                                             dev_name,
+                                             devmod_id,
+                                             dev_identifier = NULL,
+                                             dev_comment = NULL) {
+  # use transaction to ensure either both, device and calibrated_device, were
+  # changed or none
+  invisible(DBI::dbWithTransaction(conn, {
+    # write device into "device" table
+    write_table(name = "device", as.list(environment()))
+    # surround dev_name with "'" and concatinate them
+    dev_name_string <- paste0(paste0("'", dev_name, "'", collapse = ", "))
+    # get IDs of newly created rows, CHECK IF ORDER IS OK!
+    dev_id <- DBI::dbGetQuery(conn,
+                              paste0("SELECT dev_id FROM device WHERE dev_name in (",
+                                     dev_name_string,");")
+    )
+    DBI::dbWriteTable(conn, name = "calibrated_device",
+                      value = data.frame(dev_id = dev_id), append = TRUE)
+  }))
+
+}
+
+
+
+
+#' Insert data into \code{physical_quantity} table
+#'
+#' @param conn Database connection.
+#' @param pq_name String vector of name of physical quantity.
+#' @param pq_unit String vector of units of physical quantity. Use "1" for
+#'   unitless quantities.
+#' @param pq_comment String vector of additional comments.
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' con <- dbConnect_klimageo()
+#' dbWriteTable_physical_quantity("air temperature", "degC")
+#' dbDisconnect(conn)
+#' }
+dbWriteTable_physical_quantity <- function(conn,
+                                           pq_name,
+                                           pq_unit,
+                                           pq_comment = NULL) {
+  write_table(name = "physical_quantity", as.list(environment()))
+}
