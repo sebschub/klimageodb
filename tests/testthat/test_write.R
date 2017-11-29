@@ -132,7 +132,7 @@ dbWriteTable_uncalibrated_device(con,
                                  devmod_id = uncalibrated_device_df$devmod_id,
                                  dev_identifier = uncalibrated_device_df$dev_identifier)
 
-test_that("dbWriteTable_device", {
+test_that("dbWriteTable_uncalibrated_device", {
   df <- dbReadTable(con, "device")
   expect_true(all.equal(rbind(device_dfnf, uncalibrated_device_dfnf),
                         df[c("dev_name", "devmod_id", "dev_identifier")]))

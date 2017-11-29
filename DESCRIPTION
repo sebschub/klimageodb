@@ -13,6 +13,5 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports: odbc
-Suggests: testthat,
-    covr
+Suggests: testthat
 RoxygenNote: 6.0.1

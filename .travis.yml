@@ -14,7 +14,7 @@ services:
 before_script:
   - psql -U postgres -c 'CREATE DATABASE klimageo;'
   - psql -U postgres -c "ALTER USER postgres WITH PASSWORD 'password';"
-  - psql -U postgres -f ${TRAVIS_BUILD_DIR}/travis/create_tables.sql
+  - psql -U postgres klimageo -f ${TRAVIS_BUILD_DIR}/travis/create_tables.sql
   - odbcinst -i -s -h -f ${TRAVIS_BUILD_DIR}/travis/odbc.ini
 #after_success:
 #  - psql -U postgres -c 'DROP SCHEMA public CASCADE;'
