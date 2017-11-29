@@ -1,4 +1,4 @@
-[![Travis-CI Build Status](https://travis-ci.org/sebschub/klimageodb.svg?branch=master)](https://travis-ci.org/sebschub/klimageodb)
+[![Travis-CI Build Status](https://travis-ci.org/sebschub/klimageodb.svg?branch=master)](https://travis-ci.org/sebschub/klimageodb) [![Coverage Status](https://img.shields.io/codecov/c/github/sebschub/klimageodb/master.svg)](https://codecov.io/github/sebschub/klimageodb?branch=master)
 
 # klimageodb
 
