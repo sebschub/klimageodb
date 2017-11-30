@@ -53,7 +53,7 @@ write_table <- function(name, arg_list) {
 #' \dontrun{
 #' con <- dbConnect_klimageo()
 #' dbWriteTable_site(con, "Adlershof", site_lon = 14., site_lat = 53.)
-#' dbDisconnect(conn)
+#' dbDisconnect(con)
 #' }
 dbWriteTable_site <- function(conn,
                               site_name,
@@ -75,7 +75,7 @@ dbWriteTable_site <- function(conn,
 #' \dontrun{
 #' con <- dbConnect_klimageo()
 #' dbWriteTable_device_manufacturer(con, "TSI")
-#' dbDisconnect(conn)
+#' dbDisconnect(con)
 #' }
 dbWriteTable_device_manufacturer <- function(conn,
                                              devman_name,
@@ -95,7 +95,7 @@ dbWriteTable_device_manufacturer <- function(conn,
 #' \dontrun{
 #' con <- dbConnect_klimageo()
 #' dbWriteTable_device_type(con, "thermometer")
-#' dbDisconnect(conn)
+#' dbDisconnect(con)
 #' }
 dbWriteTable_device_type <- function(conn,
                                      devtype_name,
@@ -108,8 +108,8 @@ dbWriteTable_device_type <- function(conn,
 #'
 #' @param conn Database connection.
 #' @param devmod_name String vector of name of model.
-#' @param devtype_id Integer vector of IDs from \code{device_type}.
-#' @param devman_id Integer vector of IDs from \code{device_manufacturer}.
+#' @param devtype_id Integer vector of \code{device_type} IDs.
+#' @param devman_id Integer vector of \code{device_manufacturer} IDs.
 #' @param devmod_comment String vector of additional comments.
 #'
 #'
@@ -121,7 +121,7 @@ dbWriteTable_device_type <- function(conn,
 #' dbWriteTable_device_manufacturer(con, "TSI")
 #' dbWriteTable_device_type(con, "thermometer")
 #' dbWriteTable_device_model(con, "THERMO1000", 1, 1)
-#' dbDisconnect(conn)
+#' dbDisconnect(con)
 #' }
 dbWriteTable_device_model <- function(conn,
                                       devmod_name,
@@ -136,7 +136,7 @@ dbWriteTable_device_model <- function(conn,
 #'
 #' @param conn Database connection.
 #' @param dev_name String vector of name of device.
-#' @param devmod_id Integer vector of device_model ID.
+#' @param devmod_id Integer vector of \code{device_model} ID.
 #' @param dev_identifier String vector of device identifiers, e.g. serial
 #'   numbers.
 #' @param dev_comment String vector of additional comments.
@@ -150,7 +150,7 @@ dbWriteTable_device_model <- function(conn,
 #' dbWriteTable_device_type(con, "thermometer")
 #' dbWriteTable_device_model(con, "THERMO1000", 1, 1)
 #' dbWriteTable_device(con, "My first THERMO1000", 1, "NCC1701-T")
-#' dbDisconnect(conn)
+#' dbDisconnect(con)
 #' }
 dbWriteTable_device <- function(conn,
                                 dev_name,
@@ -164,9 +164,9 @@ dbWriteTable_device <- function(conn,
 #' Insert data into \code{calibrated_device} table
 #'
 #' @param conn Database connection.
-#' @param dev_id Integer vector of device ID.
+#' @param dev_id Integer vector of \code{device} ID.
 #' @param caldev_datetime POSIXct vector of date and time of calibration.
-#' @param caldev_parameter String vector of values of calibration parameters.'
+#' @param caldev_parameter String vector of values of calibration parameters.
 #' @param caldev_comment String vector of additional comments.
 #'
 #' @export
@@ -182,7 +182,7 @@ dbWriteTable_device <- function(conn,
 #'                                1,
 #'                                as.POSIXct("2012-01-01 12:15:12", tz = "GMT"),
 #'                                "a=10, b=99.12")
-#' dbDisconnect(conn)
+#' dbDisconnect(con)
 #' }
 dbWriteTable_calibrated_device <- function(conn,
                                            dev_id,
@@ -210,7 +210,7 @@ dbWriteTable_calibrated_device <- function(conn,
 #'
 #' @param conn Database connection.
 #' @param dev_name String vector of name of device.
-#' @param devmod_id Integer vector of device_model ID.
+#' @param devmod_id Integer vector of \code{device_model} ID.
 #' @param dev_identifier String vector of device identifiers, e.g. serial
 #'   numbers.
 #' @param dev_comment String vector of additional comments.
@@ -224,7 +224,7 @@ dbWriteTable_calibrated_device <- function(conn,
 #' dbWriteTable_device_type(con, "thermometer")
 #' dbWriteTable_device_model(con, "THERMO1000", 1, 1)
 #' dbWriteTable_device(con, "My first THERMO1000", 1, "NCC1701-T")
-#' dbDisconnect(conn)
+#' dbDisconnect(con)
 #' }
 dbWriteTable_uncalibrated_device <- function(conn,
                                              dev_name,
@@ -265,12 +265,193 @@ dbWriteTable_uncalibrated_device <- function(conn,
 #' @examples
 #' \dontrun{
 #' con <- dbConnect_klimageo()
-#' dbWriteTable_physical_quantity("air temperature", "degC")
-#' dbDisconnect(conn)
+#' dbWriteTable_physical_quantity(con, "air temperature", "degC")
+#' dbDisconnect(con)
 #' }
 dbWriteTable_physical_quantity <- function(conn,
                                            pq_name,
                                            pq_unit,
                                            pq_comment = NULL) {
   write_table(name = "physical_quantity", as.list(environment()))
+}
+
+
+
+#' Insert data into \code{integration_type} table
+#'
+#' @param conn Database connection.
+#' @param inttype_name String vector of name of integration type.
+#' @param inttype_description String vector of description of \code{integration_type}.
+#' @param inttype_comment String vector of additional comments.
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' con <- dbConnect_klimageo()
+#' dbWriteTable_integration_type(con, "average", "average value over a period")
+#' dbDisconnect(con)
+#' }
+dbWriteTable_integration_type <- function(conn,
+                                          inttype_name,
+                                          inttype_description,
+                                          inttype_comment = NULL) {
+  write_table(name = "integration_type", as.list(environment()))
+}
+
+
+
+#' Insert data into \code{integration} table
+#'
+#' @param conn Database connection.
+#' @param inttype_id Integer vector of \code{integration_type} ID.
+#' @param int_measurement_interval Numeric vector of intervals between measurements in s.
+#' @param int_interval Numeric vector of integration interval in s of one stored measurement.
+#' @param int_comment Character vector of additional information.
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' con <- dbConnect_klimageo()
+#' dbWriteTable_integration_type("average", "average value over a period")
+#' dbWriteTable_integration(con, 1, 60, 600)
+#' dbDisconnect(con)
+#' }
+dbWriteTable_integration <- function(conn,
+                                          inttype_id,
+                                          int_measurement_interval,
+                                          int_interval,
+                                          int_comment = NULL) {
+  write_table(name = "integration", as.list(environment()))
+}
+
+
+
+
+#' Insert data into \code{person} table
+#'
+#' @param conn Database connection.
+#' @param pers_name Character vector of person name.
+#' @param pers_comment Character vector of additional information.
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' con <- dbConnect_klimageo()
+#' dbWriteTable_person(con, "Maxi Mueller")
+#' dbDisconnect(con)
+#' }
+dbWriteTable_person <- function(conn,
+                                pers_name,
+                                pers_comment = NULL) {
+  write_table(name = "person", as.list(environment()))
+}
+
+
+
+#' Insert data into \code{measurand} table
+#'
+#' @param conn Database connection.
+#' @param md_name Character vector of measurand name.
+#' @param md_setup_datetime POSIXct vector of date and time of set-up of measurand.
+#' @param pq_id Integer vector of \code{physical_quantity} ID.
+#' @param site_id Integer vector of \code{site} ID.
+#' @param caldev_id Integer vector of \code{calibrated_device} ID.
+#' @param int_id Integer vector of \code{integration} ID.
+#' @param md_height Numeric vector of measurement height.
+#' @param pers_id Integer vector of \code{person} ID.
+#' @param md_comment Character vector of additional information.
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' con <- dbConnect_klimageo()
+#' # add all required entries before with the respective dbWriteTable_*
+#' dbWriteTable_measurand(md_name = "TA2M_1",
+#'                        md_setup_datetime = as.POSIXct("2012-01-01 12:15:12", tz = "UTC"),
+#'                        pq_id = 1,
+#'                        site_id = 1,
+#'                        caldev_id = 1,
+#'                        int_id = 1,
+#'                        md_height = 2.,
+#'                        pers_id = 1,
+#'                        md_comment = "the 2m temperature"))
+#' dbDisconnect(con)
+#' }
+dbWriteTable_measurand <- function(conn,
+                                md_name,
+                                md_setup_datetime,
+                                pq_id,
+                                site_id,
+                                caldev_id,
+                                int_id,
+                                md_height = NULL,
+                                pers_id = NULL,
+                                md_comment = NULL) {
+  if (!inherits(md_setup_datetime, "POSIXct")) {
+    stop("md_setup_datetime is not POSIXct")
+  }
+  write_table(name = "measurand", as.list(environment()))
+}
+
+
+#' Insert data into \code{quality_flag} table
+#'
+#' @param conn Database connection.
+#' @param qf_id Integer vector with 1 <= qf_id <= 9 indicating value ok and
+#'   qf_id >= 10 indicating value not ok;
+#' @param qf_name Character vector of quality_flag name.
+#' @param qf_description Character vector of quality_flag description.
+#' @param qf_comment Character vector of of additional information..
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' con <- dbConnect_klimageo()
+#' dbWriteTable_quality_flag(
+#'    qf_id = c(1,11),
+#'    qf_name = c("value ok, automatic qc", "corrected calculation constant"),
+#'    qf_description = c("value ok, automatically checked for consistency",
+#'                       "original value used from calculation constant")))
+#' dbDisconnect(con)
+#' }
+dbWriteTable_quality_flag <- function(conn,
+                                      qf_id,
+                                      qf_name,
+                                      qf_description,
+                                      qf_comment = NULL) {
+  write_table(name = "quality_flag", as.list(environment()))
+}
+
+
+#' Insert data into \code{station_adlershof} table
+#'
+#' @param conn Database connection.
+#' @param stadl_datetime POSIXct vector of date and time of measurement.
+#' @param md_id Integer vector of measurand ID.
+#' @param stadl_value Numeric vector of measurement values.
+#' @param qf_id Integer vector with 1 <= qf_id <= 9 indicating value ok and
+#'   qf_id >= 10 indicating value not ok;
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' con <- dbConnect_klimageo()
+#' # add all required entries before with the respective dbWriteTable_*
+#' dbWriteTable_station_adlershof
+#' dbDisconnect(con)
+#' }
+dbWriteTable_station_adlershof <- function(conn,
+                                           stadl_datetime,
+                                           md_id,
+                                           stadl_value,
+                                           qf_id = NULL) {
+  if (!inherits(stadl_datetime, "POSIXct")) {
+    stop("stadl_datetime is not POSIXct")
+  }
+  write_table(name = "station_adlershof", as.list(environment()))
 }

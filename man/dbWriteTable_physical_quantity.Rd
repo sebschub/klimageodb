@@ -22,7 +22,7 @@ Insert data into \code{physical_quantity} table
 \examples{
 \dontrun{
 con <- dbConnect_klimageo()
-dbWriteTable_physical_quantity("air temperature", "degC")
-dbDisconnect(conn)
+dbWriteTable_physical_quantity(con, "air temperature", "degC")
+dbDisconnect(con)
 }
 }

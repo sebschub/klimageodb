@@ -28,6 +28,6 @@ Insert data into \code{site} table
 \dontrun{
 con <- dbConnect_klimageo()
 dbWriteTable_site(con, "Adlershof", site_lon = 14., site_lat = 53.)
-dbDisconnect(conn)
+dbDisconnect(con)
 }
 }

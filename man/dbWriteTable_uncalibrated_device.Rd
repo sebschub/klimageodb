@@ -13,7 +13,7 @@ dbWriteTable_uncalibrated_device(conn, dev_name, devmod_id,
 
 \item{dev_name}{String vector of name of device.}
 
-\item{devmod_id}{Integer vector of device_model ID.}
+\item{devmod_id}{Integer vector of \code{device_model} ID.}
 
 \item{dev_identifier}{String vector of device identifiers, e.g. serial
 numbers.}
@@ -35,6 +35,6 @@ dbWriteTable_device_manufacturer(con, "TSI")
 dbWriteTable_device_type(con, "thermometer")
 dbWriteTable_device_model(con, "THERMO1000", 1, 1)
 dbWriteTable_device(con, "My first THERMO1000", 1, "NCC1701-T")
-dbDisconnect(conn)
+dbDisconnect(con)
 }
 }

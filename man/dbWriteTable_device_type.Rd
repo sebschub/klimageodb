@@ -20,6 +20,6 @@ Insert data into \code{device_type} table
 \dontrun{
 con <- dbConnect_klimageo()
 dbWriteTable_device_type(con, "thermometer")
-dbDisconnect(conn)
+dbDisconnect(con)
 }
 }

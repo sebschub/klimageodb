@@ -12,9 +12,9 @@ dbWriteTable_device_model(conn, devmod_name, devtype_id, devman_id = NULL,
 
 \item{devmod_name}{String vector of name of model.}
 
-\item{devtype_id}{Integer vector of IDs from \code{device_type}.}
+\item{devtype_id}{Integer vector of \code{device_type} IDs.}
 
-\item{devman_id}{Integer vector of IDs from \code{device_manufacturer}.}
+\item{devman_id}{Integer vector of \code{device_manufacturer} IDs.}
 
 \item{devmod_comment}{String vector of additional comments.}
 }
@@ -27,6 +27,6 @@ con <- dbConnect_klimageo()
 dbWriteTable_device_manufacturer(con, "TSI")
 dbWriteTable_device_type(con, "thermometer")
 dbWriteTable_device_model(con, "THERMO1000", 1, 1)
-dbDisconnect(conn)
+dbDisconnect(con)
 }
 }

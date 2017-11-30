@@ -20,6 +20,6 @@ Insert data into \code{device_manufacturer} table
 \dontrun{
 con <- dbConnect_klimageo()
 dbWriteTable_device_manufacturer(con, "TSI")
-dbDisconnect(conn)
+dbDisconnect(con)
 }
 }

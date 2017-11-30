@@ -202,4 +202,164 @@ test_that("dbWriteTable_physical_quantity", {
 })
 
 
+
+integration_type_df <- data.frame(inttype_name = c("single", "average"),
+                                  inttype_description = c("single value at a specific time", "average value over a period"))
+integration_type_df_full <- cbind(data.frame(inttype_id = as.integer(c(1, 2))),
+                                  integration_type_df,
+                                  data.frame(inttype_comment = as.character(c(NA,NA)), stringsAsFactors = FALSE))
+integration_type_df_full$inttype_name <- as.character(integration_type_df_full$inttype_name)
+integration_type_df_full$inttype_description <- as.character(integration_type_df_full$inttype_description)
+
+test_that("dbWriteTable_integration_type", {
+  dbWriteTable_integration_type(con,
+                                inttype_name = integration_type_df$inttype_name,
+                                inttype_description = integration_type_df$inttype_description)
+  df <- dbReadTable(con, "integration_type")
+  expect_true(identical(integration_type_df_full, df))
+})
+
+
+
+
+integration_df <- data.frame(inttype_id = 2,
+                             int_measurement_interval = 60,
+                             int_interval = 600)
+integration_df_full <- cbind(data.frame(int_id = as.integer(1)),
+                                  integration_df)
+
+test_that("dbWriteTable_integration", {
+  dbWriteTable_integration(con,
+                           inttype_id = integration_df$inttype_id,
+                           int_measurement_interval = integration_df$int_measurement_interval,
+                           int_interval = integration_df$int_interval,)
+  df <- dbReadTable(con, "integration_type")
+  expect_true(identical(integration_type_df_full, df))
+})
+
+
+
+person_df <- data.frame(pers_name = "Karl Heinz")
+person_df_full <- cbind(data.frame(pers_id = as.integer(1)),
+                        person_df,
+                        data.frame(pers_comment = as.character(NA)), stringsAsFactors = FALSE)
+person_df_full$pers_name <- as.character(person_df_full$pers_name)
+person_df_full$pers_comment <- as.character(person_df_full$pers_comment)
+
+test_that("dbWriteTable_person", {
+  dbWriteTable_person(con,
+                      pers_name = person_df$pers_name)
+  df <- dbReadTable(con, "person")
+  expect_true(identical(person_df_full, df))
+})
+
+
+
+measurand_df <- data.frame(md_name = "TA2M_1",
+                           md_setup_datetime = "2012-01-01 12:15:12",
+                           pq_id = 1,
+                           site_id = 1,
+                           caldev_id = 1,
+                           int_id = 1,
+                           md_height = 2.,
+                           pers_id = 1,
+                           md_comment = "the 2m temperature")
+measurand_dfPct <- measurand_df
+measurand_dfPct$md_setup_datetime <-
+  as.POSIXct(measurand_dfPct$md_setup_datetime, tz = "UTC")
+
+measurand_dfPct_full <- cbind(data.frame(md_id = as.integer(1)),
+                        measurand_dfPct)
+measurand_dfPct_full$md_name <- as.character(measurand_dfPct_full$md_name)
+measurand_dfPct_full$md_comment <- as.character(measurand_dfPct_full$md_comment)
+
+test_that("dbWriteTable_measurand", {
+  dbWriteTable_measurand(con,
+                         md_name = measurand_dfPct$md_name,
+                         md_setup_datetime = measurand_dfPct$md_setup_datetime,
+                         pq_id = measurand_dfPct$pq_id,
+                         site_id = measurand_dfPct$site_id,
+                         caldev_id = measurand_dfPct$caldev_id,
+                         int_id = measurand_dfPct$int_id,
+                         md_height = measurand_dfPct$md_height,
+                         pers_id = measurand_dfPct$pers_id,
+                         md_comment = measurand_dfPct$md_comment)
+  df <- dbReadTable(con, "measurand")
+  expect_true(all.equal(measurand_dfPct_full, df))
+  expect_error(
+    dbWriteTable_measurand(con,
+                           md_name = measurand_df$md_name,
+                           md_setup_datetime = measurand_df$md_setup_datetime,
+                           pq_id = measurand_df$pq_id,
+                           site_id = measurand_df$site_id,
+                           caldev_id = measurand_df$caldev_id,
+                           int_id = measurand_df$int_id,
+                           md_height = measurand_df$md_height,
+                           pers_id = measurand_df$pers_id,
+                           md_comment = measurand_df$md_comment)
+
+  )
+})
+
+
+
+
+quality_flag_df <- data.frame(
+  qf_id = c(1,11),
+  qf_name = c("value ok, automatic qc", "corrected calculation constant"),
+  qf_description = c("value ok, automatically checked for consistency",
+                     "original value used from calculation constant"))
+
+quality_flag_df_full <- cbind(quality_flag_df,
+                                 data.frame(qf_comment = as.character(c(NA, NA)), stringsAsFactors = FALSE))
+quality_flag_df_full$qf_name <- as.character(quality_flag_df_full$qf_name)
+quality_flag_df_full$qf_description <- as.character(quality_flag_df_full$qf_description)
+
+test_that("dbWriteTable_quality_flag", {
+  dbWriteTable_quality_flag(con,
+                         qf_id = quality_flag_df$qf_id,
+                         qf_name = quality_flag_df$qf_name,
+                         qf_description = quality_flag_df$qf_description)
+  df <- dbReadTable(con, "quality_flag")
+  expect_true(all.equal(quality_flag_df_full, df))
+})
+
+
+
+station_adlershof_df <- data.frame(
+  stadl_datetime = c("2017-01-01 12:15:12", "2017-01-01 16:15:12"),
+  md_id = c(1, 1),
+  stadl_value = c(293.15, 294.15))
+
+# test different time zones
+station_adlershof_dfPct <- station_adlershof_df
+station_adlershof_dfPct$stadl_datetime <-
+  c(as.POSIXct(station_adlershof_dfPct$stadl_datetime[1], tz = "UTC"),
+    as.POSIXct(station_adlershof_dfPct$stadl_datetime[2], tz = "CET"))
+station_adlershof_dfPct_full <- cbind(data.frame(stadl_id = c(1, 2)),
+                                      station_adlershof_dfPct,
+                                      data.frame(qf_id = as.integer(NA, NA)))
+
+test_that("dbWriteTable_station_adlershof", {
+  dbWriteTable_station_adlershof(con,
+                            stadl_datetime = station_adlershof_dfPct$stadl_datetime,
+                            md_id = station_adlershof_dfPct$md_id,
+                            stadl_value = station_adlershof_dfPct$stadl_value)
+  df <- dbReadTable(con, "station_adlershof")
+  # convert 64bit integer to standard R integer
+  df$stadl_id <- as.integer(df$stadl_id)
+  expect_true(all.equal(station_adlershof_dfPct_full, df))
+  # no POSIXct should give error
+  expect_error(
+    dbWriteTable_station_adlershof(con,
+                                   stadl_datetime = station_adlershof_df$stadl_datetime,
+                                   md_id = station_adlershof_df$md_id,
+                                   stadl_value = station_adlershof_df$stadl_value)
+  )
+})
+
+
+
+
+
 dbDisconnect(con)

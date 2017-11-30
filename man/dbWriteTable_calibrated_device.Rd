@@ -10,11 +10,11 @@ dbWriteTable_calibrated_device(conn, dev_id, caldev_datetime = NULL,
 \arguments{
 \item{conn}{Database connection.}
 
-\item{dev_id}{Integer vector of device ID.}
+\item{dev_id}{Integer vector of \code{device} ID.}
 
 \item{caldev_datetime}{POSIXct vector of date and time of calibration.}
 
-\item{caldev_parameter}{String vector of values of calibration parameters.'}
+\item{caldev_parameter}{String vector of values of calibration parameters.}
 
 \item{caldev_comment}{String vector of additional comments.}
 }
@@ -32,6 +32,6 @@ dbWriteTable_calibrated_device(con,
                                1,
                                as.POSIXct("2012-01-01 12:15:12", tz = "GMT"),
                                "a=10, b=99.12")
-dbDisconnect(conn)
+dbDisconnect(con)
 }
 }
