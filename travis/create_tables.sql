@@ -187,7 +187,7 @@ CREATE TABLE quality_flag (
 
 
 CREATE TABLE station_adlershof (
-    stadl_id       bigserial PRIMARY KEY,
+    stadl_id       serial PRIMARY KEY, -- conversion to bigserial might be required later
     stadl_datetime timestamp with time zone NOT NULL
       CHECK (stadl_datetime >= '2000-01-01' AND stadl_datetime < NOW()),
     md_id          smallint NOT NULL REFERENCES measurand(md_id),
@@ -203,8 +203,8 @@ CREATE TABLE station_adlershof (
   COMMENT ON COLUMN station_adlershof.qf_id          IS 'references quality flag, 1<=qf<=9: value ok, qf>=10: value not ok, NULL: not analysed';
 
 CREATE TABLE station_adlershof_correction (
-    stadlcor_id       bigserial PRIMARY KEY,
-    stadl_id          bigint UNIQUE REFERENCES station_adlershof(stadl_id),
+    stadlcor_id       serial PRIMARY KEY, -- conversion to bigserial might be required later
+    stadl_id          integer NOT NULL UNIQUE REFERENCES station_adlershof(stadl_id), -- conversion to bigint might be required later
     stadlcor_datetime timestamp with time zone NOT NULL
       CHECK (stadlcor_datetime >= '2000-01-01' AND stadlcor_datetime < NOW()),
     md_id             smallint NOT NULL REFERENCES measurand(md_id),
