@@ -135,11 +135,11 @@ calibrated_device_df_compare2 <-
                    stringsAsFactors = FALSE)
   )
 
-test_that("dbWriteTable_uncalibrated_device", {
-  dbWriteTable_uncalibrated_device(con,
-                                   dev_name = uncalibrated_device_df$dev_name,
-                                   devmod_id = uncalibrated_device_df$devmod_id,
-                                   dev_identifier = uncalibrated_device_df$dev_identifier)
+test_that("dbAdd_uncalibrated_device", {
+  dbAdd_uncalibrated_device(con,
+                            dev_name = uncalibrated_device_df$dev_name,
+                            devmod_id = uncalibrated_device_df$devmod_id,
+                            dev_identifier = uncalibrated_device_df$dev_identifier)
   df <- dbReadTable(con, "device")
   expect_true(all.equal(device_df_compare2, df))
   dfcd <- dbReadTable(con, "calibrated_device")

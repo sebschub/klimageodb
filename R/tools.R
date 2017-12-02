@@ -222,14 +222,14 @@ dbWriteTable_calibrated_device <- function(conn,
 #' dbWriteTable_device_manufacturer(con, "TSI")
 #' dbWriteTable_device_type(con, "thermometer")
 #' dbWriteTable_device_model(con, "THERMO1000", 1, 1)
-#' dbWriteTable_device(con, "My first THERMO1000", 1, "NCC1701-T")
+#' dbAdd_uncalibrated_device(con, "My first THERMO1000", 1, "NCC1701-T")
 #' dbDisconnect(con)
 #' }
-dbWriteTable_uncalibrated_device <- function(conn,
-                                             dev_name,
-                                             devmod_id,
-                                             dev_identifier = NULL,
-                                             dev_comment = NULL) {
+dbAdd_uncalibrated_device <- function(conn,
+                                      dev_name,
+                                      devmod_id,
+                                      dev_identifier = NULL,
+                                      dev_comment = NULL) {
   # use transaction to ensure either both, device and calibrated_device, were
   # changed or none
   invisible(DBI::dbWithTransaction(conn, {
