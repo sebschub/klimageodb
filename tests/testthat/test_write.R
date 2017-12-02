@@ -35,10 +35,16 @@ test_dbWriteTable_table <- function(conn, table, df, args_ind) {
 
   test_that(test_string, {
     # call test function
-    do.call(test_function, args)
+    res <- do.call(test_function, args)
 
-    # get result from database
-    df_db <- dbReadTable(conn, table)
+    if (table %in% c("station_adlershof", "station_adlershof_correction")) {
+      # get table from database because these functions don't get new data
+      # THIS ONLY WORKS WHEN APPLIED TO EMPTY DATABASE!
+      df_db <- dbReadTable(conn, table)
+    } else {
+      df_db <- res
+    }
+
     # compare with expected
     expect_true(all.equal(df_compare, df_db))
 
@@ -121,25 +127,33 @@ uncalibrated_device_df <- data.frame(
   devmod_id = c(1, 1),
   dev_identifier = c("NCC1701-T1", "NCC1701-T2"),
   dev_comment = as.character(c(NA, NA)))
+device_df_new_compare <- factor2character(uncalibrated_device_df)
 # columns added by database and row from device above
 device_df_compare2 <- rbind(factor2character(device_df),
-                            factor2character(uncalibrated_device_df))
+                            device_df_new_compare)
+
+calibrated_device_df_new_compare <- data.frame(
+  caldev_id = as.integer(c(2, 3)),
+  dev_id = device_df_compare2$dev_id[-1],
+  caldev_datetime = as.POSIXct(c(NA, NA)),
+  caldev_parameter = as.character(c(NA, NA)),
+  caldev_comment = as.character(c(NA, NA)),
+  stringsAsFactors = FALSE)
 
 calibrated_device_df_compare2 <-
   rbind(factor2character(calibrated_device_df),
-        data.frame(caldev_id = as.integer(c(2, 3)),
-                   dev_id = device_df_compare2$dev_id[-1],
-                   caldev_datetime = as.character(c(NA, NA)),
-                   caldev_parameter = as.character(c(NA, NA)),
-                   caldev_comment = as.character(c(NA, NA)),
-                   stringsAsFactors = FALSE)
+        calibrated_device_df_new_compare
   )
 
 test_that("dbAdd_uncalibrated_device", {
-  dbAdd_uncalibrated_device(con,
-                            dev_name = uncalibrated_device_df$dev_name,
-                            devmod_id = uncalibrated_device_df$devmod_id,
-                            dev_identifier = uncalibrated_device_df$dev_identifier)
+  res <- dbAdd_uncalibrated_device(con,
+                                   dev_name = uncalibrated_device_df$dev_name,
+                                   devmod_id = uncalibrated_device_df$devmod_id,
+                                   dev_identifier = uncalibrated_device_df$dev_identifier)
+  # test the new rows output
+  expect_true(all.equal(device_df_new_compare, res$device))
+  expect_true(all.equal(calibrated_device_df_new_compare, res$calibrated_device))
+  # test total tables
   df <- dbReadTable(con, "device")
   expect_true(all.equal(device_df_compare2, df))
   dfcd <- dbReadTable(con, "calibrated_device")

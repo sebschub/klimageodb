@@ -21,6 +21,9 @@ m.}
 
 \item{site_comment}{String vector of additional comments.}
 }
+\value{
+Data frame of newly added rows.
+}
 \description{
 Insert data into \code{site} table
 }

@@ -18,6 +18,9 @@ dbWriteTable_calibrated_device(conn, dev_id, caldev_datetime = NULL,
 
 \item{caldev_comment}{String vector of additional comments.}
 }
+\value{
+Data frame of newly added rows.
+}
 \description{
 Insert data into \code{calibrated_device} table
 }

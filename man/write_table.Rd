@@ -4,13 +4,18 @@
 \alias{write_table}
 \title{Write table to database}
 \usage{
-write_table(name, arg_list)
+write_table(name, arg_list, return_newrows = TRUE)
 }
 \arguments{
 \item{name}{Name of the table.}
 
 \item{arg_list}{List with first element being DBIConnection to the target
 database and rest being columns of same length to be put into the table.}
+
+\item{return_newrows}{Return the newly added rows?}
+}
+\value{
+Newly added rows or NULL.
 }
 \description{
 Write table to database

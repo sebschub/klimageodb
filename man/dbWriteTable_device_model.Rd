@@ -18,6 +18,9 @@ dbWriteTable_device_model(conn, devmod_name, devtype_id, devman_id = NULL,
 
 \item{devmod_comment}{String vector of additional comments.}
 }
+\value{
+Data frame of newly added rows.
+}
 \description{
 Insert data into \code{device_model} table
 }

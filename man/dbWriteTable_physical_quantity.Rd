@@ -16,6 +16,9 @@ unitless quantities.}
 
 \item{pq_comment}{String vector of additional comments.}
 }
+\value{
+Data frame of newly added rows.
+}
 \description{
 Insert data into \code{physical_quantity} table
 }

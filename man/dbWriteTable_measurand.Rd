@@ -28,6 +28,9 @@ dbWriteTable_measurand(conn, md_name, md_setup_datetime, pq_id, site_id,
 
 \item{md_comment}{Character vector of additional information.}
 }
+\value{
+Data frame of newly added rows.
+}
 \description{
 Insert data into \code{measurand} table
 }

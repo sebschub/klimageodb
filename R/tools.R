@@ -21,20 +21,81 @@ dbConnect_klimageo <- function(dsn = "klimageodb") {
 }
 
 
+#' Get primary key name of a table
+#'
+#' @param conn Database connection.
+#' @param name Name of the table.
+#'
+#' @return String of primary key.
+get_primarykey <- function(conn, name) {
+  # get name of primary key, from https://wiki.postgresql.org/wiki/Retrieve_primary_key_columns
+  DBI::dbGetQuery(
+    conn,
+    paste0("SELECT a.attname FROM pg_index i JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey) WHERE i.indrelid = '",
+           name,
+           "'::regclass AND i.indisprimary;")
+  )[1,1]
+}
+
+
+
+#' Get values of a column from a table
+#'
+#' @param conn Database connection.
+#' @param name Name of the table.
+#'
+#' @return Vector of values.
+get_column_values <- function(conn, name, columns) {
+  # get primary key values
+  DBI::dbGetQuery(
+    conn,
+    paste("SELECT", columns, "FROM", name, ";")
+  )[[1]]
+}
+
 #' Write table to database
 #'
 #' @param name Name of the table.
 #' @param arg_list List with first element being DBIConnection to the target
 #'   database and rest being columns of same length to be put into the table.
+#' @param return_newrows Return the newly added rows?
 #'
-write_table <- function(name, arg_list) {
+#' @return Newly added rows or NULL.
+write_table <- function(name, arg_list, return_newrows = TRUE) {
   # conn is first in list
   conn <- arg_list[[1]]
+
   # convert the rest to data frame ignoring NULL
   df <- arg_list[-1]
   df <- do.call(cbind.data.frame, df[!sapply(df, is.null)])
+
+  # get pk values before insertion of data
+  if (return_newrows) {
+    pk_string <- get_primarykey(conn, name)
+    old_pk_values <- get_column_values(conn, name, pk_string)
+  }
+
   # write the table
   DBI::dbWriteTable(conn, name = name, value = df, append = TRUE)
+
+  if (return_newrows) {
+    # get pk values after insertion of data
+    new_pk_values <- get_column_values(conn, name, pk_string)
+    diff_pk_values <- setdiff(new_pk_values, old_pk_values)
+    if (length(diff_pk_values > 0)) {
+      diff_pk_string <- paste0(paste0("'",
+                                      diff_pk_values,
+                                      "'",
+                                      collapse = ", ")
+      )
+      DBI::dbGetQuery(conn,
+                      paste("SELECT * FROM", name,
+                            "WHERE", pk_string, "in (", diff_pk_string, ");"
+                      ))
+    } else {
+      NULL
+    }
+  }
 }
 
 #' Insert data into \code{site} table
@@ -47,6 +108,7 @@ write_table <- function(name, arg_list) {
 #'   m.
 #' @param site_comment String vector of additional comments.
 #'
+#' @return Data frame of newly added rows.
 #' @export
 #'
 #' @examples
@@ -69,6 +131,7 @@ dbWriteTable_site <- function(conn,
 #' @param devman_name String vector of name of device manufacturer.
 #' @param devman_comment String vector of additional comments.
 #'
+#' @return Data frame of newly added rows.
 #' @export
 #'
 #' @examples
@@ -89,6 +152,7 @@ dbWriteTable_device_manufacturer <- function(conn,
 #' @param devtype_name String vector of name of device type.
 #' @param devtype_comment String vector of additional comments.
 #'
+#' @return Data frame of newly added rows.
 #' @export
 #'
 #' @examples
@@ -112,7 +176,7 @@ dbWriteTable_device_type <- function(conn,
 #' @param devman_id Integer vector of \code{device_manufacturer} IDs.
 #' @param devmod_comment String vector of additional comments.
 #'
-#'
+#' @return Data frame of newly added rows.
 #' @export
 #'
 #' @examples
@@ -141,6 +205,7 @@ dbWriteTable_device_model <- function(conn,
 #'   numbers.
 #' @param dev_comment String vector of additional comments.
 #'
+#' @return Data frame of newly added rows.
 #' @export
 #'
 #' @examples
@@ -169,6 +234,7 @@ dbWriteTable_device <- function(conn,
 #' @param caldev_parameter String vector of values of calibration parameters.
 #' @param caldev_comment String vector of additional comments.
 #'
+#' @return Data frame of newly added rows.
 #' @export
 #'
 #' @examples
@@ -214,6 +280,7 @@ dbWriteTable_calibrated_device <- function(conn,
 #'   numbers.
 #' @param dev_comment String vector of additional comments.
 #'
+#' @return List of data frames of newly added rows.
 #' @export
 #'
 #' @examples
@@ -232,19 +299,12 @@ dbAdd_uncalibrated_device <- function(conn,
                                       dev_comment = NULL) {
   # use transaction to ensure either both, device and calibrated_device, were
   # changed or none
-  invisible(DBI::dbWithTransaction(conn, {
+  DBI::dbWithTransaction(conn, {
     # write device into "device" table
-    write_table(name = "device", as.list(environment()))
-    # surround dev_name with "'" and concatinate them
-    dev_name_string <- paste0(paste0("'", dev_name, "'", collapse = ", "))
-    # get IDs of newly created rows, CHECK IF ORDER IS OK!
-    dev_id <- DBI::dbGetQuery(conn,
-                              paste0("SELECT dev_id FROM device WHERE dev_name in (",
-                                     dev_name_string,");")
-    )
-    DBI::dbWriteTable(conn, name = "calibrated_device",
-                      value = data.frame(dev_id = dev_id), append = TRUE)
-  }))
+    new_device <- write_table(name = "device", as.list(environment()))
+    new_calibrated_device <- dbWriteTable_calibrated_device(conn, dev_id = new_device$dev_id)
+  })
+  list(device = new_device, calibrated_device = new_calibrated_device)
 
 }
 
@@ -259,6 +319,7 @@ dbAdd_uncalibrated_device <- function(conn,
 #'   unitless quantities.
 #' @param pq_comment String vector of additional comments.
 #'
+#' @return Data frame of newly added rows.
 #' @export
 #'
 #' @examples
@@ -283,6 +344,7 @@ dbWriteTable_physical_quantity <- function(conn,
 #' @param inttype_description String vector of description of \code{integration_type}.
 #' @param inttype_comment String vector of additional comments.
 #'
+#' @return Data frame of newly added rows.
 #' @export
 #'
 #' @examples
@@ -308,6 +370,7 @@ dbWriteTable_integration_type <- function(conn,
 #' @param int_interval Numeric vector of integration interval in s of one stored measurement.
 #' @param int_comment Character vector of additional information.
 #'
+#' @return Data frame of newly added rows.
 #' @export
 #'
 #' @examples
@@ -334,6 +397,7 @@ dbWriteTable_integration <- function(conn,
 #' @param pers_name Character vector of person name.
 #' @param pers_comment Character vector of additional information.
 #'
+#' @return Data frame of newly added rows.
 #' @export
 #'
 #' @examples
@@ -363,6 +427,7 @@ dbWriteTable_person <- function(conn,
 #' @param pers_id Integer vector of \code{person} ID.
 #' @param md_comment Character vector of additional information.
 #'
+#' @return Data frame of newly added rows.
 #' @export
 #'
 #' @examples
@@ -406,6 +471,7 @@ dbWriteTable_measurand <- function(conn,
 #' @param qf_description Character vector of quality_flag description.
 #' @param qf_comment Character vector of of additional information..
 #'
+#' @return Data frame of newly added rows.
 #' @export
 #'
 #' @examples
@@ -437,6 +503,8 @@ dbWriteTable_quality_flag <- function(conn,
 #'   qf_id >= 10 indicating value not ok.
 #' @export
 #'
+#' @return For performance reason, contrary to the meta data table functions,
+#'   this function does not return anything.
 #' @examples
 #' \dontrun{
 #' con <- dbConnect_klimageo()
@@ -455,7 +523,7 @@ dbWriteTable_station_adlershof <- function(conn,
   if (!inherits(stadl_datetime, "POSIXct")) {
     stop("stadl_datetime is not POSIXct.")
   }
-  write_table(name = "station_adlershof", as.list(environment()))
+  write_table(name = "station_adlershof", as.list(environment()), return_newrows = FALSE)
 }
 
 
@@ -484,6 +552,8 @@ dbWriteTable_station_adlershof <- function(conn,
 #' @param md_id Integer vector of corrected \code{measurand} ID.
 #' @param stadlcor_value Numeric vector of corrected value of measurement.
 #'
+#' @return For performance reason, contrary to the meta data table functions,
+#'   these functions do not return anything.
 #' @export
 #'
 #' @examples
@@ -540,9 +610,6 @@ dbWriteTable_station_adlershof_correction <- function(conn,
     stop("stadlcor_datetime is not POSIXct.")
   }
   write_table(name = "station_adlershof_correction",
-              list(conn = conn,
-                   stadl_id = stadl_id,
-                   stadlcor_datetime = stadlcor_datetime,
-                   md_id = md_id,
-                   stadlcor_value = stadlcor_value))
+              as.list(environment()),
+              return_newrows = FALSE)
 }

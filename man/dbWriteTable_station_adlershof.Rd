@@ -19,6 +19,10 @@ dbWriteTable_station_adlershof(conn, stadl_datetime, md_id, stadl_value,
 \item{qf_id}{Integer vector with 1 <= qf_id <= 9 indicating value ok and
 qf_id >= 10 indicating value not ok.}
 }
+\value{
+For performance reason, contrary to the meta data table functions,
+  this function does not return anything.
+}
 \description{
 Insert data into \code{station_adlershof} table
 }

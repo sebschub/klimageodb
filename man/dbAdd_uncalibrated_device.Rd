@@ -20,6 +20,9 @@ numbers.}
 
 \item{dev_comment}{String vector of additional comments.}
 }
+\value{
+List of data frames of newly added rows.
+}
 \description{
 This function adds new devices to the database that do not require any
 calibration. First, it adds the new devices into the \code{device} table. It

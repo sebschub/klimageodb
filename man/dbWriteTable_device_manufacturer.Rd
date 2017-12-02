@@ -13,6 +13,9 @@ dbWriteTable_device_manufacturer(conn, devman_name, devman_comment = NULL)
 
 \item{devman_comment}{String vector of additional comments.}
 }
+\value{
+Data frame of newly added rows.
+}
 \description{
 Insert data into \code{device_manufacturer} table
 }

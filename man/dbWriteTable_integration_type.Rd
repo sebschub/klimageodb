@@ -16,6 +16,9 @@ dbWriteTable_integration_type(conn, inttype_name, inttype_description,
 
 \item{inttype_comment}{String vector of additional comments.}
 }
+\value{
+Data frame of newly added rows.
+}
 \description{
 Insert data into \code{integration_type} table
 }

@@ -13,6 +13,9 @@ dbWriteTable_person(conn, pers_name, pers_comment = NULL)
 
 \item{pers_comment}{Character vector of additional information.}
 }
+\value{
+Data frame of newly added rows.
+}
 \description{
 Insert data into \code{person} table
 }

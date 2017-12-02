@@ -19,6 +19,9 @@ qf_id >= 10 indicating value not ok;}
 
 \item{qf_comment}{Character vector of of additional information..}
 }
+\value{
+Data frame of newly added rows.
+}
 \description{
 Insert data into \code{quality_flag} table
 }

@@ -13,6 +13,9 @@ dbWriteTable_device_type(conn, devtype_name, devtype_comment = NULL)
 
 \item{devtype_comment}{String vector of additional comments.}
 }
+\value{
+Data frame of newly added rows.
+}
 \description{
 Insert data into \code{device_type} table
 }

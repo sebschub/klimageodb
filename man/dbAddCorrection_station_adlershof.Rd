@@ -29,6 +29,10 @@ measurement.}
 
 \item{stadlcor_value}{Numeric vector of corrected value of measurement.}
 }
+\value{
+For performance reason, contrary to the meta data table functions,
+  these functions do not return anything.
+}
 \description{
 In general, use \code{dbAddCorrection_station_adlershof} to consistently add
 the corrected measurement values to \code{station_adlershof_correction} and

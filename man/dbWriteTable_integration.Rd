@@ -18,6 +18,9 @@ dbWriteTable_integration(conn, inttype_id, int_measurement_interval,
 
 \item{int_comment}{Character vector of additional information.}
 }
+\value{
+Data frame of newly added rows.
+}
 \description{
 Insert data into \code{integration} table
 }
