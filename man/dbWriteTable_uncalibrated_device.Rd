@@ -2,8 +2,8 @@
 % Please edit documentation in R/tools.R
 \name{dbWriteTable_uncalibrated_device}
 \alias{dbWriteTable_uncalibrated_device}
-\title{Insert data into \code{device} and \code{calibrated_device} table with
-calibration parameters \code{NULL}}
+\title{Insert data into \code{device} and \code{calibrated_device} without
+calibration parameters}
 \usage{
 dbWriteTable_uncalibrated_device(conn, dev_name, devmod_id,
   dev_identifier = NULL, dev_comment = NULL)
@@ -21,12 +21,11 @@ numbers.}
 \item{dev_comment}{String vector of additional comments.}
 }
 \description{
-This function adds new devices to the database that do not
-  require any calibration. First, it adds the new devices into the
-  \code{device} table. It then uses the respective created
-  \code{device.dev_id} to add new entries in \code{calibrated_device} with both
-  \code{calibrated_device.caldev_datetime} and
-  \code{calibrated_device.caldev_parameter} being \code{NULL}.
+This function adds new devices to the database that do not require any
+calibration. First, it adds the new devices into the \code{device} table. It
+then uses the respective created \code{device.dev_id} to add new entries in
+\code{calibrated_device} with both \code{calibrated_device.caldev_datetime}
+and \code{calibrated_device.caldev_parameter} being \code{NULL}.
 }
 \examples{
 \dontrun{

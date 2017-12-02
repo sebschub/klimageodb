@@ -327,18 +327,19 @@ test_that("dbWriteTable_quality_flag", {
 
 
 station_adlershof_df <- data.frame(
-  stadl_datetime = c("2017-01-01 12:15:12", "2017-01-01 16:15:12"),
-  md_id = c(1, 1),
-  stadl_value = c(293.15, 294.15))
+  stadl_datetime = c("2017-01-01 12:15:12", "2017-01-01 16:15:12", "2017-01-05 16:15:12"),
+  md_id = c(1, 1, 1),
+  stadl_value = c(293.15, 294.15, 270.15))
 
 # test different time zones
 station_adlershof_dfPct <- station_adlershof_df
 station_adlershof_dfPct$stadl_datetime <-
   c(as.POSIXct(station_adlershof_dfPct$stadl_datetime[1], tz = "UTC"),
-    as.POSIXct(station_adlershof_dfPct$stadl_datetime[2], tz = "CET"))
-station_adlershof_dfPct_full <- cbind(data.frame(stadl_id = c(1, 2)),
+    as.POSIXct(station_adlershof_dfPct$stadl_datetime[2], tz = "CET"),
+    as.POSIXct(station_adlershof_dfPct$stadl_datetime[2], tz = "GMT"))
+station_adlershof_dfPct_full <- cbind(data.frame(stadl_id = c(1, 2, 3)),
                                       station_adlershof_dfPct,
-                                      data.frame(qf_id = as.integer(NA, NA)))
+                                      data.frame(qf_id = as.integer(NA, NA, NA)))
 
 test_that("dbWriteTable_station_adlershof", {
   dbWriteTable_station_adlershof(con,
@@ -346,8 +347,6 @@ test_that("dbWriteTable_station_adlershof", {
                             md_id = station_adlershof_dfPct$md_id,
                             stadl_value = station_adlershof_dfPct$stadl_value)
   df <- dbReadTable(con, "station_adlershof")
-  # convert 64bit integer to standard R integer
-  df$stadl_id <- as.integer(df$stadl_id)
   expect_true(all.equal(station_adlershof_dfPct_full, df))
   # no POSIXct should give error
   expect_error(
@@ -360,6 +359,52 @@ test_that("dbWriteTable_station_adlershof", {
 
 
 
+cor_stadl_id <- 1
+station_adlershof_dfPct_full$qf_id[cor_stadl_id] <- 1
+test_that("dbUpdateQF_station_adlershof", {
+  dbUpdateQF_station_adlershof(con,
+                               stadl_id = cor_stadl_id,
+                               qf_id = station_adlershof_dfPct_full$qf_id[cor_stadl_id])
+  df <- dbReadTable(con, "station_adlershof")
+  # reorder df because UPDATE changes original order
+  df <- df[order(df$stadl_id), ]
+  rownames(df) <- 1:3
+  expect_true(all.equal(station_adlershof_dfPct_full, df))
+})
+
+
+cor_stadl_id <- c(2, 3)
+station_adlershof_correction_df <-
+  data.frame(stadlcor_id = c(1, 2),
+             stadl_id = cor_stadl_id,
+             stadlcor_datetime = c("2017-05-01 16:15:12", "2017-05-05 16:15:12"),
+             md_id = c(1,1),
+             stadlcor_value = c(290.15, 278.15)
+  )
+station_adlershof_correction_dfPct <- station_adlershof_correction_df
+station_adlershof_correction_dfPct$stadlcor_datetime <-
+  as.POSIXct(station_adlershof_correction_dfPct$stadlcor_datetime, tz = "UTC")
+
+station_adlershof_dfPct_full$qf_id[cor_stadl_id] <- 11
+test_that("dbAddCorrection_station_adlershof", {
+  dbAddCorrection_station_adlershof(con,
+                                    stadl_id = station_adlershof_correction_dfPct$stadl_id,
+                                    qf_id = station_adlershof_dfPct_full$qf_id[cor_stadl_id],
+                                    stadlcor_datetime = station_adlershof_correction_dfPct$stadlcor_datetime,
+                                    md_id = station_adlershof_correction_dfPct$md_id,
+                                    stadlcor_value = station_adlershof_correction_dfPct$stadlcor_value)
+  df <- dbReadTable(con, "station_adlershof_correction")
+  expect_true(all.equal(station_adlershof_correction_dfPct, df))
+  # no POSIXct should give error
+  expect_error(
+    dbAddCorrection_station_adlershof(con,
+                                      stadl_id = station_adlershof_correction_df$stadl_id,
+                                      qf_id = station_adlershof_dfPct_full$qf_id[cor_stadl_id],
+                                      stadlcor_datetime = station_adlershof_correction_df$stadlcor_datetime,
+                                      md_id = station_adlershof_correction_df$md_id,
+                                      stadlcor_value = station_adlershof_correction_df$stadlcor_value)
+  )
+})
 
 
 dbDisconnect(con)

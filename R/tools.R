@@ -191,22 +191,21 @@ dbWriteTable_calibrated_device <- function(conn,
                                            caldev_comment = NULL) {
   # we need caldev_datetime to be POSIXct for consistent time zone storage
   if (!is.null(caldev_datetime) & !inherits(caldev_datetime, "POSIXct")) {
-    stop("caldev_datetime is used but not POSIXct")
+    stop("caldev_datetime is used but not POSIXct.")
   }
   write_table(name = "calibrated_device", as.list(environment()))
 }
 
 
 
-#' Insert data into \code{device} and \code{calibrated_device} table with
-#' calibration parameters \code{NULL}
+#' Insert data into \code{device} and \code{calibrated_device} without
+#' calibration parameters
 #'
-#' @description This function adds new devices to the database that do not
-#'   require any calibration. First, it adds the new devices into the
-#'   \code{device} table. It then uses the respective created
-#'   \code{device.dev_id} to add new entries in \code{calibrated_device} with both
-#'   \code{calibrated_device.caldev_datetime} and
-#'   \code{calibrated_device.caldev_parameter} being \code{NULL}.
+#' This function adds new devices to the database that do not require any
+#' calibration. First, it adds the new devices into the \code{device} table. It
+#' then uses the respective created \code{device.dev_id} to add new entries in
+#' \code{calibrated_device} with both \code{calibrated_device.caldev_datetime}
+#' and \code{calibrated_device.caldev_parameter} being \code{NULL}.
 #'
 #' @param conn Database connection.
 #' @param dev_name String vector of name of device.
@@ -392,7 +391,7 @@ dbWriteTable_measurand <- function(conn,
                                 pers_id = NULL,
                                 md_comment = NULL) {
   if (!inherits(md_setup_datetime, "POSIXct")) {
-    stop("md_setup_datetime is not POSIXct")
+    stop("md_setup_datetime is not POSIXct.")
   }
   write_table(name = "measurand", as.list(environment()))
 }
@@ -435,14 +434,17 @@ dbWriteTable_quality_flag <- function(conn,
 #' @param md_id Integer vector of measurand ID.
 #' @param stadl_value Numeric vector of measurement values.
 #' @param qf_id Integer vector with 1 <= qf_id <= 9 indicating value ok and
-#'   qf_id >= 10 indicating value not ok;
+#'   qf_id >= 10 indicating value not ok.
 #' @export
 #'
 #' @examples
 #' \dontrun{
 #' con <- dbConnect_klimageo()
 #' # add all required entries before with the respective dbWriteTable_*
-#' dbWriteTable_station_adlershof
+#' dbWriteTable_station_adlershof(con,
+#'                                stadl_datetime = as.POSIXct("2017-01-01 12:15:12", tz = "UTC"),
+#'                                md_id = 1,
+#'                                stadl_value = 273.15)
 #' dbDisconnect(con)
 #' }
 dbWriteTable_station_adlershof <- function(conn,
@@ -451,7 +453,96 @@ dbWriteTable_station_adlershof <- function(conn,
                                            stadl_value,
                                            qf_id = NULL) {
   if (!inherits(stadl_datetime, "POSIXct")) {
-    stop("stadl_datetime is not POSIXct")
+    stop("stadl_datetime is not POSIXct.")
   }
   write_table(name = "station_adlershof", as.list(environment()))
+}
+
+
+
+#' Add corrections of \code{station_adlershof} measurements
+#'
+#' In general, use \code{dbAddCorrection_station_adlershof} to consistently add
+#' the corrected measurement values to \code{station_adlershof_correction} and
+#' to modify the quality flags in \code{station_adlershof}.
+#' \code{dbWriteTable_station_adlershof_correction} and
+#' \code{dbUpdateQF_station_adlershof} do the respective single actions.
+#'
+#' By design, qf_id with values >= 10 in \code{station_adlershof} indicates that
+#' entries in \code{station_adlershof} are corrected in
+#' \code{station_adlershof_correction}. Thus,
+#' \code{dbAddCorrection_station_adlershof} imposes the constraint qf_id >= 10.
+#' \code{dbUpdateQF_station_adlershof}, on the other hand, allows general values
+#' of qf_id (further checks are done by the database).
+#'
+#' @param conn Database connection.
+#' @param stadl_id Integer vector of \code{station_adlershof} ID for which to
+#'   add corrected measurements and/or for which modify the quality flag.
+#' @param qf_id Integer vector of \code{quality_flag} ID.
+#' @param stadlcor_datetime POSIXct vector of corrected date and time of
+#'   measurement.
+#' @param md_id Integer vector of corrected \code{measurand} ID.
+#' @param stadlcor_value Numeric vector of corrected value of measurement.
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' con <- dbConnect_klimageo()
+#' add all required entries before with the respective dbWriteTable_*
+#' dbAddCorrection_station_adlershof(con,
+#'                                   stadl_id = c(1,2),
+#'                                   qf_id = c(11,11),
+#'                                   stadlcor_datetime =
+#'                                     as.POSIXct(c("2017-01-01 12:15:12", "2017-01-01 12:15:12"), tz = "UTC"),
+#'                                   md_id = c(1,1),
+#'                                   stadlcor_value = c(290.12, 289.23))
+#' dbDisconnect(con)
+#' }
+dbAddCorrection_station_adlershof <- function(conn,
+                                              stadl_id, qf_id,
+                                              stadlcor_datetime,
+                                              md_id,
+                                              stadlcor_value) {
+  if (!all(qf_id >= 10)) {
+    stop("Not all qf_id values are larger or equal 10.")
+  }
+  DBI::dbWithTransaction(conn, {
+    dbWriteTable_station_adlershof_correction(conn = conn,
+                     stadl_id = stadl_id,
+                     stadlcor_datetime = stadlcor_datetime,
+                     md_id = md_id,
+                     stadlcor_value = stadlcor_value)
+    dbUpdateQF_station_adlershof(conn, stadl_id, qf_id)
+  })
+}
+
+
+
+#' @rdname dbAddCorrection_station_adlershof
+#' @export
+dbUpdateQF_station_adlershof <- function(conn, stadl_id, qf_id) {
+  qf_id_update <- DBI::dbSendStatement(conn, 'UPDATE station_adlershof SET "qf_id"=? WHERE stadl_id=?')
+  DBI::dbBind(qf_id_update, list(qf_id, stadl_id))
+  DBI::dbGetRowsAffected(qf_id_update)
+  DBI::dbClearResult(qf_id_update)
+}
+
+
+#' @rdname dbAddCorrection_station_adlershof
+#' @export
+dbWriteTable_station_adlershof_correction <- function(conn,
+                                                      stadl_id,
+                                                      stadlcor_datetime,
+                                                      md_id,
+                                                      stadlcor_value) {
+  if (!inherits(stadlcor_datetime, "POSIXct")) {
+    stop("stadlcor_datetime is not POSIXct.")
+  }
+  write_table(name = "station_adlershof_correction",
+              list(conn = conn,
+                   stadl_id = stadl_id,
+                   stadlcor_datetime = stadlcor_datetime,
+                   md_id = md_id,
+                   stadlcor_value = stadlcor_value))
 }

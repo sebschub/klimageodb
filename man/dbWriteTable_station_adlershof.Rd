@@ -17,7 +17,7 @@ dbWriteTable_station_adlershof(conn, stadl_datetime, md_id, stadl_value,
 \item{stadl_value}{Numeric vector of measurement values.}
 
 \item{qf_id}{Integer vector with 1 <= qf_id <= 9 indicating value ok and
-qf_id >= 10 indicating value not ok;}
+qf_id >= 10 indicating value not ok.}
 }
 \description{
 Insert data into \code{station_adlershof} table
@@ -26,7 +26,10 @@ Insert data into \code{station_adlershof} table
 \dontrun{
 con <- dbConnect_klimageo()
 # add all required entries before with the respective dbWriteTable_*
-dbWriteTable_station_adlershof
+dbWriteTable_station_adlershof(con,
+                               stadl_datetime = as.POSIXct("2017-01-01 12:15:12", tz = "UTC"),
+                               md_id = 1,
+                               stadl_value = 273.15)
 dbDisconnect(con)
 }
 }
