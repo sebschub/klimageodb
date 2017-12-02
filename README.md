@@ -2,7 +2,8 @@
 
 # klimageodb
 
-The goal of klimageodb is to ...
+This package simplifies the access to our measurement database. The
+database fields are described in `travis/create_tables.sql`.
 
 ## Installation
 
@@ -13,11 +14,12 @@ You can install klimageodb from github with:
 # install.packages("devtools")
 devtools::install_github("sebschub/klimageodb")
 ```
+If you receive the error `Installation failed: error in running
+command`, try setting `options(unzip = "unzip")` before running
+`install_github`.
 
-## Example
-
-This is a basic example which shows you how to solve a common problem:
-
-``` r
-## basic example code
-```
+The package is based on the
+[DBI](https://cran.r-project.org/web/packages/DBI/) and the
+[odbc](https://cran.r-project.org/web/packages/odbc/). Consequently, a
+[ODBC driver](http://db.rstudio.com/best-practices/drivers/) has to be
+set-up before this package can be used.
