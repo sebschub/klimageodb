@@ -43,13 +43,14 @@ get_primarykey <- function(conn, name) {
 #'
 #' @param conn Database connection.
 #' @param name Name of the table.
+#' @param column Name of the column.
 #'
 #' @return Vector of values.
-get_column_values <- function(conn, name, columns) {
+get_column_values <- function(conn, name, column) {
   # get primary key values
   DBI::dbGetQuery(
     conn,
-    paste("SELECT", columns, "FROM", name, ";")
+    paste("SELECT", column, "FROM", name, ";")
   )[[1]]
 }
 
@@ -560,13 +561,14 @@ dbWriteTable_station_adlershof <- function(conn,
 #' \dontrun{
 #' con <- dbConnect_klimageo()
 #' add all required entries before with the respective dbWriteTable_*
-#' dbAddCorrection_station_adlershof(con,
-#'                                   stadl_id = c(1,2),
-#'                                   qf_id = c(11,11),
-#'                                   stadlcor_datetime =
-#'                                     as.POSIXct(c("2017-01-01 12:15:12", "2017-01-01 12:15:12"), tz = "UTC"),
-#'                                   md_id = c(1,1),
-#'                                   stadlcor_value = c(290.12, 289.23))
+#' dbAddCorrection_station_adlershof(
+#'   con,
+#'   stadl_id = c(1,2),
+#'   qf_id = c(11,11),
+#'   stadlcor_datetime =
+#'   as.POSIXct(c("2017-01-01 12:15:12", "2017-01-01 12:15:12"), tz = "UTC"),
+#'   md_id = c(1,1),
+#'   stadlcor_value = c(290.12, 289.23))
 #' dbDisconnect(con)
 #' }
 dbAddCorrection_station_adlershof <- function(conn,

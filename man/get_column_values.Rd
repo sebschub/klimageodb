@@ -4,12 +4,14 @@
 \alias{get_column_values}
 \title{Get values of a column from a table}
 \usage{
-get_column_values(conn, name, columns)
+get_column_values(conn, name, column)
 }
 \arguments{
 \item{conn}{Database connection.}
 
 \item{name}{Name of the table.}
+
+\item{column}{Name of the column.}
 }
 \value{
 Vector of values.
