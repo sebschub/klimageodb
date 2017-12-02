@@ -33,7 +33,7 @@ test_dbWriteTable_table <- function(conn, table, df, args_ind) {
   # argument for test function
   args <- c(list(conn = con), as.list(df[args_ind]))
 
-  test_that("dbWriteTable_site", {
+  test_that(test_string, {
     # call test function
     do.call(test_function, args)
 
