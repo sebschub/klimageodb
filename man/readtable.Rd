@@ -16,6 +16,11 @@
 \alias{dbReadTable_quality_flag}
 \alias{dbReadTable_station_adlershof}
 \alias{dbReadTable_station_adlershof_correction}
+\alias{dbReadTable_device_model_detail}
+\alias{dbReadTable_device_detail}
+\alias{dbReadTable_calibrated_device_detail}
+\alias{dbReadTable_integration_detail}
+\alias{dbReadTable_measurand_detail}
 \title{Table reading}
 \usage{
 dbReadTable_site(conn)
@@ -45,13 +50,38 @@ dbReadTable_quality_flag(conn)
 dbReadTable_station_adlershof(conn)
 
 dbReadTable_station_adlershof_correction(conn)
+
+dbReadTable_device_model_detail(conn)
+
+dbReadTable_device_detail(conn)
+
+dbReadTable_calibrated_device_detail(conn)
+
+dbReadTable_integration_detail(conn)
+
+dbReadTable_measurand_detail(conn)
 }
 \arguments{
 \item{conn}{Database connection.}
 }
+\value{
+The functions return a data frame that contains the complete data
+  from the respective remote table, effectively the result of calling
+  \code{\link[DBI]{dbGetQuery}} with \code{SELECT * FROM <name>}. An error is
+  raised if the table does not exist. An empty table is returned as a data
+  frame with zero rows.
+}
 \description{
-These function retrieve the respective tables as a data frame from the
-database.
+These function retrieve the respective tables and views as a data frame from
+the database.
+}
+\details{
+Most of the listed function retrieve present tables in the database. For
+convinience, function of the form \code{dbReadTable_*_detail} receive the
+views which join different database tables together. For example,
+\code{dbReadTable_measurand_detail} retrieves the \code{measurand} table with
+all id fields replaced by the corresponding information in
+\code{physical_quantity}, \code{calibrated_device}, etc.
 }
 \seealso{
 \code{\link[DBI]{dbReadTable}} for the general function to retrieve
