@@ -113,6 +113,7 @@ write_table <- function(name, arg_list, return_newrows = TRUE) {
 #' @param site_comment String vector of additional comments.
 #'
 #' @return Data frame of newly added rows.
+#' @family custom dbWriteTable functions
 #' @export
 #'
 #' @examples
@@ -136,6 +137,7 @@ dbWriteTable_site <- function(conn,
 #' @param devman_comment String vector of additional comments.
 #'
 #' @return Data frame of newly added rows.
+#' @family custom dbWriteTable functions
 #' @export
 #'
 #' @examples
@@ -157,6 +159,7 @@ dbWriteTable_device_manufacturer <- function(conn,
 #' @param devtype_comment String vector of additional comments.
 #'
 #' @return Data frame of newly added rows.
+#' @family custom dbWriteTable functions
 #' @export
 #'
 #' @examples
@@ -181,6 +184,7 @@ dbWriteTable_device_type <- function(conn,
 #' @param devmod_comment String vector of additional comments.
 #'
 #' @return Data frame of newly added rows.
+#' @family custom dbWriteTable functions
 #' @export
 #'
 #' @examples
@@ -210,6 +214,7 @@ dbWriteTable_device_model <- function(conn,
 #' @param dev_comment String vector of additional comments.
 #'
 #' @return Data frame of newly added rows.
+#' @family custom dbWriteTable functions
 #' @export
 #'
 #' @examples
@@ -239,6 +244,7 @@ dbWriteTable_device <- function(conn,
 #' @param caldev_comment String vector of additional comments.
 #'
 #' @return Data frame of newly added rows.
+#' @family custom dbWriteTable functions
 #' @export
 #'
 #' @examples
@@ -285,6 +291,9 @@ dbWriteTable_calibrated_device <- function(conn,
 #' @param dev_comment String vector of additional comments.
 #'
 #' @return List of data frames of newly added rows.
+#' @seealso \code{\link{dbWriteTable_device}} and
+#'   \code{\link{dbWriteTable_calibrated_device}} for the separate functions
+#'   called by this wrapper.
 #' @export
 #'
 #' @examples
@@ -324,6 +333,7 @@ dbAdd_uncalibrated_device <- function(conn,
 #' @param pq_comment String vector of additional comments.
 #'
 #' @return Data frame of newly added rows.
+#' @family custom dbWriteTable functions
 #' @export
 #'
 #' @examples
@@ -349,6 +359,7 @@ dbWriteTable_physical_quantity <- function(conn,
 #' @param inttype_comment String vector of additional comments.
 #'
 #' @return Data frame of newly added rows.
+#' @family custom dbWriteTable functions
 #' @export
 #'
 #' @examples
@@ -375,6 +386,7 @@ dbWriteTable_integration_type <- function(conn,
 #' @param int_comment Character vector of additional information.
 #'
 #' @return Data frame of newly added rows.
+#' @family custom dbWriteTable functions
 #' @export
 #'
 #' @examples
@@ -402,6 +414,7 @@ dbWriteTable_integration <- function(conn,
 #' @param pers_comment Character vector of additional information.
 #'
 #' @return Data frame of newly added rows.
+#' @family custom dbWriteTable functions
 #' @export
 #'
 #' @examples
@@ -432,6 +445,7 @@ dbWriteTable_person <- function(conn,
 #' @param md_comment Character vector of additional information.
 #'
 #' @return Data frame of newly added rows.
+#' @family custom dbWriteTable functions
 #' @export
 #'
 #' @examples
@@ -476,6 +490,7 @@ dbWriteTable_measurand <- function(conn,
 #' @param qf_comment Character vector of of additional information..
 #'
 #' @return Data frame of newly added rows.
+#' @family custom dbWriteTable functions
 #' @export
 #'
 #' @examples
@@ -509,6 +524,7 @@ dbWriteTable_quality_flag <- function(conn,
 #'
 #' @return For performance reason, contrary to the meta data table functions,
 #'   this function does not return anything.
+#' @family custom dbWriteTable functions
 #' @examples
 #' \dontrun{
 #' con <- dbConnect_klimageo()

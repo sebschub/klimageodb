@@ -40,3 +40,8 @@ dbAdd_uncalibrated_device(con, "My first THERMO1000", 1, "NCC1701-T")
 dbDisconnect(con)
 }
 }
+\seealso{
+\code{\link{dbWriteTable_device}} and
+  \code{\link{dbWriteTable_calibrated_device}} for the separate functions
+  called by this wrapper.
+}

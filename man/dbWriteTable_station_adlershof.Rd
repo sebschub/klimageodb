@@ -37,3 +37,17 @@ dbWriteTable_station_adlershof(con,
 dbDisconnect(con)
 }
 }
+\seealso{
+Other custom dbWriteTable functions: \code{\link{dbWriteTable_calibrated_device}},
+  \code{\link{dbWriteTable_device_manufacturer}},
+  \code{\link{dbWriteTable_device_model}},
+  \code{\link{dbWriteTable_device_type}},
+  \code{\link{dbWriteTable_device}},
+  \code{\link{dbWriteTable_integration_type}},
+  \code{\link{dbWriteTable_integration}},
+  \code{\link{dbWriteTable_measurand}},
+  \code{\link{dbWriteTable_person}},
+  \code{\link{dbWriteTable_physical_quantity}},
+  \code{\link{dbWriteTable_quality_flag}},
+  \code{\link{dbWriteTable_site}}
+}
