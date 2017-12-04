@@ -1,4 +1,4 @@
-context("Database write functions")
+context("Database write and some read functions")
 
 con <- dbConnect_klimageo()
 test_that("dbConnect_klimageo", {
@@ -33,8 +33,8 @@ test_dbWriteTable_table <- function(conn, table, df, args_ind) {
   read_function <- get(read_string)
 
   # argument for test function
-  write_args <- c(list(conn = con), as.list(df[args_ind]))
-  read_args <- c(list(conn = con))
+  write_args <- c(list(conn = conn), as.list(df[args_ind]))
+  read_args <- c(list(conn = conn))
 
   # write test
   test_that(write_string, {
