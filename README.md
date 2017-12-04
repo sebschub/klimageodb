@@ -20,6 +20,6 @@ command`, try setting `options(unzip = "unzip")` before running
 
 The package is based on the
 [DBI](https://cran.r-project.org/web/packages/DBI/) and the
-[odbc](https://cran.r-project.org/web/packages/odbc/). Consequently, a
+[odbc](https://cran.r-project.org/web/packages/odbc/) package. Consequently, an 
 [ODBC driver](http://db.rstudio.com/best-practices/drivers/) has to be
 set-up before this package can be used.
