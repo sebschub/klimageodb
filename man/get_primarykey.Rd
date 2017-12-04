@@ -17,3 +17,4 @@ String of primary key.
 \description{
 Get primary key name of a table
 }
+\keyword{internal}

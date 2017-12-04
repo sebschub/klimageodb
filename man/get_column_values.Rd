@@ -19,3 +19,4 @@ Vector of values.
 \description{
 Get values of a column from a table
 }
+\keyword{internal}

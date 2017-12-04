@@ -20,3 +20,4 @@ Newly added rows or NULL.
 \description{
 Write table to database
 }
+\keyword{internal}

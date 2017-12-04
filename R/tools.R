@@ -27,6 +27,7 @@ dbConnect_klimageo <- function(dsn = "klimageodb") {
 #' @param name Name of the table.
 #'
 #' @return String of primary key.
+#' @keywords internal
 get_primarykey <- function(conn, name) {
   # get name of primary key, from https://wiki.postgresql.org/wiki/Retrieve_primary_key_columns
   DBI::dbGetQuery(
@@ -46,6 +47,7 @@ get_primarykey <- function(conn, name) {
 #' @param column Name of the column.
 #'
 #' @return Vector of values.
+#' @keywords internal
 get_column_values <- function(conn, name, column) {
   # get primary key values
   DBI::dbGetQuery(
@@ -62,6 +64,7 @@ get_column_values <- function(conn, name, column) {
 #' @param return_newrows Return the newly added rows?
 #'
 #' @return Newly added rows or NULL.
+#' @keywords internal
 write_table <- function(name, arg_list, return_newrows = TRUE) {
   # conn is first in list
   conn <- arg_list[[1]]
