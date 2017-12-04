@@ -27,15 +27,19 @@ test_dbWriteTable_table <- function(conn, table, df, args_ind) {
   }
 
   # function to test
-  test_string <- paste0("dbWriteTable_", table)
-  test_function <- get(test_string)
+  write_string <- paste0("dbWriteTable_", table)
+  write_function <- get(write_string)
+  read_string <- paste0("dbReadTable_", table)
+  read_function <- get(read_string)
 
   # argument for test function
-  args <- c(list(conn = con), as.list(df[args_ind]))
+  write_args <- c(list(conn = con), as.list(df[args_ind]))
+  read_args <- c(list(conn = con))
 
-  test_that(test_string, {
+  # write test
+  test_that(write_string, {
     # call test function
-    res <- do.call(test_function, args)
+    res <- do.call(write_function, write_args)
 
     if (table %in% c("station_adlershof", "station_adlershof_correction")) {
       # get table from database because these functions don't get new data
@@ -51,8 +55,17 @@ test_dbWriteTable_table <- function(conn, table, df, args_ind) {
     if (test_nonPct) {
       # non-POSIXct should fail
       args_nonPct <- c(list(conn = con), as.list(df_nonPct[args_ind]))
-      expect_error(do.call(test_function, args_nonPct), "POSIXct")
+      expect_error(do.call(write_function, args_nonPct), "POSIXct")
     }
+  })
+
+  # read test
+  test_that(read_string, {
+    # get table from database because these functions don't get new data
+    # THIS ONLY WORKS WHEN APPLIED TO EMPTY DATABASE!
+    df_db <- do.call(read_function, read_args)
+    # compare with expected
+    expect_true(all.equal(df_compare, df_db))
   })
 }
 
@@ -286,6 +299,11 @@ test_that("dbAddCorrection_station_adlershof", {
                                       stadlcor_value = station_adlershof_correction_df$stadlcor_value),
     "POSIXct"
   )
+})
+
+test_that("dbReadTable_station_adlershof_correction", {
+  df <- dbReadTable_station_adlershof_correction(con)
+  expect_true(all.equal(station_adlershof_correction_df, df))
 })
 
 
