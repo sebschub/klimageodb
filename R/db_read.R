@@ -10,7 +10,8 @@
 #' all id fields replaced by the corresponding information in
 #' \code{physical_quantity}, \code{calibrated_device}, etc.
 #'
-#' @param conn Database connection.
+#' @inheritParams database_fields
+#'
 #' @return The functions return a data frame that contains the complete data
 #'   from the respective remote table, effectively the result of calling
 #'   \code{\link[DBI]{dbGetQuery}} with \code{SELECT * FROM <name>}. An error is

@@ -17,15 +17,15 @@ dbWriteTable_station_adlershof_correction(conn, stadl_id, stadlcor_datetime,
 \arguments{
 \item{conn}{Database connection.}
 
-\item{stadl_id}{Integer vector of \code{station_adlershof} ID for which to
-add corrected measurements and/or for which modify the quality flag.}
+\item{stadl_id}{Integer vector of \code{station_adlershof} ID.}
 
-\item{qf_id}{Integer vector of \code{quality_flag} ID.}
+\item{qf_id}{Integer vector with 1 <= qf_id <= 9 indicating value ok and
+qf_id >= 10 indicating value not ok.}
 
 \item{stadlcor_datetime}{POSIXct vector of corrected date and time of
 measurement.}
 
-\item{md_id}{Integer vector of corrected \code{measurand} ID.}
+\item{md_id}{Integer vector of measurand ID.}
 
 \item{stadlcor_value}{Numeric vector of corrected value of measurement.}
 }

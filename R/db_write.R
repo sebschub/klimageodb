@@ -1,7 +1,73 @@
-#' Get primary key name of a table
+#' Collection of arguments to "@inheritParams" from
+#'
 #'
 #' @param conn Database connection.
+#' @param caldev_id Integer vector of \code{calibrated_device} ID.
+#' @param caldev_datetime POSIXct vector of date and time of calibration.
+#' @param caldev_parameter String vector of values of calibration parameters.
+#' @param caldev_comment String vector of additional comments.
+#' @param dev_id Integer vector of \code{device} ID.
+#' @param dev_name String vector of name of device.
+#' @param dev_identifier String vector of device identifiers, e.g. serial
+#'   numbers.
+#' @param dev_comment String vector of additional comments.
+#' @param devman_id Integer vector of \code{device_manufacturer} IDs.
+#' @param devman_name String vector of name of device manufacturer.
+#' @param devman_comment String vector of additional comments.
+#' @param devmod_id Integer vector of \code{device_model} ID.
+#' @param devmod_name String vector of name of model.
+#' @param devmod_comment String vector of additional comments.
+#' @param devtype_id Integer vector of \code{device_type} IDs.
+#' @param devtype_name String vector of name of device type.
+#' @param devtype_comment String vector of additional comments.
+#' @param int_id Integer vector of \code{integration} ID.
+#' @param int_measurement_interval Numeric vector of intervals between measurements in s.
+#' @param int_interval Numeric vector of integration interval in s of one stored measurement.
+#' @param int_comment Character vector of additional information.
+#' @param inttype_id Integer vector of \code{integration_type} ID.
+#' @param inttype_name String vector of name of integration type.
+#' @param inttype_description String vector of description of \code{integration_type}.
+#' @param inttype_comment String vector of additional comments.
+#' @param md_id Integer vector of measurand ID.
+#' @param md_comment Character vector of additional information.
+#' @param md_name Character vector of measurand name.
+#' @param md_setup_datetime POSIXct vector of date and time of set-up of measurand.
+#' @param md_height Numeric vector of measurement height.
 #' @param name Name of the table.
+#' @param pers_id Integer vector of \code{person} ID.
+#' @param pers_name Character vector of person name.
+#' @param pers_comment Character vector of additional information.
+#' @param pq_id Integer vector of \code{physical_quantity} ID.
+#' @param pq_name String vector of name of physical quantity.
+#' @param pq_unit String vector of units of physical quantity. Use "1" for
+#'   unitless quantities.
+#' @param pq_comment String vector of additional comments.
+#' @param qf_id Integer vector with 1 <= qf_id <= 9 indicating value ok and
+#'   qf_id >= 10 indicating value not ok.
+#' @param qf_name Character vector of quality_flag name.
+#' @param qf_description Character vector of quality_flag description.
+#' @param qf_comment Character vector of of additional information.
+#' @param site_id Integer vector of \code{site} ID.
+#' @param site_name String vector of name of site or name of campaign.
+#' @param site_lat Numeric vector of geographical latitude WGS84.
+#' @param site_lon Numeric vector of geographical longitude WGS84.
+#' @param site_altitude Numeric vector of height above sea level of surface in
+#'   m.
+#' @param site_comment String vector of additional comments.
+#' @param stadl_id Integer vector of \code{station_adlershof} ID.
+#' @param stadl_datetime POSIXct vector of date and time of measurement.
+#' @param stadl_value Numeric vector of measurement values.
+#' @param stadlcor_datetime POSIXct vector of corrected date and time of
+#'   measurement.
+#' @param stadlcor_value Numeric vector of corrected value of measurement.
+#
+#' @name database_fields
+#' @keywords internal
+NULL
+
+#' Get primary key name of a table
+#'
+#' @inheritParams database_fields
 #'
 #' @return String of primary key.
 #' @keywords internal
@@ -17,20 +83,20 @@ get_primarykey <- function(conn, name) {
 
 
 
-#' Get values of a column from a table
+#' Get columns as a data frame from a table
 #'
 #' @param conn Database connection.
 #' @param name Name of the table.
-#' @param column Name of the column.
+#' @param columns Character vector of names of the column.
 #'
-#' @return Vector of values.
+#' @return Data frame of columns.
 #' @keywords internal
-get_column_values <- function(conn, name, column) {
-  # get primary key values
+get_columns <- function(conn, name, columns) {
+  columns_string <- paste(columns, collapse = ",")
   DBI::dbGetQuery(
     conn,
-    paste("SELECT", column, "FROM", name, ";")
-  )[[1]]
+    paste("SELECT", columns_string, "FROM", name, ";")
+  )
 }
 
 #' Write table to database
@@ -53,7 +119,7 @@ write_table <- function(name, arg_list, return_newrows = TRUE) {
   # get pk values before insertion of data
   if (return_newrows) {
     pk_string <- get_primarykey(conn, name)
-    old_pk_values <- get_column_values(conn, name, pk_string)
+    old_pk_values <- get_columns(conn, name, pk_string)[[1]]
   }
 
   # write the table
@@ -61,7 +127,7 @@ write_table <- function(name, arg_list, return_newrows = TRUE) {
 
   if (return_newrows) {
     # get pk values after insertion of data
-    new_pk_values <- get_column_values(conn, name, pk_string)
+    new_pk_values <- get_columns(conn, name, pk_string)[[1]]
     diff_pk_values <- setdiff(new_pk_values, old_pk_values)
     if (length(diff_pk_values > 0)) {
       diff_pk_string <- paste0(paste0("'",
@@ -81,13 +147,7 @@ write_table <- function(name, arg_list, return_newrows = TRUE) {
 
 #' Insert data into \code{site} table
 #'
-#' @param conn Database connection.
-#' @param site_name String vector of name of site or name of campaign.
-#' @param site_lat Numeric vector of geographical latitude WGS84.
-#' @param site_lon Numeric vector of geographical longitude WGS84.
-#' @param site_altitude Numeric vector of height above sea level of surface in
-#'   m.
-#' @param site_comment String vector of additional comments.
+#' @inheritParams database_fields
 #'
 #' @return Data frame of newly added rows.
 #' @family custom dbWriteTable functions
@@ -109,9 +169,8 @@ dbWriteTable_site <- function(conn,
 
 #' Insert data into \code{device_manufacturer} table
 #'
-#' @param conn Database connection.
-#' @param devman_name String vector of name of device manufacturer.
-#' @param devman_comment String vector of additional comments.
+#'
+#' @inheritParams database_fields
 #'
 #' @return Data frame of newly added rows.
 #' @family custom dbWriteTable functions
@@ -131,9 +190,8 @@ dbWriteTable_device_manufacturer <- function(conn,
 
 #' Insert data into \code{device_type} table
 #'
-#' @param conn Database connection.
-#' @param devtype_name String vector of name of device type.
-#' @param devtype_comment String vector of additional comments.
+#'
+#' @inheritParams database_fields
 #'
 #' @return Data frame of newly added rows.
 #' @family custom dbWriteTable functions
@@ -154,11 +212,8 @@ dbWriteTable_device_type <- function(conn,
 
 #' Insert data into \code{device_model} table
 #'
-#' @param conn Database connection.
-#' @param devmod_name String vector of name of model.
-#' @param devtype_id Integer vector of \code{device_type} IDs.
-#' @param devman_id Integer vector of \code{device_manufacturer} IDs.
-#' @param devmod_comment String vector of additional comments.
+#'
+#' @inheritParams database_fields
 #'
 #' @return Data frame of newly added rows.
 #' @family custom dbWriteTable functions
@@ -183,12 +238,7 @@ dbWriteTable_device_model <- function(conn,
 
 #' Insert data into \code{device} table
 #'
-#' @param conn Database connection.
-#' @param dev_name String vector of name of device.
-#' @param devmod_id Integer vector of \code{device_model} ID.
-#' @param dev_identifier String vector of device identifiers, e.g. serial
-#'   numbers.
-#' @param dev_comment String vector of additional comments.
+#' @inheritParams database_fields
 #'
 #' @return Data frame of newly added rows.
 #' @family custom dbWriteTable functions
@@ -214,11 +264,7 @@ dbWriteTable_device <- function(conn,
 
 #' Insert data into \code{calibrated_device} table
 #'
-#' @param conn Database connection.
-#' @param dev_id Integer vector of \code{device} ID.
-#' @param caldev_datetime POSIXct vector of date and time of calibration.
-#' @param caldev_parameter String vector of values of calibration parameters.
-#' @param caldev_comment String vector of additional comments.
+#' @inheritParams database_fields
 #'
 #' @return Data frame of newly added rows.
 #' @family custom dbWriteTable functions
@@ -260,12 +306,7 @@ dbWriteTable_calibrated_device <- function(conn,
 #' \code{calibrated_device} with both \code{calibrated_device.caldev_datetime}
 #' and \code{calibrated_device.caldev_parameter} being \code{NULL}.
 #'
-#' @param conn Database connection.
-#' @param dev_name String vector of name of device.
-#' @param devmod_id Integer vector of \code{device_model} ID.
-#' @param dev_identifier String vector of device identifiers, e.g. serial
-#'   numbers.
-#' @param dev_comment String vector of additional comments.
+#' @inheritParams database_fields
 #'
 #' @return List of data frames of newly added rows.
 #' @seealso \code{\link{dbWriteTable_device}} and
@@ -303,11 +344,8 @@ dbAdd_uncalibrated_device <- function(conn,
 
 #' Insert data into \code{physical_quantity} table
 #'
-#' @param conn Database connection.
-#' @param pq_name String vector of name of physical quantity.
-#' @param pq_unit String vector of units of physical quantity. Use "1" for
-#'   unitless quantities.
-#' @param pq_comment String vector of additional comments.
+#'
+#' @inheritParams database_fields
 #'
 #' @return Data frame of newly added rows.
 #' @family custom dbWriteTable functions
@@ -330,10 +368,8 @@ dbWriteTable_physical_quantity <- function(conn,
 
 #' Insert data into \code{integration_type} table
 #'
-#' @param conn Database connection.
-#' @param inttype_name String vector of name of integration type.
-#' @param inttype_description String vector of description of \code{integration_type}.
-#' @param inttype_comment String vector of additional comments.
+#'
+#' @inheritParams database_fields
 #'
 #' @return Data frame of newly added rows.
 #' @family custom dbWriteTable functions
@@ -356,11 +392,8 @@ dbWriteTable_integration_type <- function(conn,
 
 #' Insert data into \code{integration} table
 #'
-#' @param conn Database connection.
-#' @param inttype_id Integer vector of \code{integration_type} ID.
-#' @param int_measurement_interval Numeric vector of intervals between measurements in s.
-#' @param int_interval Numeric vector of integration interval in s of one stored measurement.
-#' @param int_comment Character vector of additional information.
+#'
+#' @inheritParams database_fields
 #'
 #' @return Data frame of newly added rows.
 #' @family custom dbWriteTable functions
@@ -386,9 +419,8 @@ dbWriteTable_integration <- function(conn,
 
 #' Insert data into \code{person} table
 #'
-#' @param conn Database connection.
-#' @param pers_name Character vector of person name.
-#' @param pers_comment Character vector of additional information.
+#'
+#' @inheritParams database_fields
 #'
 #' @return Data frame of newly added rows.
 #' @family custom dbWriteTable functions
@@ -410,16 +442,8 @@ dbWriteTable_person <- function(conn,
 
 #' Insert data into \code{measurand} table
 #'
-#' @param conn Database connection.
-#' @param md_name Character vector of measurand name.
-#' @param md_setup_datetime POSIXct vector of date and time of set-up of measurand.
-#' @param pq_id Integer vector of \code{physical_quantity} ID.
-#' @param site_id Integer vector of \code{site} ID.
-#' @param caldev_id Integer vector of \code{calibrated_device} ID.
-#' @param int_id Integer vector of \code{integration} ID.
-#' @param md_height Numeric vector of measurement height.
-#' @param pers_id Integer vector of \code{person} ID.
-#' @param md_comment Character vector of additional information.
+#'
+#' @inheritParams database_fields
 #'
 #' @return Data frame of newly added rows.
 #' @family custom dbWriteTable functions
@@ -459,12 +483,8 @@ dbWriteTable_measurand <- function(conn,
 
 #' Insert data into \code{quality_flag} table
 #'
-#' @param conn Database connection.
-#' @param qf_id Integer vector with 1 <= qf_id <= 9 indicating value ok and
-#'   qf_id >= 10 indicating value not ok;
-#' @param qf_name Character vector of quality_flag name.
-#' @param qf_description Character vector of quality_flag description.
-#' @param qf_comment Character vector of of additional information..
+#'
+#' @inheritParams database_fields
 #'
 #' @return Data frame of newly added rows.
 #' @family custom dbWriteTable functions
@@ -491,12 +511,9 @@ dbWriteTable_quality_flag <- function(conn,
 
 #' Insert data into \code{station_adlershof} table
 #'
-#' @param conn Database connection.
-#' @param stadl_datetime POSIXct vector of date and time of measurement.
-#' @param md_id Integer vector of measurand ID.
-#' @param stadl_value Numeric vector of measurement values.
-#' @param qf_id Integer vector with 1 <= qf_id <= 9 indicating value ok and
-#'   qf_id >= 10 indicating value not ok.
+#'
+#' @inheritParams database_fields
+#'
 #' @export
 #'
 #' @return For performance reason, contrary to the meta data table functions,
@@ -540,14 +557,8 @@ dbWriteTable_station_adlershof <- function(conn,
 #' \code{dbUpdateQF_station_adlershof}, on the other hand, allows general values
 #' of qf_id (further checks are done by the database).
 #'
-#' @param conn Database connection.
-#' @param stadl_id Integer vector of \code{station_adlershof} ID for which to
-#'   add corrected measurements and/or for which modify the quality flag.
-#' @param qf_id Integer vector of \code{quality_flag} ID.
-#' @param stadlcor_datetime POSIXct vector of corrected date and time of
-#'   measurement.
-#' @param md_id Integer vector of corrected \code{measurand} ID.
-#' @param stadlcor_value Numeric vector of corrected value of measurement.
+#'
+#' @inheritParams database_fields
 #'
 #' @return For performance reason, contrary to the meta data table functions,
 #'   these functions do not return anything.

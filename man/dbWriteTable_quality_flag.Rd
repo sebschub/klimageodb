@@ -11,13 +11,13 @@ dbWriteTable_quality_flag(conn, qf_id, qf_name, qf_description,
 \item{conn}{Database connection.}
 
 \item{qf_id}{Integer vector with 1 <= qf_id <= 9 indicating value ok and
-qf_id >= 10 indicating value not ok;}
+qf_id >= 10 indicating value not ok.}
 
 \item{qf_name}{Character vector of quality_flag name.}
 
 \item{qf_description}{Character vector of quality_flag description.}
 
-\item{qf_comment}{Character vector of of additional information..}
+\item{qf_comment}{Character vector of of additional information.}
 }
 \value{
 Data frame of newly added rows.
