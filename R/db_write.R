@@ -509,8 +509,18 @@ dbWriteTable_quality_flag <- function(conn,
 }
 
 
-#' Insert data into \code{station_adlershof} table
+#' Add measurements to \code{station_adlershof} table
 #'
+#' \code{dbWriteTable_station_adlershof} requires a correct measurand id while
+#' \code{dbAddMeasurement_station_adlershof} derives that from the measurand
+#' name.
+#'
+#' \code{dbWriteTable_station_adlershof} requires a correct measurand id
+#' \code{md_id} to write measurements to station_adlershof.
+#' \code{dbAddMeasurement_station_adlershof} finds \code{md_id} from a given
+#' measurand name \code{md_name}. To this end, it queries the table
+#' \code{measurand} and selects the according to \code{md_setup_datetime} the
+#' most recent \code{md_id}.
 #'
 #' @inheritParams database_fields
 #'
@@ -523,12 +533,45 @@ dbWriteTable_quality_flag <- function(conn,
 #' \dontrun{
 #' con <- dbConnect_klimageo()
 #' # add all required entries before with the respective dbWriteTable_*
+#' dbAddMeasurement_station_adlershof(con,
+#'                                md_name = "TA2M_1"
+#'                                stadl_datetime = as.POSIXct("2017-01-01 12:05:12", tz = "UTC"),
+#'                                stadl_value = 272.15)
 #' dbWriteTable_station_adlershof(con,
 #'                                stadl_datetime = as.POSIXct("2017-01-01 12:15:12", tz = "UTC"),
 #'                                md_id = 1,
 #'                                stadl_value = 273.15)
 #' dbDisconnect(con)
 #' }
+dbAddMeasurement_station_adlershof <- function(conn,
+                                               md_name,
+                                               stadl_datetime,
+                                               stadl_value,
+                                               qf_id = NULL) {
+
+  # get the most recent md_id with md_name
+  # get md_id values only for the unique values of md_name, do this via factor
+  md_id <- as.factor(md_name)
+  # get for each level of md_name the md_id
+  for (mdn in seq_along(levels(md_id))) {
+    levels(md_id)[mdn] <- DBI::dbGetQuery(
+      conn,
+      paste0("SELECT md_id FROM measurand ",
+             "WHERE md_name='", levels(md_id)[mdn], "' ",
+             "ORDER BY md_setup_datetime DESC LIMIT 1;")
+    )[1,1]
+  }
+  # stadl_datetime checked in dbWriteTable_station_adlershof
+  dbWriteTable_station_adlershof(conn,
+                                 stadl_datetime = stadl_datetime,
+                                 md_id = md_id,
+                                 stadl_value = stadl_value,
+                                 qf_id = qf_id)
+}
+
+
+#' @rdname dbAddMeasurement_station_adlershof
+#' @export
 dbWriteTable_station_adlershof <- function(conn,
                                            stadl_datetime,
                                            md_id,
@@ -562,6 +605,7 @@ dbWriteTable_station_adlershof <- function(conn,
 #'
 #' @return For performance reason, contrary to the meta data table functions,
 #'   these functions do not return anything.
+#' @family custom dbWriteTable functions
 #' @export
 #'
 #' @examples

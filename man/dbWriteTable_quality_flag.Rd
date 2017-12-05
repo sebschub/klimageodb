@@ -37,7 +37,9 @@ dbDisconnect(con)
 }
 }
 \seealso{
-Other custom dbWriteTable functions: \code{\link{dbWriteTable_calibrated_device}},
+Other custom dbWriteTable functions: \code{\link{dbAddCorrection_station_adlershof}},
+  \code{\link{dbAddMeasurement_station_adlershof}},
+  \code{\link{dbWriteTable_calibrated_device}},
   \code{\link{dbWriteTable_device_manufacturer}},
   \code{\link{dbWriteTable_device_model}},
   \code{\link{dbWriteTable_device_type}},
@@ -47,6 +49,5 @@ Other custom dbWriteTable functions: \code{\link{dbWriteTable_calibrated_device}
   \code{\link{dbWriteTable_measurand}},
   \code{\link{dbWriteTable_person}},
   \code{\link{dbWriteTable_physical_quantity}},
-  \code{\link{dbWriteTable_site}},
-  \code{\link{dbWriteTable_station_adlershof}}
+  \code{\link{dbWriteTable_site}}
 }

@@ -216,16 +216,18 @@ test_dbWriteTable_table(con, "person", person_df, 2)
 
 
 measurand_df <- data.frame(
-  md_id = 1,
-  md_name = "TA2M_1",
-  md_setup_datetime = as.POSIXct("2012-01-01 12:15:12", tz = "UTC"),
-  pq_id = 1,
-  site_id = 1,
-  caldev_id = 1,
-  int_id = 1,
-  md_height = 2.,
-  pers_id = 1,
-  md_comment = "the 2m temperature")
+  md_id = c(1, 2, 3),
+  md_name = c("TA2M_1", "TA2M_1", "TA2M_2"),
+  md_setup_datetime = as.POSIXct(
+    c("2012-01-01 12:15:12", "2013-01-01 12:15:12", "2014-01-01 12:15:12"),
+    tz = "UTC"),
+  pq_id = c(1, 1, 1),
+  site_id = c(1, 1, 1),
+  caldev_id = c(1, 2, 2),
+  int_id = c(1, 1, 1),
+  md_height = c(2., 2., 2.),
+  pers_id = c(1, 1, 1),
+  md_comment = c("the 2m temperature", "the 2m temperature", "the 2m temperature"))
 
 test_dbWriteTable_table(con, "measurand", measurand_df, 2:10)
 
@@ -253,6 +255,28 @@ station_adlershof_df <- data.frame(
 
 test_dbWriteTable_table(con, "station_adlershof", station_adlershof_df, 2:4)
 
+md_name <- c("TA2M_1", "TA2M_1", "TA2M_2")
+station_adlershof_df_new <- data.frame(
+  stadl_id = c(4, 5, 6),
+  stadl_datetime = c(as.POSIXct("2017-02-01 12:15:12", tz = "UTC"),
+                     as.POSIXct("2017-02-01 16:15:12", tz = "CET"),
+                     as.POSIXct("2017-02-05 16:15:12", tz = "GMT")),
+  md_id = c(2, 2, 3),
+  stadl_value = c(293.15, 294.15, 270.15),
+  qf_id = as.integer(NA, NA, NA))
+
+station_adlershof_df <- rbind(station_adlershof_df, station_adlershof_df_new)
+
+test_that("dbAddMeasurement_station_adlershof", {
+  dbAddMeasurement_station_adlershof(
+    con,
+    md_name = md_name,
+    stadl_datetime = station_adlershof_df_new$stadl_datetime,
+    stadl_value = station_adlershof_df_new$stadl_value)
+  df <- dbReadTable_station_adlershof(con)
+  expect_true(all.equal(df, station_adlershof_df))
+})
+
 
 
 cor_stadl_id <- 1
@@ -264,7 +288,7 @@ test_that("dbUpdateQF_station_adlershof", {
   df <- dbReadTable(con, "station_adlershof")
   # reorder df because UPDATE changes original order
   df <- df[order(df$stadl_id), ]
-  rownames(df) <- 1:3
+  rownames(df) <- 1:nrow(df)
   expect_true(all.equal(station_adlershof_df, df))
 })
 
