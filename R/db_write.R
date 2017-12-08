@@ -60,7 +60,7 @@
 #' @param stadlcor_datetime POSIXct vector of corrected date and time of
 #'   measurement.
 #' @param stadlcor_value Numeric vector of corrected value of measurement.
-#
+#'
 #' @name database_fields
 #' @keywords internal
 NULL
@@ -99,6 +99,77 @@ get_columns <- function(conn, name, columns) {
   )
 }
 
+#' @rdname dbWithTransaction_or_Savepoint
+#' @export
+#' @keywords internal
+dbBegin_or_Savepoint <- function(conn, spname) {
+  tryCatch({
+    DBI::dbBegin(conn)
+    TRUE
+  }, error = function(e) {
+    DBI::dbExecute(conn, paste("SAVEPOINT", spname, ";"))
+    FALSE
+  })
+}
+
+#' @rdname dbWithTransaction_or_Savepoint
+#' @export
+#' @keywords internal
+dbCommit_or_Savepoint <- function(conn, transaction, spname) {
+  if (transaction) {
+    DBI::dbCommit(conn)
+  } else {
+    DBI::dbExecute(conn, paste("RELEASE SAVEPOINT", spname, ";"))
+  }
+}
+
+#' @rdname dbWithTransaction_or_Savepoint
+#' @export
+#' @keywords internal
+dbRollback_or_Savepoint <- function(conn, transaction, spname) {
+  if (transaction) {
+    DBI::dbRollback(conn)
+  } else {
+    DBI::dbExecute(conn, paste("ROLLBACK TO SAVEPOINT", spname, ";"))
+    DBI::dbExecute(conn, paste("RELEASE SAVEPOINT", spname, ";"))
+  }
+}
+
+#' Self-contained SQL commands within new transactions or savepoint in present
+#' transaction
+#'
+#' The function \code{dbWithTransaction_or_Savepoint()} starts a new transaction
+#' or issues a savepoint via \code{dbBegin_or_Savepoint()}. If the execution of
+#' the \code{code} argument fails, the state will be committed or the savepoint
+#' removed via \code{dbCommit_or_Savepoint()}. Otherwise, the transaction is
+#' rollbacked completely or up until the savepoint via
+#' \code{dbRollback_or_Savepoint()}. The functions work similiarly to
+#' \code{\link[DBI]{dbWithTransaction}()}, \code{\link[DBI]{dbBegin}()},
+#' \code{\link[DBI]{dbCommit}()} or \code{\link[DBI]{dbRollback}()},
+#' respectively, but allow to be nested by using savepoints if necessary.
+#'
+#' @inheritParams database_fields
+#' @param code An arbitrary block of R code.
+#' @param spname String of the possibly required savpoint.
+#' @param transaction Use standard transactions or use Savepoints?
+#'
+#' @return \code{dbWithTransaction()} returns the value of the executed code.
+#'   Failure to initiate the transaction (e.g. if the connection is closed)
+#'   gives an error.
+#' @export
+#' @keywords internal
+dbWithTransaction_or_Savepoint <- function(conn, code, spname) {
+  new_transaction <- dbBegin_or_Savepoint(conn, spname)
+  code_result <- tryCatch(code,
+                          error = function(e){
+                            dbRollback_or_Savepoint(conn, new_transaction, spname)
+                            stop(e$message)
+                          })
+  dbCommit_or_Savepoint(conn, new_transaction, spname)
+  code_result
+}
+
+
 #' Write table to database
 #'
 #' @param name Name of the table.
@@ -116,33 +187,34 @@ write_table <- function(name, arg_list, return_newrows = TRUE) {
   df <- arg_list[-1]
   df <- do.call(cbind.data.frame, df[!sapply(df, is.null)])
 
-  # get pk values before insertion of data
-  if (return_newrows) {
-    pk_string <- get_primarykey(conn, name)
-    old_pk_values <- get_columns(conn, name, pk_string)[[1]]
-  }
-
-  # write the table
-  DBI::dbWriteTable(conn, name = name, value = df, append = TRUE)
-
-  if (return_newrows) {
-    # get pk values after insertion of data
-    new_pk_values <- get_columns(conn, name, pk_string)[[1]]
-    diff_pk_values <- setdiff(new_pk_values, old_pk_values)
-    if (length(diff_pk_values > 0)) {
-      diff_pk_string <- paste0(paste0("'",
-                                      diff_pk_values,
-                                      "'",
-                                      collapse = ", ")
-      )
-      DBI::dbGetQuery(conn,
-                      paste("SELECT * FROM", name,
-                            "WHERE", pk_string, "in (", diff_pk_string, ");"
-                      ))
-    } else {
-      NULL
+  dbWithTransaction_or_Savepoint(conn, {
+    # get pk values before insertion of data
+    if (return_newrows) {
+      pk_string <- get_primarykey(conn, name)
+      old_pk_values <- get_columns(conn, name, pk_string)[[1]]
     }
-  }
+
+    # write the table
+    DBI::dbWriteTable(conn, name = name, value = df, append = TRUE)
+
+    if (return_newrows) {
+      # get pk values after insertion of data
+      new_pk_values <- get_columns(conn, name, pk_string)[[1]]
+      diff_pk_values <- setdiff(new_pk_values, old_pk_values)
+      if (length(diff_pk_values > 0)) {
+        diff_pk_string <- paste0(paste0("'",
+                                        diff_pk_values,
+                                        "'",
+                                        collapse = ", ")
+        )
+        DBI::dbGetQuery(conn,
+                        paste("SELECT * FROM", name,
+                              "WHERE", pk_string, "in (", diff_pk_string, ");"
+                        ))
+      }
+    }
+  }, spname = "write_table_savepoint")
+
 }
 
 #' Insert data into \code{site} table
@@ -330,11 +402,11 @@ dbAdd_uncalibrated_device <- function(conn,
                                       dev_comment = NULL) {
   # use transaction to ensure either both, device and calibrated_device, were
   # changed or none
-  DBI::dbWithTransaction(conn, {
+  dbWithTransaction_or_Savepoint(conn, {
     # write device into "device" table
     new_device <- write_table(name = "device", as.list(environment()))
     new_calibrated_device <- dbWriteTable_calibrated_device(conn, dev_id = new_device$dev_id)
-  })
+  }, spname = "dbAdd_uncalibrated_device_savepoint")
   list(device = new_device, calibrated_device = new_calibrated_device)
 
 }
@@ -553,20 +625,22 @@ dbAddMeasurement_station_adlershof <- function(conn,
   # get md_id values only for the unique values of md_name, do this via factor
   md_id <- as.factor(md_name)
   # get for each level of md_name the md_id
-  for (mdn in seq_along(levels(md_id))) {
-    levels(md_id)[mdn] <- DBI::dbGetQuery(
-      conn,
-      paste0("SELECT md_id FROM measurand ",
-             "WHERE md_name='", levels(md_id)[mdn], "' ",
-             "ORDER BY md_setup_datetime DESC LIMIT 1;")
-    )[1,1]
-  }
-  # stadl_datetime checked in dbWriteTable_station_adlershof
-  dbWriteTable_station_adlershof(conn,
-                                 stadl_datetime = stadl_datetime,
-                                 md_id = md_id,
-                                 stadl_value = stadl_value,
-                                 qf_id = qf_id)
+  dbWithTransaction_or_Savepoint(conn, {
+    for (mdn in seq_along(levels(md_id))) {
+      levels(md_id)[mdn] <- DBI::dbGetQuery(
+        conn,
+        paste0("SELECT md_id FROM measurand ",
+               "WHERE md_name='", levels(md_id)[mdn], "' ",
+               "ORDER BY md_setup_datetime DESC LIMIT 1;")
+      )[1,1]
+    }
+    # stadl_datetime checked in dbWriteTable_station_adlershof
+    dbWriteTable_station_adlershof(conn,
+                                   stadl_datetime = stadl_datetime,
+                                   md_id = md_id,
+                                   stadl_value = stadl_value,
+                                   qf_id = qf_id)
+  }, spname = "dbAddMeasurement_station_adlershof_savepoint")
 }
 
 
@@ -630,14 +704,14 @@ dbAddCorrection_station_adlershof <- function(conn,
   if (!all(qf_id >= 10)) {
     stop("Not all qf_id values are larger or equal 10.")
   }
-  DBI::dbWithTransaction(conn, {
+  dbWithTransaction_or_Savepoint(conn, {
     dbWriteTable_station_adlershof_correction(conn = conn,
                      stadl_id = stadl_id,
                      stadlcor_datetime = stadlcor_datetime,
                      md_id = md_id,
                      stadlcor_value = stadlcor_value)
     dbUpdateQF_station_adlershof(conn, stadl_id, qf_id)
-  })
+  }, spname = "dbAddCorrection_station_adlershof_savepoint")
 }
 
 
@@ -645,10 +719,12 @@ dbAddCorrection_station_adlershof <- function(conn,
 #' @rdname dbAddCorrection_station_adlershof
 #' @export
 dbUpdateQF_station_adlershof <- function(conn, stadl_id, qf_id) {
-  qf_id_update <- DBI::dbSendStatement(conn, 'UPDATE station_adlershof SET "qf_id"=? WHERE stadl_id=?')
-  DBI::dbBind(qf_id_update, list(qf_id, stadl_id))
-  DBI::dbGetRowsAffected(qf_id_update)
-  DBI::dbClearResult(qf_id_update)
+  dbWithTransaction_or_Savepoint(conn, {
+    qf_id_update <- DBI::dbSendStatement(conn, 'UPDATE station_adlershof SET "qf_id"=? WHERE stadl_id=?')
+    DBI::dbBind(qf_id_update, list(qf_id, stadl_id))
+    DBI::dbGetRowsAffected(qf_id_update)
+    DBI::dbClearResult(qf_id_update)
+  }, spname = "dbUpdateQF_station_adlershof_savepoint")
 }
 
 

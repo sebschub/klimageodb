@@ -6,6 +6,11 @@ test_that("dbConnect_klimageo2", {
 })
 
 
+test_transaction_completed <- function(conn) {
+  expect_true(dbBegin(conn))
+  expect_true(dbCommit(conn))
+}
+
 simple_read_test <- function(conn, table) {
 
   read_string <- paste0("dbReadTable_", table)
@@ -18,6 +23,7 @@ simple_read_test <- function(conn, table) {
     df <- do.call(read_function, read_args)
     df_dbi <- dbReadTable(conn, table)
     expect_true(identical(df, df_dbi))
+    test_transaction_completed(conn)
   })
 
 }

@@ -12,6 +12,11 @@ factor2character <- function(df) {
   df
 }
 
+test_transaction_completed <- function(conn) {
+  expect_true(dbBegin(conn))
+  expect_true(dbCommit(conn))
+}
+
 test_dbWriteTable_table <- function(conn, table, df, args_ind) {
   # database does not store factors, identical and all.equal gives false when
   # comparing factor and non-factor so convert to character
@@ -57,6 +62,9 @@ test_dbWriteTable_table <- function(conn, table, df, args_ind) {
       args_nonPct <- c(list(conn = con), as.list(df_nonPct[args_ind]))
       expect_error(do.call(write_function, args_nonPct), "POSIXct")
     }
+
+    # transaction should be finished
+    test_transaction_completed(conn)
   })
 
   # read test
@@ -68,6 +76,50 @@ test_dbWriteTable_table <- function(conn, table, df, args_ind) {
     expect_true(all.equal(df_compare, df_db))
   })
 }
+
+
+# check transaction function
+test_that("dbWithTransaction_or_Savepoint", {
+  # correct result
+  x <- dbWithTransaction_or_Savepoint(con, 1, "sptest1")
+  expect_identical(x, 1)
+
+  # correct result
+  x <- dbWithTransaction_or_Savepoint(con, 2, "sptest2")
+  expect_identical(x, 2)
+
+  # works also within transaction
+  expect_true(dbBegin(con))
+  x <- dbWithTransaction_or_Savepoint(con, 3, "sptest3")
+  expect_identical(x, 3)
+  x <- dbWithTransaction_or_Savepoint(con, 4, "sptest4")
+  expect_identical(x, 4)
+  expect_true(dbCommit(con))
+
+  # dbRollback seems to be not working correctly with odbc (see
+  # https://github.com/r-dbi/odbc/issues/138)
+  # # error message is forwarded and really rolled back
+  # expect_error(
+  #   dbWithTransaction_or_Savepoint(con, {
+  #     dbWriteTable(con, "testtable", data.frame(me = 1, you = 2))
+  #     stop("CUSTOM ERROR MESSAGE")
+  #     }, "sptest5"),
+  #   "CUSTOM ERROR MESSAGE")
+  # expect_error(dbReadTable(con, "testtable"), 'ERROR: relation "testtable" does not exist')
+  # expect_true(dbBegin(con))
+  # expect_error(
+  #   dbWithTransaction_or_Savepoint(con, {
+  #     stop("CUSTOM ERROR MESSAGE")
+  #     dbWriteTable(con, "testtable", data.frame(me = 1, you = 2))
+  #     }, "sptest5"),
+  #   "CUSTOM ERROR MESSAGE")
+  # expect_error(dbReadTable(con, "testtable"), 'ERROR: relation "testtable" does not exist')
+  # expect_true(dbCommit(con))
+
+
+
+})
+
 
 site_df <- data.frame(
   site_id = 1,
@@ -171,6 +223,7 @@ test_that("dbAdd_uncalibrated_device", {
   expect_true(all.equal(device_df_compare2, df))
   dfcd <- dbReadTable(con, "calibrated_device")
   expect_true(all.equal(calibrated_device_df_compare2, dfcd))
+  test_transaction_completed(con)
 })
 
 
@@ -275,6 +328,7 @@ test_that("dbAddMeasurement_station_adlershof", {
     stadl_value = station_adlershof_df_new$stadl_value)
   df <- dbReadTable_station_adlershof(con)
   expect_true(all.equal(df, station_adlershof_df))
+  test_transaction_completed(con)
 })
 
 
@@ -290,6 +344,7 @@ test_that("dbUpdateQF_station_adlershof", {
   df <- df[order(df$stadl_id), ]
   rownames(df) <- 1:nrow(df)
   expect_true(all.equal(station_adlershof_df, df))
+  test_transaction_completed(con)
 })
 
 
@@ -323,12 +378,19 @@ test_that("dbAddCorrection_station_adlershof", {
                                       stadlcor_value = station_adlershof_correction_df$stadlcor_value),
     "POSIXct"
   )
+  test_transaction_completed(con)
 })
 
 test_that("dbReadTable_station_adlershof_correction", {
   df <- dbReadTable_station_adlershof_correction(con)
   expect_true(all.equal(station_adlershof_correction_df, df))
+  test_transaction_completed(con)
 })
 
+
+# all transaction should have been either committed or rollbacked
+test_that("transaction complete", {
+  test_transaction_completed(con)
+})
 
 dbDisconnect(con)

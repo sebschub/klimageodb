@@ -17,5 +17,7 @@
 #' dbDisconnect(con)
 #' }
 dbConnect_klimageo <- function(dsn = "klimageodb") {
-  DBI::dbConnect(odbc::odbc(), dsn = dsn, timezone = "Europe/Berlin")
+  con <- DBI::dbConnect(odbc::odbc(), dsn = dsn, timezone = "Europe/Berlin")
+  odbc::odbcSetTransactionIsolationLevel(con, "repeatable_read")
+  con
 }
