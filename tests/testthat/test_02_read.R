@@ -22,7 +22,7 @@ simple_read_test <- function(conn, table) {
   test_that(read_string, {
     df <- do.call(read_function, read_args)
     df_dbi <- dbReadTable(conn, table)
-    expect_true(identical(df, df_dbi))
+    expect_identical(df, df_dbi)
     test_transaction_completed(conn)
   })
 

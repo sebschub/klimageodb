@@ -55,7 +55,7 @@ test_dbWriteTable_table <- function(conn, table, df, args_ind) {
     }
 
     # compare with expected
-    expect_true(all.equal(df_compare, df_db))
+    expect_equal(df_compare, df_db)
 
     if (test_nonPct) {
       # non-POSIXct should fail
@@ -73,7 +73,7 @@ test_dbWriteTable_table <- function(conn, table, df, args_ind) {
     # THIS ONLY WORKS WHEN APPLIED TO EMPTY DATABASE!
     df_db <- do.call(read_function, read_args)
     # compare with expected
-    expect_true(all.equal(df_compare, df_db))
+    expect_equal(df_compare, df_db)
   })
 }
 
@@ -216,13 +216,13 @@ test_that("dbAdd_uncalibrated_device", {
                                    devmod_id = uncalibrated_device_df$devmod_id,
                                    dev_identifier = uncalibrated_device_df$dev_identifier)
   # test the new rows output
-  expect_true(all.equal(device_df_new_compare, res$device))
-  expect_true(all.equal(calibrated_device_df_new_compare, res$calibrated_device))
+  expect_equal(device_df_new_compare, res$device)
+  expect_equal(calibrated_device_df_new_compare, res$calibrated_device)
   # test total tables
   df <- dbReadTable(con, "device")
-  expect_true(all.equal(device_df_compare2, df))
+  expect_equal(device_df_compare2, df)
   dfcd <- dbReadTable(con, "calibrated_device")
-  expect_true(all.equal(calibrated_device_df_compare2, dfcd))
+  expect_equal(calibrated_device_df_compare2, dfcd)
   test_transaction_completed(con)
 })
 
@@ -327,7 +327,7 @@ test_that("dbAddMeasurement_station_adlershof", {
     stadl_datetime = station_adlershof_df_new$stadl_datetime,
     stadl_value = station_adlershof_df_new$stadl_value)
   df <- dbReadTable_station_adlershof(con)
-  expect_true(all.equal(df, station_adlershof_df))
+  expect_equal(df, station_adlershof_df)
   test_transaction_completed(con)
 })
 
@@ -343,7 +343,7 @@ test_that("dbUpdateQF_station_adlershof", {
   # reorder df because UPDATE changes original order
   df <- df[order(df$stadl_id), ]
   rownames(df) <- 1:nrow(df)
-  expect_true(all.equal(station_adlershof_df, df))
+  expect_equal(station_adlershof_df, df)
   test_transaction_completed(con)
 })
 
@@ -367,7 +367,7 @@ test_that("dbAddCorrection_station_adlershof", {
                                     md_id = station_adlershof_correction_df$md_id,
                                     stadlcor_value = station_adlershof_correction_df$stadlcor_value)
   df <- dbReadTable(con, "station_adlershof_correction")
-  expect_true(all.equal(station_adlershof_correction_df, df))
+  expect_equal(station_adlershof_correction_df, df)
   # no POSIXct should give error
   expect_error(
     dbAddCorrection_station_adlershof(con,
@@ -383,7 +383,7 @@ test_that("dbAddCorrection_station_adlershof", {
 
 test_that("dbReadTable_station_adlershof_correction", {
   df <- dbReadTable_station_adlershof_correction(con)
-  expect_true(all.equal(station_adlershof_correction_df, df))
+  expect_equal(station_adlershof_correction_df, df)
   test_transaction_completed(con)
 })
 
