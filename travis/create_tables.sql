@@ -30,7 +30,7 @@ CREATE TABLE device_manufacturer (
 
 CREATE TABLE device_type (
     devtype_id      smallserial PRIMARY KEY,
-    devtype_name    varchar(30) NOT NULL UNIQUE,
+    devtype_name    varchar(50) NOT NULL UNIQUE,
     devtype_comment varchar(50)
     );
   COMMENT ON TABLE  device_type                 IS 'measurement device type';
