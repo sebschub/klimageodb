@@ -4,20 +4,27 @@
 \alias{dbConnect_klimageo}
 \title{Connect to klimageo database}
 \usage{
-dbConnect_klimageo(dsn = "klimageodb")
+dbConnect_klimageo(dbname = "klimageo", host = "blobdb.cms.hu-berlin.de",
+  port = 5432, user = NULL, password = NULL)
 }
 \arguments{
-\item{dsn}{The Data Source Name. This corresponds to the set-up entry in the
-\href{http://db.rstudio.com/best-practices/drivers/}{odbc.ini}.}
+\item{dbname}{Database name.}
+
+\item{host, port}{Host and port.}
+
+\item{user, password}{User name and password. If \code{NULL}, will be
+retrieved from \code{PGUSER} and \code{PGPASSWORD} envvars, or from the
+appropriate line in \code{~/.pgpass}. See
+\url{http://www.postgresql.org/docs/9.6/static/libpq-pgpass.html} for more
+details.}
 }
 \value{
 An S4 object that inherits from DBIConnection. This object is used to
   communicate with the database engine.
 }
 \description{
-Connect to the klimegeo database. The connection is done via the \code{odbc}
-package. Thus, the odbc driver and connection settings have to be set-up
-outside of R before. The correct timezone is chosen by this command.
+Connect to the klimegeo database. The connection is done via the
+\code{RPostgres} package.
 }
 \examples{
 \dontrun{

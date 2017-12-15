@@ -1,6 +1,6 @@
 context("Database simple read functions")
 
-con <- dbConnect_klimageo()
+con <- dbConnect_klimageo(host = "localhost")
 test_that("dbConnect_klimageo2", {
   expect_is(con, "DBIConnection")
 })

@@ -720,9 +720,10 @@ dbAddCorrection_station_adlershof <- function(conn,
 #' @export
 dbUpdateQF_station_adlershof <- function(conn, stadl_id, qf_id) {
   dbWithTransaction_or_Savepoint(conn, {
-    qf_id_update <- DBI::dbSendStatement(conn, 'UPDATE station_adlershof SET "qf_id"=? WHERE stadl_id=?')
-    DBI::dbBind(qf_id_update, list(qf_id, stadl_id))
-    DBI::dbGetRowsAffected(qf_id_update)
+    qf_id_update <-
+      DBI::dbSendStatement(conn,
+                           statement = 'UPDATE station_adlershof SET "qf_id"=$1 WHERE stadl_id=$2',
+                           params = list(qf_id, stadl_id))
     DBI::dbClearResult(qf_id_update)
   }, spname = "dbUpdateQF_station_adlershof_savepoint")
 }

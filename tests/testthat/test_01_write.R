@@ -1,6 +1,6 @@
 context("Database write and some read functions")
 
-con <- dbConnect_klimageo()
+con <- dbConnect_klimageo(host = "localhost")
 test_that("dbConnect_klimageo", {
   expect_is(con, "DBIConnection")
 })
@@ -96,28 +96,23 @@ test_that("dbWithTransaction_or_Savepoint", {
   expect_identical(x, 4)
   expect_true(dbCommit(con))
 
-  # dbRollback seems to be not working correctly with odbc (see
-  # https://github.com/r-dbi/odbc/issues/138)
-  # # error message is forwarded and really rolled back
-  # expect_error(
-  #   dbWithTransaction_or_Savepoint(con, {
-  #     dbWriteTable(con, "testtable", data.frame(me = 1, you = 2))
-  #     stop("CUSTOM ERROR MESSAGE")
-  #     }, "sptest5"),
-  #   "CUSTOM ERROR MESSAGE")
-  # expect_error(dbReadTable(con, "testtable"), 'ERROR: relation "testtable" does not exist')
-  # expect_true(dbBegin(con))
-  # expect_error(
-  #   dbWithTransaction_or_Savepoint(con, {
-  #     stop("CUSTOM ERROR MESSAGE")
-  #     dbWriteTable(con, "testtable", data.frame(me = 1, you = 2))
-  #     }, "sptest5"),
-  #   "CUSTOM ERROR MESSAGE")
-  # expect_error(dbReadTable(con, "testtable"), 'ERROR: relation "testtable" does not exist')
-  # expect_true(dbCommit(con))
-
-
-
+  # error message is forwarded and really rolled back
+  expect_error(
+    dbWithTransaction_or_Savepoint(con, {
+      dbWriteTable(con, "testtable", data.frame(me = 1, you = 2))
+      stop("CUSTOM ERROR MESSAGE")
+    }, "sptest5"),
+    "CUSTOM ERROR MESSAGE")
+  expect_error(dbReadTable(con, "testtable"), 'relation "testtable" does not exist')
+  expect_true(dbBegin(con))
+  expect_error(
+    dbWithTransaction_or_Savepoint(con, {
+      dbWriteTable(con, "testtable", data.frame(me = 1, you = 2))
+      stop("CUSTOM ERROR MESSAGE")
+    }, "sptest6"),
+    "CUSTOM ERROR MESSAGE")
+  expect_error(dbReadTable(con, "testtable"), 'relation "testtable" does not exist')
+  expect_true(dbCommit(con))
 })
 
 
