@@ -2,9 +2,13 @@
 % Please edit documentation in R/db_write.R
 \name{dbWriteTable_device_model}
 \alias{dbWriteTable_device_model}
-\title{Insert data into \code{device_model} table}
+\alias{dbAdd_device_model}
+\title{Add device models to \code{device_model} table}
 \usage{
 dbWriteTable_device_model(conn, devmod_name, devtype_id, devman_id = NULL,
+  devmod_comment = NULL)
+
+dbAdd_device_model(conn, devmod_name, devtype_name, devman_name = NULL,
   devmod_comment = NULL)
 }
 \arguments{
@@ -17,12 +21,19 @@ dbWriteTable_device_model(conn, devmod_name, devtype_id, devman_id = NULL,
 \item{devman_id}{Integer vector of \code{device_manufacturer} IDs.}
 
 \item{devmod_comment}{String vector of additional comments.}
+
+\item{devtype_name}{String vector of name of device type.}
+
+\item{devman_name}{String vector of name of device manufacturer.}
 }
 \value{
 Data frame of newly added rows.
 }
 \description{
-Insert data into \code{device_model} table
+\code{dbWriteTable_device_model} requires a correct device type id and,
+optionally, a correct device manufacturer id while \code{dbAdd_device_model}
+derives that from the device type and the device manufacturer name,
+respectively.
 }
 \examples{
 \dontrun{

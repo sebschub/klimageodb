@@ -129,18 +129,18 @@ test_dbWriteTable_table(con, "site", site_df, 2:6)
 
 
 device_manufacturer_df <- data.frame(
-  devman_id = 1,
-  devman_name = "TSI",
-  devman_comment = as.character(NA))
+  devman_id = c(1, 2),
+  devman_name = c("TSI", "Grimm"),
+  devman_comment = as.character(c(NA, NA)))
 
 test_dbWriteTable_table(con, "device_manufacturer", device_manufacturer_df, 2)
 
 
 
 device_type_df <- data.frame(
-  devtype_id = 1,
-  devtype_name = "thermometer",
-  devtype_comment = "measures temperature")
+  devtype_id = c(1, 2),
+  devtype_name = c("thermometer", "barometer"),
+  devtype_comment = c("measures temperature", "measures pressure"))
 
 test_dbWriteTable_table(con, "device_type", device_type_df, 2:3)
 
@@ -156,6 +156,29 @@ device_model_df <- data.frame(
 test_dbWriteTable_table(con, "device_model", device_model_df, 2:5)
 
 
+device_model_df_new <- data.frame(
+  devmod_id = c(2, 3),
+  devmod_name = c("THERMO2000", "Press0r"),
+  devtype_id = c(1, 2),
+  devman_id = c(2, 1),
+  devmod_comment = c("big", "small")
+)
+
+device_model_df <- factor2character(rbind(device_model_df, device_model_df_new))
+
+test_that("Add_device_model", {
+  res <- dbAdd_device_model(
+    con,
+    devmod_name = device_model_df_new$devmod_name,
+    devtype_name = device_type_df$devtype_name[device_model_df_new$devtype_id],
+    devman_name = device_manufacturer_df$devman_name[device_model_df_new$devman_id],
+    devmod_comment = device_model_df_new$devmod_comment
+    )
+  expect_equal(res, factor2character(device_model_df_new))
+  res <- dbReadTable_device_model(con)
+  expect_equal(res, device_model_df)
+})
+
 
 device_df <- data.frame(
   dev_id = 1,
@@ -165,6 +188,33 @@ device_df <- data.frame(
   dev_comment = "it beeps")
 
 test_dbWriteTable_table(con, "device", device_df, 2:5)
+
+
+
+device_df_new <- data.frame(
+  dev_id = c(2,3),
+  dev_name = c("My first Press0r", "My second THERMO1000"),
+  devmod_id = c(3, 1),
+  dev_identifier = c("NCC1701-P", "NCC1702-T"),
+  dev_comment = as.character(c(NA, NA))
+)
+
+device_df <- factor2character(rbind(device_df, device_df_new))
+
+test_that("Add_device", {
+  res <- dbAdd_device(
+    con,
+    dev_name = device_df_new$dev_name,
+    devmod_name = device_model_df$devmod_name[device_df_new$devmod_id],
+    dev_identifier = device_df_new$dev_identifier,
+    dev_comment = device_df_new$dev_comment
+  )
+  expect_equal(res, factor2character(device_df_new))
+  res <- dbReadTable_device(con)
+  expect_equal(res, device_df)
+})
+
+
 
 
 
@@ -182,8 +232,8 @@ test_dbWriteTable_table(con, "calibrated_device", calibrated_device_df, 2:4)
 # add new entries to device and calibrated_device. CHECK IF NUMBER OF ROWS
 # MODIFIES ABOVE!
 uncalibrated_device_df <- data.frame(
-  dev_id = c(2,3),
-  dev_name = c("My second THERMO1000", "My third THERMO1000"),
+  dev_id = c(4,5),
+  dev_name = c("My other THERMO1000", "My third THERMO1000"),
   devmod_id = c(1, 1),
   dev_identifier = c("NCC1701-T1", "NCC1701-T2"),
   dev_comment = as.character(c(NA, NA)))
@@ -194,7 +244,7 @@ device_df_compare2 <- rbind(factor2character(device_df),
 
 calibrated_device_df_new_compare <- data.frame(
   caldev_id = as.integer(c(2, 3)),
-  dev_id = device_df_compare2$dev_id[-1],
+  dev_id = device_df_compare2$dev_id[length(device_df_compare2$dev_id)-c(1,0)],
   caldev_datetime = as.POSIXct(c(NA, NA)),
   caldev_parameter = as.character(c(NA, NA)),
   caldev_comment = as.character(c(NA, NA)),

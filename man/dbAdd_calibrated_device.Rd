@@ -2,9 +2,13 @@
 % Please edit documentation in R/db_write.R
 \name{dbWriteTable_calibrated_device}
 \alias{dbWriteTable_calibrated_device}
-\title{Insert data into \code{calibrated_device} table}
+\alias{dbAdd_calibrated_device}
+\title{Add calibrated devices to \code{calibrated_device} table}
 \usage{
 dbWriteTable_calibrated_device(conn, dev_id, caldev_datetime = NULL,
+  caldev_parameter = NULL, caldev_comment = NULL)
+
+dbAdd_calibrated_device(conn, dev_name, caldev_datetime = NULL,
   caldev_parameter = NULL, caldev_comment = NULL)
 }
 \arguments{
@@ -17,12 +21,15 @@ dbWriteTable_calibrated_device(conn, dev_id, caldev_datetime = NULL,
 \item{caldev_parameter}{String vector of values of calibration parameters.}
 
 \item{caldev_comment}{String vector of additional comments.}
+
+\item{dev_name}{String vector of name of device.}
 }
 \value{
 Data frame of newly added rows.
 }
 \description{
-Insert data into \code{calibrated_device} table
+\code{dbWriteTable_calibrated_device} requires a correct device id while
+\code{dbAdd_calibrated_device} derives that from the device name.
 }
 \examples{
 \dontrun{
@@ -39,6 +46,10 @@ dbDisconnect(con)
 }
 }
 \seealso{
+\code{\link{dbAdd_uncalibrated_device}} for adding a device that
+  does not require calibration to both \code{device} and
+  \code{calibrated_device}
+
 Other custom dbWriteTable functions: \code{\link{dbAddCorrection_station_adlershof}},
   \code{\link{dbAddMeasurement_station_adlershof}},
   \code{\link{dbWriteTable_device_manufacturer}},

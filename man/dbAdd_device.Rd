@@ -2,9 +2,13 @@
 % Please edit documentation in R/db_write.R
 \name{dbWriteTable_device}
 \alias{dbWriteTable_device}
-\title{Insert data into \code{device} table}
+\alias{dbAdd_device}
+\title{Add devices to \code{device} table}
 \usage{
 dbWriteTable_device(conn, dev_name, devmod_id, dev_identifier = NULL,
+  dev_comment = NULL)
+
+dbAdd_device(conn, dev_name, devmod_name, dev_identifier = NULL,
   dev_comment = NULL)
 }
 \arguments{
@@ -18,12 +22,15 @@ dbWriteTable_device(conn, dev_name, devmod_id, dev_identifier = NULL,
 numbers.}
 
 \item{dev_comment}{String vector of additional comments.}
+
+\item{devmod_name}{String vector of name of model.}
 }
 \value{
 Data frame of newly added rows.
 }
 \description{
-Insert data into \code{device} table
+\code{dbWriteTable_device} requires a correct device model id while
+\code{dbAdd_device} derives that from the device model name.
 }
 \examples{
 \dontrun{
@@ -36,6 +43,10 @@ dbDisconnect(con)
 }
 }
 \seealso{
+\code{\link{dbAdd_uncalibrated_device}} for adding a device that
+  does not require calibration to both \code{device} and
+  \code{calibrated_device}
+
 Other custom dbWriteTable functions: \code{\link{dbAddCorrection_station_adlershof}},
   \code{\link{dbAddMeasurement_station_adlershof}},
   \code{\link{dbWriteTable_calibrated_device}},

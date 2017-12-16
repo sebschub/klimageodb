@@ -99,6 +99,25 @@ get_columns <- function(conn, name, columns) {
   )
 }
 
+
+get_ids_from_uniquecolumn <- function(conn,
+                                      table, id_name,
+                                      column_name, column_values) {
+  # do this via factor
+  column_ids <- as.factor(column_values)
+  # get for each level of column_values the id
+
+  for (cil in seq_along(levels(column_ids))) {
+    levels(column_ids)[cil] <- DBI::dbGetQuery(
+      conn,
+      paste0("SELECT ", id_name, " FROM ", table,
+             " WHERE ", column_name, "='", levels(column_ids)[cil], "';")
+    )[1,1]
+  }
+  column_ids
+}
+
+
 #' @rdname dbWithTransaction_or_Savepoint
 #' @export
 #' @keywords internal
@@ -282,8 +301,23 @@ dbWriteTable_device_type <- function(conn,
 }
 
 
-#' Insert data into \code{device_model} table
+#' @rdname dbAdd_device_model
+#' @export
+dbWriteTable_device_model <- function(conn,
+                                      devmod_name,
+                                      devtype_id,
+                                      devman_id = NULL,
+                                      devmod_comment = NULL) {
+  write_table(name = "device_model", as.list(environment()))
+}
+
+
+#' Add device models to \code{device_model} table
 #'
+#' \code{dbWriteTable_device_model} requires a correct device type id and,
+#' optionally, a correct device manufacturer id while \code{dbAdd_device_model}
+#' derives that from the device type and the device manufacturer name,
+#' respectively.
 #'
 #' @inheritParams database_fields
 #'
@@ -299,20 +333,58 @@ dbWriteTable_device_type <- function(conn,
 #' dbWriteTable_device_model(con, "THERMO1000", 1, 1)
 #' dbDisconnect(con)
 #' }
-dbWriteTable_device_model <- function(conn,
-                                      devmod_name,
-                                      devtype_id,
-                                      devman_id = NULL,
-                                      devmod_comment = NULL) {
-  write_table(name = "device_model", as.list(environment()))
+dbAdd_device_model <- function(conn,
+                               devmod_name,
+                               devtype_name,
+                               devman_name = NULL,
+                               devmod_comment = NULL) {
+
+  dbWithTransaction_or_Savepoint(conn, {
+    devtype_id <- get_ids_from_uniquecolumn(conn,
+                                            table = "device_type",
+                                            id_name = "devtype_id",
+                                            column_name = "devtype_name",
+                                            column_values = devtype_name)
+    if (!is.null(devman_name)) {
+      devman_id <- get_ids_from_uniquecolumn(conn,
+                                             table = "device_manufacturer",
+                                             id_name = "devman_id",
+                                             column_name = "devman_name",
+                                             column_values = devman_name)
+    } else {
+      devman_id <- NULL
+    }
+    dbWriteTable_device_model(conn,
+                              devmod_name = devmod_name,
+                              devtype_id = devtype_id,
+                              devman_id = devman_id,
+                              devmod_comment = devmod_comment)
+  }, spname = "dbAdd_device_model")
 }
 
 
-#' Insert data into \code{device} table
+
+#' @rdname dbAdd_device
+#' @export
+dbWriteTable_device <- function(conn,
+                                dev_name,
+                                devmod_id,
+                                dev_identifier = NULL,
+                                dev_comment = NULL) {
+  write_table(name = "device", as.list(environment()))
+}
+
+#' Add devices to \code{device} table
+#'
+#' \code{dbWriteTable_device} requires a correct device model id while
+#' \code{dbAdd_device} derives that from the device model name.
 #'
 #' @inheritParams database_fields
 #'
 #' @return Data frame of newly added rows.
+#' @seealso \code{\link{dbAdd_uncalibrated_device}} for adding a device that
+#'   does not require calibration to both \code{device} and
+#'   \code{calibrated_device}
 #' @family custom dbWriteTable functions
 #' @export
 #'
@@ -325,20 +397,53 @@ dbWriteTable_device_model <- function(conn,
 #' dbWriteTable_device(con, "My first THERMO1000", 1, "NCC1701-T")
 #' dbDisconnect(con)
 #' }
-dbWriteTable_device <- function(conn,
-                                dev_name,
-                                devmod_id,
-                                dev_identifier = NULL,
-                                dev_comment = NULL) {
-  write_table(name = "device", as.list(environment()))
+dbAdd_device <- function(conn,
+                         dev_name,
+                         devmod_name,
+                         dev_identifier = NULL,
+                         dev_comment = NULL) {
+
+  dbWithTransaction_or_Savepoint(conn, {
+    devmod_id <- get_ids_from_uniquecolumn(conn,
+                                           table = "device_model",
+                                           id_name = "devmod_id",
+                                           column_name = "devmod_name",
+                                           column_values = devmod_name)
+    dbWriteTable_device(conn,
+                        dev_name = dev_name,
+                        devmod_id = devmod_id,
+                        dev_identifier = dev_identifier,
+                        dev_comment = dev_comment)
+  }, spname = "dbAdd_device")
 }
 
 
-#' Insert data into \code{calibrated_device} table
+
+#' @rdname dbAdd_calibrated_device
+#' @export
+dbWriteTable_calibrated_device <- function(conn,
+                                           dev_id,
+                                           caldev_datetime = NULL,
+                                           caldev_parameter = NULL,
+                                           caldev_comment = NULL) {
+  # we need caldev_datetime to be POSIXct for consistent time zone storage
+  if (!is.null(caldev_datetime) & !inherits(caldev_datetime, "POSIXct")) {
+    stop("caldev_datetime is used but not POSIXct.")
+  }
+  write_table(name = "calibrated_device", as.list(environment()))
+}
+
+#' Add calibrated devices to \code{calibrated_device} table
+#'
+#' \code{dbWriteTable_calibrated_device} requires a correct device id while
+#' \code{dbAdd_calibrated_device} derives that from the device name.
 #'
 #' @inheritParams database_fields
 #'
 #' @return Data frame of newly added rows.
+#' @seealso \code{\link{dbAdd_uncalibrated_device}} for adding a device that
+#'   does not require calibration to both \code{device} and
+#'   \code{calibrated_device}
 #' @family custom dbWriteTable functions
 #' @export
 #'
@@ -355,17 +460,27 @@ dbWriteTable_device <- function(conn,
 #'                                "a=10, b=99.12")
 #' dbDisconnect(con)
 #' }
-dbWriteTable_calibrated_device <- function(conn,
-                                           dev_id,
-                                           caldev_datetime = NULL,
-                                           caldev_parameter = NULL,
-                                           caldev_comment = NULL) {
-  # we need caldev_datetime to be POSIXct for consistent time zone storage
-  if (!is.null(caldev_datetime) & !inherits(caldev_datetime, "POSIXct")) {
-    stop("caldev_datetime is used but not POSIXct.")
-  }
-  write_table(name = "calibrated_device", as.list(environment()))
+dbAdd_calibrated_device <- function(conn,
+                                    dev_name,
+                                    caldev_datetime = NULL,
+                                    caldev_parameter = NULL,
+                                    caldev_comment = NULL) {
+  dbWithTransaction_or_Savepoint(conn, {
+    dev_id <- get_ids_from_uniquecolumn(conn,
+                                        table = "device",
+                                        id_name = "dev_id",
+                                        column_name = "dev_name",
+                                        column_values = dev_name)
+    dbWriteTable_calibrated_device(conn,
+                                   dev_id = dev_id,
+                                   caldev_datetime = caldev_datetime,
+                                   caldev_parameter = caldev_parameter,
+                                   caldev_comment = caldev_comment)
+  }, spname = "dbAdd_calibrated_device")
+
 }
+
+
 
 
 

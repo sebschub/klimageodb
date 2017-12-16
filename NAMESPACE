@@ -2,6 +2,9 @@
 
 export(dbAddCorrection_station_adlershof)
 export(dbAddMeasurement_station_adlershof)
+export(dbAdd_calibrated_device)
+export(dbAdd_device)
+export(dbAdd_device_model)
 export(dbAdd_uncalibrated_device)
 export(dbBegin_or_Savepoint)
 export(dbCommit_or_Savepoint)
