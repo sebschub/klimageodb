@@ -365,8 +365,8 @@ station_adlershof_df_new <- data.frame(
 
 station_adlershof_df <- rbind(station_adlershof_df, station_adlershof_df_new)
 
-test_that("dbAddMeasurement_station_adlershof", {
-  dbAddMeasurement_station_adlershof(
+test_that("dbAdd_station_adlershof", {
+  dbAdd_station_adlershof(
     con,
     md_name = md_name,
     stadl_datetime = station_adlershof_df_new$stadl_datetime,
@@ -380,8 +380,8 @@ test_that("dbAddMeasurement_station_adlershof", {
 
 cor_stadl_id <- 1
 station_adlershof_df$qf_id[cor_stadl_id] <- 1
-test_that("dbUpdateQF_station_adlershof", {
-  dbUpdateQF_station_adlershof(con,
+test_that("dbUpdate_station_adlershof_qf_id", {
+  dbUpdate_station_adlershof_qf_id(con,
                                stadl_id = cor_stadl_id,
                                qf_id = station_adlershof_df$qf_id[cor_stadl_id])
   df <- dbReadTable(con, "station_adlershof")

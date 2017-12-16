@@ -699,15 +699,14 @@ dbWriteTable_quality_flag <- function(conn,
 #' Add measurements to \code{station_adlershof} table
 #'
 #' \code{dbWriteTable_station_adlershof} requires a correct measurand id while
-#' \code{dbAddMeasurement_station_adlershof} derives that from the measurand
-#' name.
+#' \code{dbAdd_station_adlershof} derives that from the measurand name.
 #'
 #' \code{dbWriteTable_station_adlershof} requires a correct measurand id
 #' \code{md_id} to write measurements to station_adlershof.
-#' \code{dbAddMeasurement_station_adlershof} finds \code{md_id} from a given
-#' measurand name \code{md_name}. To this end, it queries the table
-#' \code{measurand} and selects the according to \code{md_setup_datetime} the
-#' most recent \code{md_id}.
+#' \code{dbAdd_station_adlershof} finds \code{md_id} from a given measurand name
+#' \code{md_name}. To this end, it queries the table \code{measurand} and
+#' selects the according to \code{md_setup_datetime} the most recent
+#' \code{md_id}.
 #'
 #' @inheritParams database_fields
 #'
@@ -720,21 +719,21 @@ dbWriteTable_quality_flag <- function(conn,
 #' \dontrun{
 #' con <- dbConnect_klimageo()
 #' # add all required entries before with the respective dbWriteTable_*
-#' dbAddMeasurement_station_adlershof(con,
-#'                                md_name = "TA2M_1"
-#'                                stadl_datetime = as.POSIXct("2017-01-01 12:05:12", tz = "UTC"),
-#'                                stadl_value = 272.15)
+#' dbAdd_station_adlershof(con,
+#'                         md_name = "TA2M_1"
+#'                         stadl_datetime = as.POSIXct("2017-01-01 12:05:12", tz = "UTC"),
+#'                         stadl_value = 272.15)
 #' dbWriteTable_station_adlershof(con,
 #'                                stadl_datetime = as.POSIXct("2017-01-01 12:15:12", tz = "UTC"),
 #'                                md_id = 1,
 #'                                stadl_value = 273.15)
 #' dbDisconnect(con)
 #' }
-dbAddMeasurement_station_adlershof <- function(conn,
-                                               md_name,
-                                               stadl_datetime,
-                                               stadl_value,
-                                               qf_id = NULL) {
+dbAdd_station_adlershof <- function(conn,
+                                    md_name,
+                                    stadl_datetime,
+                                    stadl_value,
+                                    qf_id = NULL) {
 
   # get the most recent md_id with md_name
   # get md_id values only for the unique values of md_name, do this via factor
@@ -759,7 +758,7 @@ dbAddMeasurement_station_adlershof <- function(conn,
 }
 
 
-#' @rdname dbAddMeasurement_station_adlershof
+#' @rdname dbAdd_station_adlershof
 #' @export
 dbWriteTable_station_adlershof <- function(conn,
                                            stadl_datetime,
@@ -780,14 +779,14 @@ dbWriteTable_station_adlershof <- function(conn,
 #' the corrected measurement values to \code{station_adlershof_correction} and
 #' to modify the quality flags in \code{station_adlershof}.
 #' \code{dbWriteTable_station_adlershof_correction} and
-#' \code{dbUpdateQF_station_adlershof} do the respective single actions.
+#' \code{dbUpdate_station_adlershof_qf_id} do the respective single actions.
 #'
 #' By design, qf_id with values >= 10 in \code{station_adlershof} indicates that
 #' entries in \code{station_adlershof} are corrected in
 #' \code{station_adlershof_correction}. Thus,
 #' \code{dbAddCorrection_station_adlershof} imposes the constraint qf_id >= 10.
-#' \code{dbUpdateQF_station_adlershof}, on the other hand, allows general values
-#' of qf_id (further checks are done by the database).
+#' \code{dbUpdate_station_adlershof_qf_id}, on the other hand, allows general
+#' values of qf_id (further checks are done by the database).
 #'
 #'
 #' @inheritParams database_fields
@@ -825,7 +824,7 @@ dbAddCorrection_station_adlershof <- function(conn,
                      stadlcor_datetime = stadlcor_datetime,
                      md_id = md_id,
                      stadlcor_value = stadlcor_value)
-    dbUpdateQF_station_adlershof(conn, stadl_id, qf_id)
+    dbUpdate_station_adlershof_qf_id(conn, stadl_id, qf_id)
   }, spname = "dbAddCorrection_station_adlershof_savepoint")
 }
 
@@ -833,7 +832,7 @@ dbAddCorrection_station_adlershof <- function(conn,
 
 #' @rdname dbAddCorrection_station_adlershof
 #' @export
-dbUpdateQF_station_adlershof <- function(conn, stadl_id, qf_id) {
+dbUpdate_station_adlershof_qf_id <- function(conn, stadl_id, qf_id) {
   dbWithTransaction_or_Savepoint(conn, {
     qf_id_update <-
       DBI::dbSendStatement(conn,

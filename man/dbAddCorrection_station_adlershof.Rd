@@ -2,14 +2,14 @@
 % Please edit documentation in R/db_write.R
 \name{dbAddCorrection_station_adlershof}
 \alias{dbAddCorrection_station_adlershof}
-\alias{dbUpdateQF_station_adlershof}
+\alias{dbUpdate_station_adlershof_qf_id}
 \alias{dbWriteTable_station_adlershof_correction}
 \title{Add corrections of \code{station_adlershof} measurements}
 \usage{
 dbAddCorrection_station_adlershof(conn, stadl_id, qf_id, stadlcor_datetime,
   md_id, stadlcor_value)
 
-dbUpdateQF_station_adlershof(conn, stadl_id, qf_id)
+dbUpdate_station_adlershof_qf_id(conn, stadl_id, qf_id)
 
 dbWriteTable_station_adlershof_correction(conn, stadl_id, stadlcor_datetime,
   md_id, stadlcor_value)
@@ -38,15 +38,15 @@ In general, use \code{dbAddCorrection_station_adlershof} to consistently add
 the corrected measurement values to \code{station_adlershof_correction} and
 to modify the quality flags in \code{station_adlershof}.
 \code{dbWriteTable_station_adlershof_correction} and
-\code{dbUpdateQF_station_adlershof} do the respective single actions.
+\code{dbUpdate_station_adlershof_qf_id} do the respective single actions.
 }
 \details{
 By design, qf_id with values >= 10 in \code{station_adlershof} indicates that
 entries in \code{station_adlershof} are corrected in
 \code{station_adlershof_correction}. Thus,
 \code{dbAddCorrection_station_adlershof} imposes the constraint qf_id >= 10.
-\code{dbUpdateQF_station_adlershof}, on the other hand, allows general values
-of qf_id (further checks are done by the database).
+\code{dbUpdate_station_adlershof_qf_id}, on the other hand, allows general
+values of qf_id (further checks are done by the database).
 }
 \examples{
 \dontrun{
@@ -64,7 +64,7 @@ dbDisconnect(con)
 }
 }
 \seealso{
-Other custom dbWriteTable functions: \code{\link{dbAddMeasurement_station_adlershof}},
+Other custom dbWriteTable functions: \code{\link{dbAdd_station_adlershof}},
   \code{\link{dbWriteTable_calibrated_device}},
   \code{\link{dbWriteTable_device_manufacturer}},
   \code{\link{dbWriteTable_device_model}},
