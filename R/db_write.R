@@ -577,8 +577,21 @@ dbWriteTable_integration_type <- function(conn,
 
 
 
-#' Insert data into \code{integration} table
+#' @rdname dbAdd_integration
+#' @export
+dbWriteTable_integration <- function(conn,
+                                     inttype_id,
+                                     int_measurement_interval,
+                                     int_interval,
+                                     int_comment = NULL) {
+  write_table(name = "integration", as.list(environment()))
+}
+
+
+#' Add integration kind to \code{integration} table
 #'
+#' \code{dbWriteTable_integration} requires a correct device integration type id
+#' while \code{dbAdd_integration} derives that from the device model name.
 #'
 #' @inheritParams database_fields
 #'
@@ -593,12 +606,24 @@ dbWriteTable_integration_type <- function(conn,
 #' dbWriteTable_integration(con, 1, 60, 600)
 #' dbDisconnect(con)
 #' }
-dbWriteTable_integration <- function(conn,
-                                          inttype_id,
-                                          int_measurement_interval,
-                                          int_interval,
-                                          int_comment = NULL) {
-  write_table(name = "integration", as.list(environment()))
+dbAdd_integration <- function(conn,
+                              inttype_name,
+                              int_measurement_interval,
+                              int_interval,
+                              int_comment = NULL) {
+  dbWithTransaction_or_Savepoint(conn, {
+    inttype_id <- get_ids_from_uniquecolumn(conn,
+                                            table = "integration_type",
+                                            id_name = "intype_id",
+                                            column_name = "inttype_name",
+                                            column_values = inttype_name)
+    dbWriteTable_integration(conn,
+                             inttype_id = inttype_id,
+                             int_measurement_interval = int_measurement_interval,
+                             int_interval = int_interval,
+                             int_comment = int_comment)
+  }, spname = "dbAdd_integration")
+
 }
 
 
@@ -652,20 +677,66 @@ dbWriteTable_person <- function(conn,
 #' dbDisconnect(con)
 #' }
 dbWriteTable_measurand <- function(conn,
-                                md_name,
-                                md_setup_datetime,
-                                pq_id,
-                                site_id,
-                                caldev_id,
-                                int_id,
-                                md_height = NULL,
-                                pers_id = NULL,
-                                md_comment = NULL) {
+                                   md_name,
+                                   md_setup_datetime,
+                                   pq_id,
+                                   site_id,
+                                   caldev_id,
+                                   int_id,
+                                   md_height = NULL,
+                                   pers_id = NULL,
+                                   md_comment = NULL) {
   if (!inherits(md_setup_datetime, "POSIXct")) {
     stop("md_setup_datetime is not POSIXct.")
   }
   write_table(name = "measurand", as.list(environment()))
 }
+
+
+dbAdd_measurand <- function(conn,
+                            md_name,
+                            md_setup_datetime,
+                            pq_name,
+                            site_name,
+                            caldev_id,
+                            int_id,
+                            md_height = NULL,
+                            pers_name = NULL,
+                            md_comment = NULL) {
+  dbWithTransaction_or_Savepoint(conn, {
+    pq_id <- get_ids_from_uniquecolumn(conn,
+                                       table = "physical_quantity",
+                                       id_name = "pq_id",
+                                       column_name = "pq_name",
+                                       column_values = pq_name)
+    site_id <- get_ids_from_uniquecolumn(conn,
+                                         table = "site",
+                                         id_name = "site_id",
+                                         column_name = "site_name",
+                                         column_values = site_name)
+    if (!is.null(pers_name)) {
+      pers_id <- get_ids_from_uniquecolumn(conn,
+                                           table = "person",
+                                           id_name = "pers_id",
+                                           column_name = "pers_name",
+                                           column_values = pers_name)
+    } else {
+      pers_id <- NULL
+    }
+    dbWriteTable_measurand(conn,
+                           md_name = md_name,
+                           md_setup_datetime = md_setup_datetime,
+                           pq_id = pq_id,
+                           site_id = site_id,
+                           caldev_id = caldev_id,
+                           int_id = int_id,
+                           md_height = md_height,
+                           pers_id = pers_id,
+                           md_comment = md_comment)
+  }, spname = "dbAdd_measurand")
+
+}
+
 
 
 #' Insert data into \code{quality_flag} table
