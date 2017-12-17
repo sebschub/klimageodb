@@ -237,22 +237,22 @@ uncalibrated_device_df <- data.frame(
   devmod_id = c(1, 1),
   dev_identifier = c("NCC1701-T1", "NCC1701-T2"),
   dev_comment = as.character(c(NA, NA)))
-device_df_new_compare <- factor2character(uncalibrated_device_df)
+device_df_new <- factor2character(uncalibrated_device_df)
 # columns added by database and row from device above
-device_df_compare2 <- rbind(factor2character(device_df),
-                            device_df_new_compare)
+device_df <- rbind(factor2character(device_df),
+                   device_df_new)
 
-calibrated_device_df_new_compare <- data.frame(
+calibrated_device_df_new <- data.frame(
   caldev_id = as.integer(c(2, 3)),
-  dev_id = device_df_compare2$dev_id[length(device_df_compare2$dev_id)-c(1,0)],
+  dev_id = device_df$dev_id[length(device_df$dev_id)-c(1,0)],
   caldev_datetime = as.POSIXct(c(NA, NA)),
   caldev_parameter = as.character(c(NA, NA)),
   caldev_comment = as.character(c(NA, NA)),
   stringsAsFactors = FALSE)
 
-calibrated_device_df_compare2 <-
+calibrated_device_df <-
   rbind(factor2character(calibrated_device_df),
-        calibrated_device_df_new_compare
+        calibrated_device_df_new
   )
 
 test_that("dbAdd_uncalibrated_device", {
@@ -261,16 +261,39 @@ test_that("dbAdd_uncalibrated_device", {
                                    devmod_id = uncalibrated_device_df$devmod_id,
                                    dev_identifier = uncalibrated_device_df$dev_identifier)
   # test the new rows output
-  expect_equal(device_df_new_compare, res$device)
-  expect_equal(calibrated_device_df_new_compare, res$calibrated_device)
+  expect_equal(device_df_new, res$device)
+  expect_equal(calibrated_device_df_new, res$calibrated_device)
   # test total tables
   df <- dbReadTable(con, "device")
-  expect_equal(device_df_compare2, df)
+  expect_equal(device_df, df)
   dfcd <- dbReadTable(con, "calibrated_device")
-  expect_equal(calibrated_device_df_compare2, dfcd)
+  expect_equal(calibrated_device_df, dfcd)
   test_transaction_completed(con)
 })
 
+
+
+calibrated_device_df_new <- data.frame(
+  caldev_id = 4,
+  dev_id = 2,
+  caldev_datetime = as.POSIXct("2013-01-01 12:15:12"),
+  caldev_parameter = as.character(NA),
+  caldev_comment = as.character(NA),
+  stringsAsFactors = FALSE)
+
+calibrated_device_df <- rbind(calibrated_device_df, calibrated_device_df_new)
+
+test_that("dbAdd_calibrated_device", {
+  res <- dbAdd_calibrated_device(con,
+                                 dev_name = device_df$dev_name[calibrated_device_df_new$dev_id],
+                                 caldev_datetime = calibrated_device_df_new$caldev_datetime,
+                                 caldev_parameter = calibrated_device_df_new$caldev_parameter,
+                                 caldev_comment = calibrated_device_df_new$caldev_comment)
+  expect_equal(calibrated_device_df_new, res)
+  df <- dbReadTable(con, "calibrated_device")
+  expect_equal(df, calibrated_device_df)
+  test_transaction_completed(con)
+})
 
 
 physical_quantity_df <- data.frame(
