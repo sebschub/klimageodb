@@ -100,7 +100,7 @@ get_columns <- function(conn, name, columns) {
 }
 
 
-get_ids_from_uniquecolumn <- function(conn,
+get_ids_from_unique_column <- function(conn,
                                       table, id_name,
                                       column_name, column_values) {
   # do this via factor
@@ -116,6 +116,27 @@ get_ids_from_uniquecolumn <- function(conn,
   }
   column_ids
 }
+
+
+get_ids_from_datetime_column <- function(conn,
+                                      table, id_name,
+                                      column_name, column_values,
+                                      column_datetime) {
+  # do this via factor
+  column_ids <- as.factor(column_values)
+  # get for each level of column_values the id
+
+  for (cil in seq_along(levels(column_ids))) {
+    levels(column_ids)[cil] <- DBI::dbGetQuery(
+      conn,
+      paste0("SELECT ", id_name, " FROM ", table,
+             " WHERE ", column_name, "='", levels(column_ids)[cil], "'",
+             " ORDER BY ", column_datetime ," DESC LIMIT 1;")
+    )[1,1]
+  }
+  column_ids
+}
+
 
 
 #' @rdname dbWithTransaction_or_Savepoint
@@ -340,13 +361,13 @@ dbAdd_device_model <- function(conn,
                                devmod_comment = NULL) {
 
   dbWithTransaction_or_Savepoint(conn, {
-    devtype_id <- get_ids_from_uniquecolumn(conn,
+    devtype_id <- get_ids_from_unique_column(conn,
                                             table = "device_type",
                                             id_name = "devtype_id",
                                             column_name = "devtype_name",
                                             column_values = devtype_name)
     if (!is.null(devman_name)) {
-      devman_id <- get_ids_from_uniquecolumn(conn,
+      devman_id <- get_ids_from_unique_column(conn,
                                              table = "device_manufacturer",
                                              id_name = "devman_id",
                                              column_name = "devman_name",
@@ -404,7 +425,7 @@ dbAdd_device <- function(conn,
                          dev_comment = NULL) {
 
   dbWithTransaction_or_Savepoint(conn, {
-    devmod_id <- get_ids_from_uniquecolumn(conn,
+    devmod_id <- get_ids_from_unique_column(conn,
                                            table = "device_model",
                                            id_name = "devmod_id",
                                            column_name = "devmod_name",
@@ -466,7 +487,7 @@ dbAdd_calibrated_device <- function(conn,
                                     caldev_parameter = NULL,
                                     caldev_comment = NULL) {
   dbWithTransaction_or_Savepoint(conn, {
-    dev_id <- get_ids_from_uniquecolumn(conn,
+    dev_id <- get_ids_from_unique_column(conn,
                                         table = "device",
                                         id_name = "dev_id",
                                         column_name = "dev_name",
@@ -577,8 +598,21 @@ dbWriteTable_integration_type <- function(conn,
 
 
 
-#' Insert data into \code{integration} table
+#' @rdname dbAdd_integration
+#' @export
+dbWriteTable_integration <- function(conn,
+                                     inttype_id,
+                                     int_measurement_interval,
+                                     int_interval,
+                                     int_comment = NULL) {
+  write_table(name = "integration", as.list(environment()))
+}
+
+
+#' Add integration kind to \code{integration} table
 #'
+#' \code{dbWriteTable_integration} requires a correct device integration type id
+#' while \code{dbAdd_integration} derives that from the device model name.
 #'
 #' @inheritParams database_fields
 #'
@@ -593,12 +627,24 @@ dbWriteTable_integration_type <- function(conn,
 #' dbWriteTable_integration(con, 1, 60, 600)
 #' dbDisconnect(con)
 #' }
-dbWriteTable_integration <- function(conn,
-                                          inttype_id,
-                                          int_measurement_interval,
-                                          int_interval,
-                                          int_comment = NULL) {
-  write_table(name = "integration", as.list(environment()))
+dbAdd_integration <- function(conn,
+                              inttype_name,
+                              int_measurement_interval,
+                              int_interval,
+                              int_comment = NULL) {
+  dbWithTransaction_or_Savepoint(conn, {
+    inttype_id <- get_ids_from_unique_column(conn,
+                                            table = "integration_type",
+                                            id_name = "inttype_id",
+                                            column_name = "inttype_name",
+                                            column_values = inttype_name)
+    dbWriteTable_integration(conn,
+                             inttype_id = inttype_id,
+                             int_measurement_interval = int_measurement_interval,
+                             int_interval = int_interval,
+                             int_comment = int_comment)
+  }, spname = "dbAdd_integration")
+
 }
 
 
@@ -627,8 +673,37 @@ dbWriteTable_person <- function(conn,
 
 
 
-#' Insert data into \code{measurand} table
+#' @rdname dbAdd_measurand
+#' @export
+dbWriteTable_measurand <- function(conn,
+                                   md_name,
+                                   md_setup_datetime,
+                                   pq_id,
+                                   site_id,
+                                   caldev_id,
+                                   int_id,
+                                   md_height = NULL,
+                                   pers_id = NULL,
+                                   md_comment = NULL) {
+  if (!inherits(md_setup_datetime, "POSIXct")) {
+    stop("md_setup_datetime is not POSIXct.")
+  }
+  write_table(name = "measurand", as.list(environment()))
+}
+
+
+
+#' Add measurand to \code{measurand} table
 #'
+#' \code{dbWriteTable_measurand} requires a correct physical quantity id, site
+#' id, calibrated device id, integration id and, optionally, person id.
+#' \code{dbAdd_measurand} derives the physical quantity id, site id, calibrated
+#' device id and person id from the respective names; integration id still have
+#' to be entered numerical as id. \strong{Note} that \code{dbAdd_measurand}
+#' derives the calibrated device id from the device id with the most recent
+#' calibration date \code{caldev_datetime}. Use
+#' \code{\link{dbReadTable_integration_detail}} to query the integration table
+#' and select the correct id.
 #'
 #' @inheritParams database_fields
 #'
@@ -651,21 +726,57 @@ dbWriteTable_person <- function(conn,
 #'                        md_comment = "the 2m temperature"))
 #' dbDisconnect(con)
 #' }
-dbWriteTable_measurand <- function(conn,
-                                md_name,
-                                md_setup_datetime,
-                                pq_id,
-                                site_id,
-                                caldev_id,
-                                int_id,
-                                md_height = NULL,
-                                pers_id = NULL,
-                                md_comment = NULL) {
-  if (!inherits(md_setup_datetime, "POSIXct")) {
-    stop("md_setup_datetime is not POSIXct.")
-  }
-  write_table(name = "measurand", as.list(environment()))
+dbAdd_measurand <- function(conn,
+                            md_name,
+                            md_setup_datetime,
+                            pq_name,
+                            site_name,
+                            dev_name,
+                            int_id,
+                            md_height = NULL,
+                            pers_name = NULL,
+                            md_comment = NULL) {
+  dbWithTransaction_or_Savepoint(conn, {
+    pq_id <- get_ids_from_unique_column(conn,
+                                       table = "physical_quantity",
+                                       id_name = "pq_id",
+                                       column_name = "pq_name",
+                                       column_values = pq_name)
+    site_id <- get_ids_from_unique_column(conn,
+                                         table = "site",
+                                         id_name = "site_id",
+                                         column_name = "site_name",
+                                         column_values = site_name)
+    # use view to get correct id
+    caldev_id <- get_ids_from_datetime_column(conn,
+                                              table = "calibrated_device_detail",
+                                              id_name = "caldev_id",
+                                              column_name = "dev_name",
+                                              column_values = dev_name,
+                                              column_datetime = "caldev_datetime")
+    if (!is.null(pers_name)) {
+      pers_id <- get_ids_from_unique_column(conn,
+                                           table = "person",
+                                           id_name = "pers_id",
+                                           column_name = "pers_name",
+                                           column_values = pers_name)
+    } else {
+      pers_id <- NULL
+    }
+    dbWriteTable_measurand(conn,
+                           md_name = md_name,
+                           md_setup_datetime = md_setup_datetime,
+                           pq_id = pq_id,
+                           site_id = site_id,
+                           caldev_id = caldev_id,
+                           int_id = int_id,
+                           md_height = md_height,
+                           pers_id = pers_id,
+                           md_comment = md_comment)
+  }, spname = "dbAdd_measurand")
+
 }
+
 
 
 #' Insert data into \code{quality_flag} table
@@ -735,19 +846,12 @@ dbAdd_station_adlershof <- function(conn,
                                     stadl_value,
                                     qf_id = NULL) {
 
-  # get the most recent md_id with md_name
-  # get md_id values only for the unique values of md_name, do this via factor
-  md_id <- as.factor(md_name)
-  # get for each level of md_name the md_id
   dbWithTransaction_or_Savepoint(conn, {
-    for (mdn in seq_along(levels(md_id))) {
-      levels(md_id)[mdn] <- DBI::dbGetQuery(
-        conn,
-        paste0("SELECT md_id FROM measurand ",
-               "WHERE md_name='", levels(md_id)[mdn], "' ",
-               "ORDER BY md_setup_datetime DESC LIMIT 1;")
-      )[1,1]
-    }
+    md_id <- get_ids_from_datetime_column(conn,
+                                          table = "measurand", id_name = "md_id",
+                                          column_name = "md_name",
+                                          column_values = md_name,
+                                          column_datetime = "md_setup_datetime")
     # stadl_datetime checked in dbWriteTable_station_adlershof
     dbWriteTable_station_adlershof(conn,
                                    stadl_datetime = stadl_datetime,

@@ -2,10 +2,14 @@
 % Please edit documentation in R/db_write.R
 \name{dbWriteTable_integration}
 \alias{dbWriteTable_integration}
-\title{Insert data into \code{integration} table}
+\alias{dbAdd_integration}
+\title{Add integration kind to \code{integration} table}
 \usage{
 dbWriteTable_integration(conn, inttype_id, int_measurement_interval,
   int_interval, int_comment = NULL)
+
+dbAdd_integration(conn, inttype_name, int_measurement_interval, int_interval,
+  int_comment = NULL)
 }
 \arguments{
 \item{conn}{Database connection.}
@@ -17,12 +21,15 @@ dbWriteTable_integration(conn, inttype_id, int_measurement_interval,
 \item{int_interval}{Numeric vector of integration interval in s of one stored measurement.}
 
 \item{int_comment}{Character vector of additional information.}
+
+\item{inttype_name}{String vector of name of integration type.}
 }
 \value{
 Data frame of newly added rows.
 }
 \description{
-Insert data into \code{integration} table
+\code{dbWriteTable_integration} requires a correct device integration type id
+while \code{dbAdd_integration} derives that from the device model name.
 }
 \examples{
 \dontrun{

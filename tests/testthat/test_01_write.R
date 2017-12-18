@@ -297,10 +297,10 @@ test_that("dbAdd_calibrated_device", {
 
 
 physical_quantity_df <- data.frame(
-  pq_id = 1,
-  pq_name = "air temperature",
-  pq_unit = "degC",
-  pq_comment = "says if air is cold or warm")
+  pq_id = c(1, 2),
+  pq_name = c("air temperature", "air pressure"),
+  pq_unit = c("degC", "hPa"),
+  pq_comment = c("says if air is cold or warm", NA))
 
 test_dbWriteTable_table(con, "physical_quantity", physical_quantity_df, 2:4)
 
@@ -324,6 +324,31 @@ integration_df <- data.frame(
   int_comment = as.character(NA))
 
 test_dbWriteTable_table(con, "integration", integration_df, 2:4)
+
+
+
+integration_df_new <- data.frame(
+  int_id = 2,
+  inttype_id = 1,
+  int_measurement_interval = 100,
+  int_interval = 100,
+  int_comment = as.character(NA),
+  stringsAsFactors = FALSE
+)
+integration_df <- rbind(factor2character(integration_df), integration_df_new)
+
+test_that("dbAdd_integration", {
+  res <- dbAdd_integration(con,
+                           inttype_name = integration_type_df$inttype_name[integration_df_new$inttype_id],
+                           int_measurement_interval = integration_df_new$int_measurement_interval,
+                           int_interval = integration_df_new$int_interval
+  )
+  expect_equal(integration_df_new, res)
+  df <- dbReadTable(con, "integration")
+  expect_equal(df, integration_df)
+  test_transaction_completed(con)
+})
+
 
 
 
