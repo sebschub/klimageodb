@@ -115,11 +115,15 @@ get_ids_from_unique_column <- function(conn,
   # get for each level of column_values the id
 
   for (cil in seq_along(levels(column_ids))) {
-    levels(column_ids)[cil] <- DBI::dbGetQuery(
+    query <- DBI::dbGetQuery(
       conn,
       paste0("SELECT ", id_name, " FROM ", table,
              " WHERE ", column_name, "='", levels(column_ids)[cil], "';")
-    )[1,1]
+    )
+    if (!identical(dim(query), as.integer(c(1, 1))) ) {
+      stop(paste("Query in", table, "with", id_name, "failed."))
+    }
+    levels(column_ids)[cil] <- query[1,1]
   }
   column_ids
 }
