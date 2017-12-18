@@ -74,9 +74,12 @@ CREATE TABLE calibrated_device (
     dev_id            smallint NOT NULL REFERENCES device(dev_id),
     caldev_datetime   timestamp WITH TIME ZONE CHECK (caldev_datetime >= '1980-01-01' AND caldev_datetime < NOW()),
     caldev_parameter  varchar(50),
-    caldev_comment    varchar(50),
-    UNIQUE (dev_id, caldev_datetime)
+    caldev_comment    varchar(50)
     );
+  -- there should be only one entry for each dev_id and caldev_datetime including NULL
+  -- NULL caldev_datetime are mapped to '0001-01-01'; ensure that this is never a real value
+  CREATE UNIQUE INDEX calibrated_device_dev_id_caldev_datetime ON calibrated_device
+    (dev_id, COALESCE(caldev_datetime, '0001-01-01+00'));
   COMMENT ON TABLE  calibrated_device                  IS 'specific calibration of device';
   COMMENT ON COLUMN calibrated_device.caldev_datetime  IS 'date and time of calibration';
   COMMENT ON COLUMN calibrated_device.caldev_parameter IS 'values of calibration parameters';
