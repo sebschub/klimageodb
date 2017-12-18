@@ -652,8 +652,36 @@ dbWriteTable_person <- function(conn,
 
 
 
-#' Insert data into \code{measurand} table
+#' @rdname dbAdd_measurand
+#' @export
+dbWriteTable_measurand <- function(conn,
+                                   md_name,
+                                   md_setup_datetime,
+                                   pq_id,
+                                   site_id,
+                                   caldev_id,
+                                   int_id,
+                                   md_height = NULL,
+                                   pers_id = NULL,
+                                   md_comment = NULL) {
+  if (!inherits(md_setup_datetime, "POSIXct")) {
+    stop("md_setup_datetime is not POSIXct.")
+  }
+  write_table(name = "measurand", as.list(environment()))
+}
+
+
+
+#' Add measurand to \code{measurand} table
 #'
+#' \code{dbWriteTable_measurand} requires a correct physical quantity id, site
+#' id, calibrated device id, integration id and, optionally, person id.
+#' \code{dbAdd_measurand} derives the physical quantity id, site id and person
+#' id from the respective names; calibrated device id and integration id still
+#' have to be entered numerical as id. Use
+#' \code{\link{dbReadTable_calibrated_device_detail}} and
+#' \code{\link{dbReadTable_integration_detail}} to query the respective tables and
+#' select the correct id.
 #'
 #' @inheritParams database_fields
 #'
@@ -676,23 +704,6 @@ dbWriteTable_person <- function(conn,
 #'                        md_comment = "the 2m temperature"))
 #' dbDisconnect(con)
 #' }
-dbWriteTable_measurand <- function(conn,
-                                   md_name,
-                                   md_setup_datetime,
-                                   pq_id,
-                                   site_id,
-                                   caldev_id,
-                                   int_id,
-                                   md_height = NULL,
-                                   pers_id = NULL,
-                                   md_comment = NULL) {
-  if (!inherits(md_setup_datetime, "POSIXct")) {
-    stop("md_setup_datetime is not POSIXct.")
-  }
-  write_table(name = "measurand", as.list(environment()))
-}
-
-
 dbAdd_measurand <- function(conn,
                             md_name,
                             md_setup_datetime,

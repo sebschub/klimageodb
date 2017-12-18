@@ -2,10 +2,14 @@
 % Please edit documentation in R/db_write.R
 \name{dbWriteTable_measurand}
 \alias{dbWriteTable_measurand}
-\title{Insert data into \code{measurand} table}
+\alias{dbAdd_measurand}
+\title{Add measurand to \code{measurand} table}
 \usage{
 dbWriteTable_measurand(conn, md_name, md_setup_datetime, pq_id, site_id,
   caldev_id, int_id, md_height = NULL, pers_id = NULL, md_comment = NULL)
+
+dbAdd_measurand(conn, md_name, md_setup_datetime, pq_name, site_name, caldev_id,
+  int_id, md_height = NULL, pers_name = NULL, md_comment = NULL)
 }
 \arguments{
 \item{conn}{Database connection.}
@@ -27,12 +31,25 @@ dbWriteTable_measurand(conn, md_name, md_setup_datetime, pq_id, site_id,
 \item{pers_id}{Integer vector of \code{person} ID.}
 
 \item{md_comment}{Character vector of additional information.}
+
+\item{pq_name}{String vector of name of physical quantity.}
+
+\item{site_name}{String vector of name of site or name of campaign.}
+
+\item{pers_name}{Character vector of person name.}
 }
 \value{
 Data frame of newly added rows.
 }
 \description{
-Insert data into \code{measurand} table
+\code{dbWriteTable_measurand} requires a correct physical quantity id, site
+id, calibrated device id, integration id and, optionally, person id.
+\code{dbAdd_measurand} derives the physical quantity id, site id and person
+id from the respective names; calibrated device id and integration id still
+have to be entered numerical as id. Use
+\code{\link{dbReadTable_calibrated_device_detail}} and
+\code{\link{dbReadTable_integration_detail}} to query the respective tables and
+select the correct id.
 }
 \examples{
 \dontrun{
