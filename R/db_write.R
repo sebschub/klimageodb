@@ -635,7 +635,7 @@ dbAdd_integration <- function(conn,
   dbWithTransaction_or_Savepoint(conn, {
     inttype_id <- get_ids_from_unique_column(conn,
                                             table = "integration_type",
-                                            id_name = "intype_id",
+                                            id_name = "inttype_id",
                                             column_name = "inttype_name",
                                             column_values = inttype_name)
     dbWriteTable_integration(conn,
