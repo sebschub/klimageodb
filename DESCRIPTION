@@ -8,12 +8,12 @@ Description: This package provides commands to easily store and retrieve
     data from the Klimageographie database.
 Depends:
     R (>= 3.1.0),
-    DBI,
-    xml2
+    DBI
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Imports: RPostgres
+Imports: RPostgres,
+    xml2
 Suggests: testthat,
     covr
 RoxygenNote: 6.0.1
