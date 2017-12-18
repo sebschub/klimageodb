@@ -274,11 +274,11 @@ test_that("dbAdd_uncalibrated_device", {
 
 
 calibrated_device_df_new <- data.frame(
-  caldev_id = 4,
-  dev_id = 2,
-  caldev_datetime = as.POSIXct("2013-01-01 12:15:12"),
-  caldev_parameter = as.character(NA),
-  caldev_comment = as.character(NA),
+  caldev_id = c(4, 5),
+  dev_id = c(2, 1),
+  caldev_datetime = as.POSIXct(c("2013-01-01 12:15:12", "2013-06-01 12:15:12")),
+  caldev_parameter = as.character(c(NA, NA)),
+  caldev_comment = as.character(c(NA, NA)),
   stringsAsFactors = FALSE)
 
 calibrated_device_df <- rbind(calibrated_device_df, calibrated_device_df_new)
@@ -399,6 +399,41 @@ measurand_df <- data.frame(
   md_comment = c("the 2m temperature", "the 2m temperature", "the 2m temperature"))
 
 test_dbWriteTable_table(con, "measurand", measurand_df, 2:10)
+
+
+measurand_df_new <- data.frame(
+  md_id = c(4, 5),
+  md_name = c("P2M_1", "RAD"),
+  md_setup_datetime = as.POSIXct(
+    c("2013-01-01 12:15:12", "2014-01-01 12:15:12"),
+    tz = "UTC"),
+  pq_id = c(3, 2),
+  site_id = c(1, 1),
+  caldev_id = c(4, 5),
+  int_id = c(1, 1),
+  md_height = c(2, 1),
+  pers_id = c(1, 1),
+  md_comment = as.character(c(NA, NA))
+)
+
+measurand_df <- rbind(measurand_df, factor2character(measurand_df_new))
+
+test_that("dbAdd_measurand", {
+  res <- dbAdd_measurand(con,
+                         md_name = measurand_df_new$md_name,
+                         md_setup_datetime = measurand_df_new$md_setup_datetime,
+                         pq_name = physical_quantity_df$pq_name[measurand_df_new$pq_id],
+                         site_name = site_df$site_name[measurand_df_new$site_id],
+                         dev_name = dbReadTable_calibrated_device_detail(con)$dev_name[measurand_df_new$caldev_id],
+                         int_id = measurand_df_new$int_id,
+                         md_height = measurand_df_new$md_height,
+                         pers_name = person_df$pers_name[measurand_df_new$pers_id])
+
+  expect_equal(res, factor2character(measurand_df_new))
+  df <- dbReadTable_measurand(con)
+  expect_equal(df, factor2character(measurand_df))
+  test_transaction_completed(con)
+})
 
 
 
