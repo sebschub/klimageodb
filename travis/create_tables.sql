@@ -87,17 +87,19 @@ CREATE TABLE calibrated_device (
 
 
 CREATE TABLE physical_quantity (
-    pq_id         smallserial PRIMARY KEY,
-    pq_name       varchar(30) NOT NULL,
-    pq_unit       varchar(10) NOT NULL,
-    pq_comment    varchar(50),
-    UNIQUE (pq_name, pq_unit)
+    pq_id          smallserial PRIMARY KEY,
+    pq_name        varchar(200) NOT NULL,
+    pq_unit        varchar(20) NOT NULL,
+    pq_description varchar(3000),
+    pq_comment     varchar(50),
+    UNIQUE (pq_name)
     );
-  COMMENT ON TABLE  physical_quantity            IS 'physical quantity, e.g. air temperature';
-  COMMENT ON COLUMN physical_quantity.pq_id      IS 'ID';
-  COMMENT ON COLUMN physical_quantity.pq_name    IS 'name, e.g. air temperature';
-  COMMENT ON COLUMN physical_quantity.pq_unit    IS 'unit, "1" for unitless';
-  COMMENT ON COLUMN physical_quantity.pq_comment IS 'additional information';
+  COMMENT ON TABLE  physical_quantity                IS 'physical quantity following CF conventions';
+  COMMENT ON COLUMN physical_quantity.pq_id          IS 'ID';
+  COMMENT ON COLUMN physical_quantity.pq_name        IS 'name, e.g. air_temperature';
+  COMMENT ON COLUMN physical_quantity.pq_unit        IS 'unit, "1" for unitless';
+  COMMENT ON COLUMN physical_quantity.pq_description IS 'description';
+  COMMENT ON COLUMN physical_quantity.pq_comment     IS 'additional information';
 
 
 

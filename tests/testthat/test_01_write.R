@@ -297,12 +297,35 @@ test_that("dbAdd_calibrated_device", {
 
 
 physical_quantity_df <- data.frame(
-  pq_id = c(1, 2),
-  pq_name = c("air temperature", "air pressure"),
-  pq_unit = c("degC", "hPa"),
-  pq_comment = c("says if air is cold or warm", NA))
+  pq_id = 1,
+  pq_name = "air_temperature",
+  pq_unit = "K",
+  pq_description = "Air temperature is the bulk temperature of the air, not the surface (skin) temperature.",
+  pq_comment = "says if air is cold or warm")
 
-test_dbWriteTable_table(con, "physical_quantity", physical_quantity_df, 2:4)
+test_dbWriteTable_table(con, "physical_quantity", physical_quantity_df, 2:5)
+
+
+
+physical_quantity_df_new <- data.frame(
+  pq_id = c(2, 3),
+  pq_name = c("diffuse_downwelling_shortwave_flux_in_air", "air_pressure"),
+  pq_unit = c("W m-2", "Pa"),
+  pq_description = c("Downwelling radiation is radiation from above. It does not mean \"net downward\".  When thought of as being incident on a surface, a radiative flux is sometimes called \"irradiance\".  In addition, it is identical with the quantity measured by a cosine-collector light-meter and sometimes called \"vector irradiance\".  In accordance with common usage in geophysical disciplines, \"flux\" implies per unit area, called \"flux density\" in physics.  \"shortwave\" means shortwave radiation. \"Diffuse\" radiation is radiation that has been scattered by particles in the atmosphere such as cloud droplets and aerosols.",
+                     "Air pressure is the force per unit area which would be exerted when the moving gas molecules of which the air is composed strike a theoretical surface of any orientation."),
+  pq_comment = as.character(c(NA, NA)),
+  stringsAsFactors = FALSE
+)
+physical_quantity_df <- rbind(factor2character(physical_quantity_df),
+                              physical_quantity_df_new)
+
+test_that("dbAdd_physical_quantity", {
+ res <- dbAdd_physical_quantity(con,
+                                standard_name = physical_quantity_df_new$pq_name)
+ expect_equal(res, physical_quantity_df_new)
+ df <- dbReadTable_physical_quantity(con)
+ expect_equal(df, physical_quantity_df)
+})
 
 
 

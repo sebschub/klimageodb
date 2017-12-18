@@ -21,26 +21,33 @@
 #' @param devtype_name String vector of name of device type.
 #' @param devtype_comment String vector of additional comments.
 #' @param int_id Integer vector of \code{integration} ID.
-#' @param int_measurement_interval Numeric vector of intervals between measurements in s.
-#' @param int_interval Numeric vector of integration interval in s of one stored measurement.
+#' @param int_measurement_interval Numeric vector of intervals between
+#'   measurements in s.
+#' @param int_interval Numeric vector of integration interval in s of one stored
+#'   measurement.
 #' @param int_comment Character vector of additional information.
 #' @param inttype_id Integer vector of \code{integration_type} ID.
 #' @param inttype_name String vector of name of integration type.
-#' @param inttype_description String vector of description of \code{integration_type}.
+#' @param inttype_description String vector of description of
+#'   \code{integration_type}.
 #' @param inttype_comment String vector of additional comments.
 #' @param md_id Integer vector of measurand ID.
 #' @param md_comment Character vector of additional information.
 #' @param md_name Character vector of measurand name.
-#' @param md_setup_datetime POSIXct vector of date and time of set-up of measurand.
+#' @param md_setup_datetime POSIXct vector of date and time of set-up of
+#'   measurand.
 #' @param md_height Numeric vector of measurement height.
 #' @param name Name of the table.
 #' @param pers_id Integer vector of \code{person} ID.
 #' @param pers_name Character vector of person name.
 #' @param pers_comment Character vector of additional information.
+#' @param standard_name Standard name of a physical quantity as defined by the
+#'   CF convention.
 #' @param pq_id Integer vector of \code{physical_quantity} ID.
 #' @param pq_name String vector of name of physical quantity.
 #' @param pq_unit String vector of units of physical quantity. Use "1" for
 #'   unitless quantities.
+#' @param pq_description String vector of description of physical quantity.
 #' @param pq_comment String vector of additional comments.
 #' @param qf_id Integer vector with 1 <= qf_id <= 9 indicating value ok and
 #'   qf_id >= 10 indicating value not ok.
@@ -549,8 +556,29 @@ dbAdd_uncalibrated_device <- function(conn,
 
 
 
+#' @rdname dbAdd_physical_quantity
+#' @export
+dbWriteTable_physical_quantity <- function(conn,
+                                           pq_name,
+                                           pq_unit,
+                                           pq_description = NULL,
+                                           pq_comment = NULL) {
+  write_table(name = "physical_quantity", as.list(environment()))
+}
 
-#' Insert data into \code{physical_quantity} table
+#' Add a physical quantity into \code{physical_quantity} table
+#'
+#' These function add rows defining a physical quantity into
+#' \code{physical_quantity}. \strong{Follow the
+#' \href{http://cfconventions.org/Data/cf-standard-names/48/build/cf-standard-name-table.html}{CF
+#' conventions}.} \code{dbAdd_physical_quantity} supports this by getting both
+#' the unit and the description from valid standard names.
+#' \code{dbWriteTable_physical_quantity} allows entering the strings manually,
+#' however, it does not enforce valid CF strings.
+#'
+#' \code{dbAdd_physical_quantity} queries
+#' \url{http://cfconventions.org/Data/cf-standard-names/48/src/cf-standard-name-table.xml}
+#' once per session. Thus, it requires an internet connection.
 #'
 #'
 #' @inheritParams database_fields
@@ -565,11 +593,15 @@ dbAdd_uncalibrated_device <- function(conn,
 #' dbWriteTable_physical_quantity(con, "air temperature", "degC")
 #' dbDisconnect(con)
 #' }
-dbWriteTable_physical_quantity <- function(conn,
-                                           pq_name,
-                                           pq_unit,
-                                           pq_comment = NULL) {
-  write_table(name = "physical_quantity", as.list(environment()))
+dbAdd_physical_quantity <- function(conn,
+                                    standard_name,
+                                    pq_comment = NULL) {
+  unit_description <- get_cf_unit_description(standard_name)
+  dbWriteTable_physical_quantity(conn,
+                                 pq_name = standard_name,
+                                 pq_unit = unit_description$unit,
+                                 pq_description = unit_description$description,
+                                 pq_comment = pq_comment)
 }
 
 

@@ -12,7 +12,8 @@ dbWriteTable_integration_type(conn, inttype_name, inttype_description,
 
 \item{inttype_name}{String vector of name of integration type.}
 
-\item{inttype_description}{String vector of description of \code{integration_type}.}
+\item{inttype_description}{String vector of description of
+\code{integration_type}.}
 
 \item{inttype_comment}{String vector of additional comments.}
 }

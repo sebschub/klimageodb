@@ -43,9 +43,11 @@ numbers.}
 
 \item{int_id}{Integer vector of \code{integration} ID.}
 
-\item{int_measurement_interval}{Numeric vector of intervals between measurements in s.}
+\item{int_measurement_interval}{Numeric vector of intervals between
+measurements in s.}
 
-\item{int_interval}{Numeric vector of integration interval in s of one stored measurement.}
+\item{int_interval}{Numeric vector of integration interval in s of one stored
+measurement.}
 
 \item{int_comment}{Character vector of additional information.}
 
@@ -53,7 +55,8 @@ numbers.}
 
 \item{inttype_name}{String vector of name of integration type.}
 
-\item{inttype_description}{String vector of description of \code{integration_type}.}
+\item{inttype_description}{String vector of description of
+\code{integration_type}.}
 
 \item{inttype_comment}{String vector of additional comments.}
 
@@ -63,7 +66,8 @@ numbers.}
 
 \item{md_name}{Character vector of measurand name.}
 
-\item{md_setup_datetime}{POSIXct vector of date and time of set-up of measurand.}
+\item{md_setup_datetime}{POSIXct vector of date and time of set-up of
+measurand.}
 
 \item{md_height}{Numeric vector of measurement height.}
 
@@ -75,12 +79,17 @@ numbers.}
 
 \item{pers_comment}{Character vector of additional information.}
 
+\item{standard_name}{Standard name of a physical quantity as defined by the
+CF convention.}
+
 \item{pq_id}{Integer vector of \code{physical_quantity} ID.}
 
 \item{pq_name}{String vector of name of physical quantity.}
 
 \item{pq_unit}{String vector of units of physical quantity. Use "1" for
 unitless quantities.}
+
+\item{pq_description}{String vector of description of physical quantity.}
 
 \item{pq_comment}{String vector of additional comments.}
 

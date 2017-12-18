@@ -16,9 +16,11 @@ dbAdd_integration(conn, inttype_name, int_measurement_interval, int_interval,
 
 \item{inttype_id}{Integer vector of \code{integration_type} ID.}
 
-\item{int_measurement_interval}{Numeric vector of intervals between measurements in s.}
+\item{int_measurement_interval}{Numeric vector of intervals between
+measurements in s.}
 
-\item{int_interval}{Numeric vector of integration interval in s of one stored measurement.}
+\item{int_interval}{Numeric vector of integration interval in s of one stored
+measurement.}
 
 \item{int_comment}{Character vector of additional information.}
 

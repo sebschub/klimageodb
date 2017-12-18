@@ -16,7 +16,8 @@ dbAdd_measurand(conn, md_name, md_setup_datetime, pq_name, site_name, dev_name,
 
 \item{md_name}{Character vector of measurand name.}
 
-\item{md_setup_datetime}{POSIXct vector of date and time of set-up of measurand.}
+\item{md_setup_datetime}{POSIXct vector of date and time of set-up of
+measurand.}
 
 \item{pq_id}{Integer vector of \code{physical_quantity} ID.}
 
