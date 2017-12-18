@@ -5,7 +5,7 @@ get_cf_standard_names_table <- function(
 
   # check if data is not already present
   if (is.null(entries <- get0("entries", envir = cf_cache))) {
-    data <- xml2::read_xml("http://cfconventions.org/Data/cf-standard-names/48/src/cf-standard-name-table.xml")
+    data <- xml2::read_xml(url)
     entries <- xml2::xml_find_all(data, '//entry')
     assign("entries", entries, envir = cf_cache)
   }
