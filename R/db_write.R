@@ -333,15 +333,6 @@ dbWriteTable_device_type <- function(conn,
 }
 
 
-#' @rdname dbAdd_device_model
-#' @export
-dbWriteTable_device_model <- function(conn,
-                                      devmod_name,
-                                      devtype_id,
-                                      devman_id = NULL,
-                                      devmod_comment = NULL) {
-  write_table(name = "device_model", as.list(environment()))
-}
 
 
 #' Add device models to \code{device_model} table
@@ -373,16 +364,16 @@ dbAdd_device_model <- function(conn,
 
   dbWithTransaction_or_Savepoint(conn, {
     devtype_id <- get_ids_from_unique_column(conn,
-                                            table = "device_type",
-                                            id_name = "devtype_id",
-                                            column_name = "devtype_name",
-                                            column_values = devtype_name)
+                                             table = "device_type",
+                                             id_name = "devtype_id",
+                                             column_name = "devtype_name",
+                                             column_values = devtype_name)
     if (!is.null(devman_name)) {
       devman_id <- get_ids_from_unique_column(conn,
-                                             table = "device_manufacturer",
-                                             id_name = "devman_id",
-                                             column_name = "devman_name",
-                                             column_values = devman_name)
+                                              table = "device_manufacturer",
+                                              id_name = "devman_id",
+                                              column_name = "devman_name",
+                                              column_values = devman_name)
     } else {
       devman_id <- NULL
     }
@@ -396,15 +387,18 @@ dbAdd_device_model <- function(conn,
 
 
 
-#' @rdname dbAdd_device
+
+#' @rdname dbAdd_device_model
 #' @export
-dbWriteTable_device <- function(conn,
-                                dev_name,
-                                devmod_id,
-                                dev_identifier = NULL,
-                                dev_comment = NULL) {
-  write_table(name = "device", as.list(environment()))
+dbWriteTable_device_model <- function(conn,
+                                      devmod_name,
+                                      devtype_id,
+                                      devman_id = NULL,
+                                      devmod_comment = NULL) {
+  write_table(name = "device_model", as.list(environment()))
 }
+
+
 
 #' Add devices to \code{device} table
 #'
@@ -437,10 +431,10 @@ dbAdd_device <- function(conn,
 
   dbWithTransaction_or_Savepoint(conn, {
     devmod_id <- get_ids_from_unique_column(conn,
-                                           table = "device_model",
-                                           id_name = "devmod_id",
-                                           column_name = "devmod_name",
-                                           column_values = devmod_name)
+                                            table = "device_model",
+                                            id_name = "devmod_id",
+                                            column_name = "devmod_name",
+                                            column_values = devmod_name)
     dbWriteTable_device(conn,
                         dev_name = dev_name,
                         devmod_id = devmod_id,
@@ -451,19 +445,16 @@ dbAdd_device <- function(conn,
 
 
 
-#' @rdname dbAdd_calibrated_device
+#' @rdname dbAdd_device
 #' @export
-dbWriteTable_calibrated_device <- function(conn,
-                                           dev_id,
-                                           caldev_datetime = NULL,
-                                           caldev_parameter = NULL,
-                                           caldev_comment = NULL) {
-  # we need caldev_datetime to be POSIXct for consistent time zone storage
-  if (!is.null(caldev_datetime) & !inherits(caldev_datetime, "POSIXct")) {
-    stop("caldev_datetime is used but not POSIXct.")
-  }
-  write_table(name = "calibrated_device", as.list(environment()))
+dbWriteTable_device <- function(conn,
+                                dev_name,
+                                devmod_id,
+                                dev_identifier = NULL,
+                                dev_comment = NULL) {
+  write_table(name = "device", as.list(environment()))
 }
+
 
 #' Add calibrated devices to \code{calibrated_device} table
 #'
@@ -499,10 +490,10 @@ dbAdd_calibrated_device <- function(conn,
                                     caldev_comment = NULL) {
   dbWithTransaction_or_Savepoint(conn, {
     dev_id <- get_ids_from_unique_column(conn,
-                                        table = "device",
-                                        id_name = "dev_id",
-                                        column_name = "dev_name",
-                                        column_values = dev_name)
+                                         table = "device",
+                                         id_name = "dev_id",
+                                         column_name = "dev_name",
+                                         column_values = dev_name)
     dbWriteTable_calibrated_device(conn,
                                    dev_id = dev_id,
                                    caldev_datetime = caldev_datetime,
@@ -510,6 +501,24 @@ dbAdd_calibrated_device <- function(conn,
                                    caldev_comment = caldev_comment)
   }, spname = "dbAdd_calibrated_device")
 
+}
+
+
+
+
+
+#' @rdname dbAdd_calibrated_device
+#' @export
+dbWriteTable_calibrated_device <- function(conn,
+                                           dev_id,
+                                           caldev_datetime = NULL,
+                                           caldev_parameter = NULL,
+                                           caldev_comment = NULL) {
+  # we need caldev_datetime to be POSIXct for consistent time zone storage
+  if (!is.null(caldev_datetime) & !inherits(caldev_datetime, "POSIXct")) {
+    stop("caldev_datetime is used but not POSIXct.")
+  }
+  write_table(name = "calibrated_device", as.list(environment()))
 }
 
 
@@ -560,16 +569,6 @@ dbAdd_uncalibrated_device <- function(conn,
 
 
 
-#' @rdname dbAdd_physical_quantity
-#' @export
-dbWriteTable_physical_quantity <- function(conn,
-                                           pq_name,
-                                           pq_unit,
-                                           pq_description = NULL,
-                                           pq_comment = NULL) {
-  write_table(name = "physical_quantity", as.list(environment()))
-}
-
 #' Add a physical quantity into \code{physical_quantity} table
 #'
 #' These function add rows defining a physical quantity into
@@ -610,6 +609,20 @@ dbAdd_physical_quantity <- function(conn,
 
 
 
+
+#' @rdname dbAdd_physical_quantity
+#' @export
+dbWriteTable_physical_quantity <- function(conn,
+                                           pq_name,
+                                           pq_unit,
+                                           pq_description = NULL,
+                                           pq_comment = NULL) {
+  write_table(name = "physical_quantity", as.list(environment()))
+}
+
+
+
+
 #' Insert data into \code{integration_type} table
 #'
 #'
@@ -632,17 +645,6 @@ dbWriteTable_integration_type <- function(conn,
   write_table(name = "integration_type", as.list(environment()))
 }
 
-
-
-#' @rdname dbAdd_integration
-#' @export
-dbWriteTable_integration <- function(conn,
-                                     inttype_id,
-                                     int_measurement_interval,
-                                     int_interval,
-                                     int_comment = NULL) {
-  write_table(name = "integration", as.list(environment()))
-}
 
 
 #' Add integration kind to \code{integration} table
@@ -670,10 +672,10 @@ dbAdd_integration <- function(conn,
                               int_comment = NULL) {
   dbWithTransaction_or_Savepoint(conn, {
     inttype_id <- get_ids_from_unique_column(conn,
-                                            table = "integration_type",
-                                            id_name = "inttype_id",
-                                            column_name = "inttype_name",
-                                            column_values = inttype_name)
+                                             table = "integration_type",
+                                             id_name = "inttype_id",
+                                             column_name = "inttype_name",
+                                             column_values = inttype_name)
     dbWriteTable_integration(conn,
                              inttype_id = inttype_id,
                              int_measurement_interval = int_measurement_interval,
@@ -683,6 +685,18 @@ dbAdd_integration <- function(conn,
 
 }
 
+
+
+
+#' @rdname dbAdd_integration
+#' @export
+dbWriteTable_integration <- function(conn,
+                                     inttype_id,
+                                     int_measurement_interval,
+                                     int_interval,
+                                     int_comment = NULL) {
+  write_table(name = "integration", as.list(environment()))
+}
 
 
 
@@ -705,26 +719,6 @@ dbWriteTable_person <- function(conn,
                                 pers_name,
                                 pers_comment = NULL) {
   write_table(name = "person", as.list(environment()))
-}
-
-
-
-#' @rdname dbAdd_measurand
-#' @export
-dbWriteTable_measurand <- function(conn,
-                                   md_name,
-                                   md_setup_datetime,
-                                   pq_id,
-                                   site_id,
-                                   caldev_id,
-                                   int_id,
-                                   md_height = NULL,
-                                   pers_id = NULL,
-                                   md_comment = NULL) {
-  if (!inherits(md_setup_datetime, "POSIXct")) {
-    stop("md_setup_datetime is not POSIXct.")
-  }
-  write_table(name = "measurand", as.list(environment()))
 }
 
 
@@ -774,15 +768,15 @@ dbAdd_measurand <- function(conn,
                             md_comment = NULL) {
   dbWithTransaction_or_Savepoint(conn, {
     pq_id <- get_ids_from_unique_column(conn,
-                                       table = "physical_quantity",
-                                       id_name = "pq_id",
-                                       column_name = "pq_name",
-                                       column_values = pq_name)
+                                        table = "physical_quantity",
+                                        id_name = "pq_id",
+                                        column_name = "pq_name",
+                                        column_values = pq_name)
     site_id <- get_ids_from_unique_column(conn,
-                                         table = "site",
-                                         id_name = "site_id",
-                                         column_name = "site_name",
-                                         column_values = site_name)
+                                          table = "site",
+                                          id_name = "site_id",
+                                          column_name = "site_name",
+                                          column_values = site_name)
     # use view to get correct id
     caldev_id <- get_ids_from_datetime_column(conn,
                                               table = "calibrated_device_detail",
@@ -792,10 +786,10 @@ dbAdd_measurand <- function(conn,
                                               column_datetime = "caldev_datetime")
     if (!is.null(pers_name)) {
       pers_id <- get_ids_from_unique_column(conn,
-                                           table = "person",
-                                           id_name = "pers_id",
-                                           column_name = "pers_name",
-                                           column_values = pers_name)
+                                            table = "person",
+                                            id_name = "pers_id",
+                                            column_name = "pers_name",
+                                            column_values = pers_name)
     } else {
       pers_id <- NULL
     }
@@ -812,6 +806,29 @@ dbAdd_measurand <- function(conn,
   }, spname = "dbAdd_measurand")
 
 }
+
+
+
+
+#' @rdname dbAdd_measurand
+#' @export
+dbWriteTable_measurand <- function(conn,
+                                   md_name,
+                                   md_setup_datetime,
+                                   pq_id,
+                                   site_id,
+                                   caldev_id,
+                                   int_id,
+                                   md_height = NULL,
+                                   pers_id = NULL,
+                                   md_comment = NULL) {
+  if (!inherits(md_setup_datetime, "POSIXct")) {
+    stop("md_setup_datetime is not POSIXct.")
+  }
+  write_table(name = "measurand", as.list(environment()))
+}
+
+
 
 
 
