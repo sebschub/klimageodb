@@ -251,7 +251,7 @@ CREATE VIEW integration_detail AS
   COMMENT ON VIEW integration_detail IS 'integration with joined details';
 
 CREATE VIEW measurand_detail AS
-  SELECT md_id, md_name, md_setup_datetime, pq_name, pq_unit, site_name, dev_name, devmod_name, caldev_datetime, md_height, inttype_name, int_measurement_interval, int_interval, pers_name, md_comment FROM measurand
+  SELECT md_id, md_name, md_setup_datetime, pq_name, pq_unit, site_name, dev_name, devmod_name, caldev_datetime, md_height, md_orientation, md_tilt, inttype_name, int_measurement_interval, int_interval, pers_name, md_comment FROM measurand
     LEFT OUTER JOIN physical_quantity        USING (pq_id)
     LEFT OUTER JOIN site                     USING (site_id)
     LEFT OUTER JOIN calibrated_device_detail USING (caldev_id)
