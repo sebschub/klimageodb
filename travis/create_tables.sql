@@ -158,10 +158,12 @@ CREATE TABLE measurand (
     caldev_id         smallint NOT NULL REFERENCES calibrated_device(caldev_id),
     int_id            smallint NOT NULL REFERENCES integration(int_id),
     md_height         double precision CHECK (md_height >= -10. AND md_height <= 10000.),
+    md_orientation    double precision CHECK (md_orientation >= -180. AND md_orientation <= 180.),
+    md_tilt           double precision CHECK (md_tilt >= 0. AND md_tilt <= 90.),
     pers_id           smallint REFERENCES person(pers_id),
     md_comment        varchar(50),
     UNIQUE (md_name, md_setup_datetime),
-    UNIQUE (md_setup_datetime, pq_id, site_id, caldev_id, md_height, int_id)
+    UNIQUE (md_setup_datetime, pq_id, site_id, caldev_id, md_height, md_orientation, md_tilt, int_id)
     -- if md_setup_datetime and dev_id equal, site_id unique
     );
   COMMENT ON TABLE  measurand                   IS 'combination of physical quantity, site, integration...';
@@ -172,6 +174,8 @@ CREATE TABLE measurand (
   COMMENT ON COLUMN measurand.site_id           IS 'reference to site where measures';
   COMMENT ON COLUMN measurand.caldev_id         IS 'reference to measuring calibrated device';
   COMMENT ON COLUMN measurand.md_height         IS 'measurement height';
+  COMMENT ON COLUMN measurand.md_orientation    IS 'measurement north-south orientation, 0° north, positive clockwise, negative counterclockwise';
+  COMMENT ON COLUMN measurand.md_tilt           IS 'measurement tilt, 0° upward, 90° downward';
   COMMENT ON COLUMN measurand.int_id            IS 'reference to integration details';
   COMMENT ON COLUMN measurand.pers_id           IS 'reference to contact person';
   COMMENT ON COLUMN measurand.md_comment        IS 'additional information';

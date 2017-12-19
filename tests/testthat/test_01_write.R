@@ -395,10 +395,12 @@ measurand_df <- data.frame(
   caldev_id = c(1, 2, 2),
   int_id = c(1, 1, 1),
   md_height = c(2., 2., 2.),
+  md_orientation = as.numeric(c(NA, NA, NA)),
+  md_tilt = as.numeric(c(NA, NA, NA)),
   pers_id = c(1, 1, 1),
   md_comment = c("the 2m temperature", "the 2m temperature", "the 2m temperature"))
 
-test_dbWriteTable_table(con, "measurand", measurand_df, 2:10)
+test_dbWriteTable_table(con, "measurand", measurand_df, 2:12)
 
 
 measurand_df_new <- data.frame(
@@ -412,6 +414,8 @@ measurand_df_new <- data.frame(
   caldev_id = c(4, 5),
   int_id = c(1, 1),
   md_height = c(2, 1),
+  md_orientation = as.numeric(c(NA, NA)),
+  md_tilt = as.numeric(c(NA, NA)),
   pers_id = c(1, 1),
   md_comment = as.character(c(NA, NA))
 )

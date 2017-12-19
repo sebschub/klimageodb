@@ -6,10 +6,12 @@
 \title{Add measurand to \code{measurand} table}
 \usage{
 dbAdd_measurand(conn, md_name, md_setup_datetime, pq_name, site_name, dev_name,
-  int_id, md_height = NULL, pers_name = NULL, md_comment = NULL)
+  int_id, md_height = NULL, md_orientation = NULL, md_tilt = NULL,
+  pers_name = NULL, md_comment = NULL)
 
 dbWriteTable_measurand(conn, md_name, md_setup_datetime, pq_id, site_id,
-  caldev_id, int_id, md_height = NULL, pers_id = NULL, md_comment = NULL)
+  caldev_id, int_id, md_height = NULL, md_orientation = NULL,
+  md_tilt = NULL, pers_id = NULL, md_comment = NULL)
 }
 \arguments{
 \item{conn}{Database connection.}
@@ -28,6 +30,10 @@ measurand.}
 \item{int_id}{Integer vector of \code{integration} ID.}
 
 \item{md_height}{Numeric vector of measurement height.}
+
+\item{md_orientation}{Numeric vector of north-south measurement orientation.}
+
+\item{md_tilt}{Numeric vector of measurement tilt.}
 
 \item{pers_name}{Character vector of person name.}
 

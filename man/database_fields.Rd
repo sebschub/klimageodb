@@ -71,6 +71,10 @@ measurand.}
 
 \item{md_height}{Numeric vector of measurement height.}
 
+\item{md_orientation}{Numeric vector of north-south measurement orientation.}
+
+\item{md_tilt}{Numeric vector of measurement tilt.}
+
 \item{name}{Name of the table.}
 
 \item{pers_id}{Integer vector of \code{person} ID.}

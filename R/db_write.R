@@ -37,6 +37,8 @@
 #' @param md_setup_datetime POSIXct vector of date and time of set-up of
 #'   measurand.
 #' @param md_height Numeric vector of measurement height.
+#' @param md_orientation Numeric vector of north-south measurement orientation.
+#' @param md_tilt Numeric vector of measurement tilt.
 #' @param name Name of the table.
 #' @param pers_id Integer vector of \code{person} ID.
 #' @param pers_name Character vector of person name.
@@ -764,6 +766,8 @@ dbAdd_measurand <- function(conn,
                             dev_name,
                             int_id,
                             md_height = NULL,
+                            md_orientation = NULL,
+                            md_tilt = NULL,
                             pers_name = NULL,
                             md_comment = NULL) {
   dbWithTransaction_or_Savepoint(conn, {
@@ -801,6 +805,8 @@ dbAdd_measurand <- function(conn,
                            caldev_id = caldev_id,
                            int_id = int_id,
                            md_height = md_height,
+                           md_orientation = md_orientation,
+                           md_tilt = md_tilt,
                            pers_id = pers_id,
                            md_comment = md_comment)
   }, spname = "dbAdd_measurand")
@@ -820,6 +826,8 @@ dbWriteTable_measurand <- function(conn,
                                    caldev_id,
                                    int_id,
                                    md_height = NULL,
+                                   md_orientation = NULL,
+                                   md_tilt = NULL,
                                    pers_id = NULL,
                                    md_comment = NULL) {
   if (!inherits(md_setup_datetime, "POSIXct")) {
