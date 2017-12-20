@@ -423,12 +423,15 @@ measurand_df_new <- data.frame(
 measurand_df <- rbind(measurand_df, factor2character(measurand_df_new))
 
 test_that("dbAdd_measurand", {
+  caldev_detail <- dbReadTable_calibrated_device_detail(con)
+  # sort by caldev_id
+  caldev_detail <- caldev_detail[order(caldev_detail$caldev_id), ]
   res <- dbAdd_measurand(con,
                          md_name = measurand_df_new$md_name,
                          md_setup_datetime = measurand_df_new$md_setup_datetime,
                          pq_name = physical_quantity_df$pq_name[measurand_df_new$pq_id],
                          site_name = site_df$site_name[measurand_df_new$site_id],
-                         dev_name = dbReadTable_calibrated_device_detail(con)$dev_name[measurand_df_new$caldev_id],
+                         dev_name = caldev_detail$dev_name[measurand_df_new$caldev_id],
                          int_id = measurand_df_new$int_id,
                          md_height = measurand_df_new$md_height,
                          pers_name = person_df$pers_name[measurand_df_new$pers_id])
