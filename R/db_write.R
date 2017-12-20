@@ -534,7 +534,7 @@ dbWriteTable_calibrated_device <- function(conn,
 #' calibration. First, it adds the new devices into the \code{device} table. It
 #' then uses the respective created \code{device.dev_id} to add new entries in
 #' \code{calibrated_device} with both \code{calibrated_device.caldev_datetime}
-#' and \code{calibrated_device.caldev_parameter} being \code{NULL}.
+#' and \code{calibrated_device.caldev_parameter} being \code{NA}.
 #'
 #' @inheritParams database_fields
 #'
@@ -555,14 +555,18 @@ dbWriteTable_calibrated_device <- function(conn,
 #' }
 dbAdd_uncalibrated_device <- function(conn,
                                       dev_name,
-                                      devmod_id,
+                                      devmod_name,
                                       dev_identifier = NULL,
                                       dev_comment = NULL) {
   # use transaction to ensure either both, device and calibrated_device, were
   # changed or none
   dbWithTransaction_or_Savepoint(conn, {
     # write device into "device" table
-    new_device <- write_table(name = "device", as.list(environment()))
+    new_device <- dbAdd_device(conn,
+                               dev_name = dev_name,
+                               devmod_name = devmod_name,
+                               dev_identifier = dev_identifier,
+                               dev_comment = dev_comment)
     new_calibrated_device <- dbWriteTable_calibrated_device(conn, dev_id = new_device$dev_id)
   }, spname = "dbAdd_uncalibrated_device_savepoint")
   list(device = new_device, calibrated_device = new_calibrated_device)

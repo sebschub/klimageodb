@@ -258,7 +258,7 @@ calibrated_device_df <-
 test_that("dbAdd_uncalibrated_device", {
   res <- dbAdd_uncalibrated_device(con,
                                    dev_name = uncalibrated_device_df$dev_name,
-                                   devmod_id = uncalibrated_device_df$devmod_id,
+                                   devmod_name = device_model_df$devmod_name[uncalibrated_device_df$devmod_id],
                                    dev_identifier = uncalibrated_device_df$dev_identifier)
   # test the new rows output
   expect_equal(device_df_new, res$device)

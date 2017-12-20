@@ -5,7 +5,7 @@
 \title{Insert data into \code{device} and \code{calibrated_device} without
 calibration parameters}
 \usage{
-dbAdd_uncalibrated_device(conn, dev_name, devmod_id, dev_identifier = NULL,
+dbAdd_uncalibrated_device(conn, dev_name, devmod_name, dev_identifier = NULL,
   dev_comment = NULL)
 }
 \arguments{
@@ -13,7 +13,7 @@ dbAdd_uncalibrated_device(conn, dev_name, devmod_id, dev_identifier = NULL,
 
 \item{dev_name}{String vector of name of device.}
 
-\item{devmod_id}{Integer vector of \code{device_model} ID.}
+\item{devmod_name}{String vector of name of model.}
 
 \item{dev_identifier}{String vector of device identifiers, e.g. serial
 numbers.}
@@ -28,7 +28,7 @@ This function adds new devices to the database that do not require any
 calibration. First, it adds the new devices into the \code{device} table. It
 then uses the respective created \code{device.dev_id} to add new entries in
 \code{calibrated_device} with both \code{calibrated_device.caldev_datetime}
-and \code{calibrated_device.caldev_parameter} being \code{NULL}.
+and \code{calibrated_device.caldev_parameter} being \code{NA}.
 }
 \examples{
 \dontrun{
