@@ -5,7 +5,7 @@
 \alias{dbWriteTable_physical_quantity}
 \title{Add a physical quantity into \code{physical_quantity} table}
 \usage{
-dbAdd_physical_quantity(conn, standard_name, pq_comment = NULL)
+dbAdd_physical_quantity(conn, pq_name, pq_comment = NULL)
 
 dbWriteTable_physical_quantity(conn, pq_name, pq_unit, pq_description = NULL,
   pq_comment = NULL)
@@ -13,12 +13,9 @@ dbWriteTable_physical_quantity(conn, pq_name, pq_unit, pq_description = NULL,
 \arguments{
 \item{conn}{Database connection.}
 
-\item{standard_name}{Standard name of a physical quantity as defined by the
-CF convention.}
+\item{pq_name}{String vector of name of physical quantity.}
 
 \item{pq_comment}{String vector of additional comments.}
-
-\item{pq_name}{String vector of name of physical quantity.}
 
 \item{pq_unit}{String vector of units of physical quantity. Use "1" for
 unitless quantities.}
@@ -32,10 +29,10 @@ Data frame of newly added rows.
 These function add rows defining a physical quantity into
 \code{physical_quantity}. \strong{Follow the
 \href{http://cfconventions.org/Data/cf-standard-names/48/build/cf-standard-name-table.html}{CF
-conventions}.} \code{dbAdd_physical_quantity} supports this by getting both
-the unit and the description from valid standard names.
-\code{dbWriteTable_physical_quantity} allows entering the strings manually,
-however, it does not enforce valid CF strings.
+conventions} as far as possible.} \code{dbAdd_physical_quantity} supports
+this by getting both the unit and the description from valid standard names
+set with \code{pq_name}. \code{dbWriteTable_physical_quantity} allows
+entering the strings manually, however, it does not enforce valid CF strings.
 }
 \details{
 \code{dbAdd_physical_quantity} queries

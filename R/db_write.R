@@ -576,10 +576,10 @@ dbAdd_uncalibrated_device <- function(conn,
 #' These function add rows defining a physical quantity into
 #' \code{physical_quantity}. \strong{Follow the
 #' \href{http://cfconventions.org/Data/cf-standard-names/48/build/cf-standard-name-table.html}{CF
-#' conventions}.} \code{dbAdd_physical_quantity} supports this by getting both
-#' the unit and the description from valid standard names.
-#' \code{dbWriteTable_physical_quantity} allows entering the strings manually,
-#' however, it does not enforce valid CF strings.
+#' conventions} as far as possible.} \code{dbAdd_physical_quantity} supports
+#' this by getting both the unit and the description from valid standard names
+#' set with \code{pq_name}. \code{dbWriteTable_physical_quantity} allows
+#' entering the strings manually, however, it does not enforce valid CF strings.
 #'
 #' \code{dbAdd_physical_quantity} queries
 #' \url{http://cfconventions.org/Data/cf-standard-names/48/src/cf-standard-name-table.xml}
@@ -599,11 +599,11 @@ dbAdd_uncalibrated_device <- function(conn,
 #' dbDisconnect(con)
 #' }
 dbAdd_physical_quantity <- function(conn,
-                                    standard_name,
+                                    pq_name,
                                     pq_comment = NULL) {
-  unit_description <- get_cf_unit_description(standard_name)
+  unit_description <- get_cf_unit_description(pq_name)
   dbWriteTable_physical_quantity(conn,
-                                 pq_name = standard_name,
+                                 pq_name = pq_name,
                                  pq_unit = unit_description$unit,
                                  pq_description = unit_description$description,
                                  pq_comment = pq_comment)

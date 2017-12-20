@@ -321,7 +321,7 @@ physical_quantity_df <- rbind(factor2character(physical_quantity_df),
 
 test_that("dbAdd_physical_quantity", {
  res <- dbAdd_physical_quantity(con,
-                                standard_name = physical_quantity_df_new$pq_name)
+                                pq_name = physical_quantity_df_new$pq_name)
  expect_equal(res, physical_quantity_df_new)
  df <- dbReadTable_physical_quantity(con)
  expect_equal(df, physical_quantity_df)
