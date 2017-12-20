@@ -69,21 +69,21 @@ CREATE TABLE device (
   COMMENT ON COLUMN device.dev_comment               IS 'additional information';
 
 
-CREATE TABLE calibrated_device (
-    caldev_id         smallserial PRIMARY KEY,
-    dev_id            smallint NOT NULL REFERENCES device(dev_id),
-    caldev_datetime   timestamp WITH TIME ZONE CHECK (caldev_datetime >= '1980-01-01' AND caldev_datetime < NOW()),
-    caldev_parameter  varchar(200),
-    caldev_comment    varchar(50)
+CREATE TABLE calibration_state (
+    calstate_id         smallserial PRIMARY KEY,
+    dev_id              smallint NOT NULL REFERENCES device(dev_id),
+    calstate_datetime   timestamp WITH TIME ZONE CHECK (calstate_datetime >= '1980-01-01' AND calstate_datetime < NOW()),
+    calstate_parameter  varchar(200),
+    calstate_comment    varchar(50)
     );
-  -- there should be only one entry for each dev_id and caldev_datetime including NULL
-  -- NULL caldev_datetime are mapped to '0001-01-01'; ensure that this is never a real value
-  CREATE UNIQUE INDEX calibrated_device_dev_id_caldev_datetime ON calibrated_device
-    (dev_id, COALESCE(caldev_datetime, '0001-01-01+00'));
-  COMMENT ON TABLE  calibrated_device                  IS 'specific calibration of device';
-  COMMENT ON COLUMN calibrated_device.caldev_datetime  IS 'date and time of calibration';
-  COMMENT ON COLUMN calibrated_device.caldev_parameter IS 'values of calibration parameters';
-  COMMENT ON COLUMN calibrated_device.caldev_comment   IS 'additional information';
+  -- there should be only one entry for each dev_id and calstate_datetime including NULL
+  -- NULL calstate_datetime are mapped to '0001-01-01'; ensure that this is never a real value
+  CREATE UNIQUE INDEX calibration_state_dev_id_calstate_datetime ON calibration_state
+    (dev_id, COALESCE(calstate_datetime, '0001-01-01+00'));
+  COMMENT ON TABLE  calibration_state                    IS 'specific calibration of device';
+  COMMENT ON COLUMN calibration_state.calstate_datetime  IS 'date and time of calibration';
+  COMMENT ON COLUMN calibration_state.calstate_parameter IS 'values of calibration parameters';
+  COMMENT ON COLUMN calibration_state.calstate_comment   IS 'additional information';
 
 
 CREATE TABLE physical_quantity (
@@ -155,7 +155,7 @@ CREATE TABLE measurand (
     md_setup_datetime timestamp with time zone NOT NULL CHECK (md_setup_datetime >= '1980-01-01' AND md_setup_datetime < NOW()),
     pq_id             smallint NOT NULL REFERENCES physical_quantity(pq_id),
     site_id           smallint NOT NULL REFERENCES site(site_id),
-    caldev_id         smallint NOT NULL REFERENCES calibrated_device(caldev_id),
+    calstate_id       smallint NOT NULL REFERENCES calibration_state(calstate_id),
     int_id            smallint NOT NULL REFERENCES integration(int_id),
     md_height         double precision CHECK (md_height >= -10. AND md_height <= 10000.),
     md_orientation    double precision CHECK (md_orientation >= -180. AND md_orientation <= 180.),
@@ -163,7 +163,7 @@ CREATE TABLE measurand (
     pers_id           smallint REFERENCES person(pers_id),
     md_comment        varchar(50),
     UNIQUE (md_name, md_setup_datetime),
-    UNIQUE (md_setup_datetime, pq_id, site_id, caldev_id, md_height, md_orientation, md_tilt, int_id)
+    UNIQUE (md_setup_datetime, pq_id, site_id, calstate_id, md_height, md_orientation, md_tilt, int_id)
     -- if md_setup_datetime and dev_id equal, site_id unique
     );
   COMMENT ON TABLE  measurand                   IS 'combination of physical quantity, site, integration...';
@@ -172,7 +172,7 @@ CREATE TABLE measurand (
   COMMENT ON COLUMN measurand.md_setup_datetime IS 'set-up date and time of measurand';
   COMMENT ON COLUMN measurand.pq_id             IS 'reference to measured physical quantity';
   COMMENT ON COLUMN measurand.site_id           IS 'reference to site where measures';
-  COMMENT ON COLUMN measurand.caldev_id         IS 'reference to measuring calibrated device';
+  COMMENT ON COLUMN measurand.calstate_id       IS 'reference to measuring calibrated device';
   COMMENT ON COLUMN measurand.md_height         IS 'measurement height';
   COMMENT ON COLUMN measurand.md_orientation    IS 'measurement north-south orientation, 0° north, positive clockwise, negative counterclockwise';
   COMMENT ON COLUMN measurand.md_tilt           IS 'measurement tilt, 0° upward, 90° downward';
@@ -240,10 +240,10 @@ CREATE VIEW device_detail AS
     LEFT OUTER JOIN device_model_detail USING (devmod_id);
   COMMENT ON VIEW device_detail IS 'measurement device with joined details';
 
-CREATE VIEW calibrated_device_detail AS
-  SELECT caldev_id, dev_name, devtype_name, devmod_name, devman_name, caldev_datetime, caldev_parameter, caldev_comment FROM calibrated_device
+CREATE VIEW calibration_state_detail AS
+  SELECT calstate_id, dev_name, devtype_name, devmod_name, devman_name, calstate_datetime, calstate_parameter, calstate_comment FROM calibration_state
     LEFT OUTER JOIN device_detail USING (dev_id);
-  COMMENT ON VIEW calibrated_device_detail IS 'calibrated measurement device with joined details';
+  COMMENT ON VIEW calibration_state_detail IS 'calibrated measurement device with joined details';
 
 CREATE VIEW integration_detail AS
   SELECT int_id, inttype_name, int_measurement_interval, int_interval, int_comment FROM integration
@@ -251,10 +251,10 @@ CREATE VIEW integration_detail AS
   COMMENT ON VIEW integration_detail IS 'integration with joined details';
 
 CREATE VIEW measurand_detail AS
-  SELECT md_id, md_name, md_setup_datetime, pq_name, pq_unit, site_name, dev_name, devmod_name, caldev_datetime, md_height, md_orientation, md_tilt, inttype_name, int_measurement_interval, int_interval, pers_name, md_comment FROM measurand
+  SELECT md_id, md_name, md_setup_datetime, pq_name, pq_unit, site_name, dev_name, devmod_name, calstate_datetime, md_height, md_orientation, md_tilt, inttype_name, int_measurement_interval, int_interval, pers_name, md_comment FROM measurand
     LEFT OUTER JOIN physical_quantity        USING (pq_id)
     LEFT OUTER JOIN site                     USING (site_id)
-    LEFT OUTER JOIN calibrated_device_detail USING (caldev_id)
+    LEFT OUTER JOIN calibration_state_detail USING (calstate_id)
     LEFT OUTER JOIN integration_detail       USING (int_id)
     LEFT OUTER JOIN person                   USING (pers_id);
   COMMENT ON VIEW measurand_detail IS 'measurand with joined details';

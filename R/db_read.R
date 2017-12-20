@@ -8,7 +8,7 @@
 #' views which join different database tables together. For example,
 #' \code{dbReadTable_measurand_detail} retrieves the \code{measurand} table with
 #' all id fields replaced by the corresponding information in
-#' \code{physical_quantity}, \code{calibrated_device}, etc.
+#' \code{physical_quantity}, \code{calibration_state}, etc.
 #'
 #' @inheritParams database_fields
 #'
@@ -60,8 +60,8 @@ dbReadTable_device <- function(conn){
 
 #' @rdname readtable
 #' @export
-dbReadTable_calibrated_device <- function(conn){
-  DBI::dbReadTable(conn, "calibrated_device")
+dbReadTable_calibration_state <- function(conn){
+  DBI::dbReadTable(conn, "calibration_state")
 }
 
 #' @rdname readtable
@@ -129,8 +129,8 @@ dbReadTable_device_detail <- function(conn){
 
 #' @rdname readtable
 #' @export
-dbReadTable_calibrated_device_detail <- function(conn){
-  DBI::dbReadTable(conn, "calibrated_device_detail")
+dbReadTable_calibration_state_detail <- function(conn){
+  DBI::dbReadTable(conn, "calibration_state_detail")
 }
 
 #' @rdname readtable

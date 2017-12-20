@@ -7,7 +7,7 @@
 \alias{dbReadTable_device_type}
 \alias{dbReadTable_device_model}
 \alias{dbReadTable_device}
-\alias{dbReadTable_calibrated_device}
+\alias{dbReadTable_calibration_state}
 \alias{dbReadTable_physical_quantity}
 \alias{dbReadTable_integration_type}
 \alias{dbReadTable_integration}
@@ -18,7 +18,7 @@
 \alias{dbReadTable_station_adlershof_correction}
 \alias{dbReadTable_device_model_detail}
 \alias{dbReadTable_device_detail}
-\alias{dbReadTable_calibrated_device_detail}
+\alias{dbReadTable_calibration_state_detail}
 \alias{dbReadTable_integration_detail}
 \alias{dbReadTable_measurand_detail}
 \title{Table reading}
@@ -33,7 +33,7 @@ dbReadTable_device_model(conn)
 
 dbReadTable_device(conn)
 
-dbReadTable_calibrated_device(conn)
+dbReadTable_calibration_state(conn)
 
 dbReadTable_physical_quantity(conn)
 
@@ -55,7 +55,7 @@ dbReadTable_device_model_detail(conn)
 
 dbReadTable_device_detail(conn)
 
-dbReadTable_calibrated_device_detail(conn)
+dbReadTable_calibration_state_detail(conn)
 
 dbReadTable_integration_detail(conn)
 
@@ -81,7 +81,7 @@ convinience, function of the form \code{dbReadTable_*_detail} receive the
 views which join different database tables together. For example,
 \code{dbReadTable_measurand_detail} retrieves the \code{measurand} table with
 all id fields replaced by the corresponding information in
-\code{physical_quantity}, \code{calibrated_device}, etc.
+\code{physical_quantity}, \code{calibration_state}, etc.
 }
 \seealso{
 \code{\link[DBI]{dbReadTable}} for the general function to retrieve

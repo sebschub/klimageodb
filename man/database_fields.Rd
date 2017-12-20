@@ -6,13 +6,13 @@
 \arguments{
 \item{conn}{Database connection.}
 
-\item{caldev_id}{Integer vector of \code{calibrated_device} ID.}
+\item{calstate_id}{Integer vector of \code{calibration_state} ID.}
 
-\item{caldev_datetime}{POSIXct vector of date and time of calibration.}
+\item{calstate_datetime}{POSIXct vector of date and time of calibration.}
 
-\item{caldev_parameter}{String vector of values of calibration parameters.}
+\item{calstate_parameter}{String vector of values of calibration parameters.}
 
-\item{caldev_comment}{String vector of additional comments.}
+\item{calstate_comment}{String vector of additional comments.}
 
 \item{dev_id}{Integer vector of \code{device} ID.}
 

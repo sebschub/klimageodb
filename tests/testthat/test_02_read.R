@@ -30,7 +30,7 @@ simple_read_test <- function(conn, table) {
 
 test_tables <- c("site",
                  "device_manufacturer", "device_type", "device_model", "device",
-                 "calibrated_device",
+                 "calibration_state",
                  "physical_quantity",
                  "integration_type", "integration",
                  "person",
@@ -38,7 +38,7 @@ test_tables <- c("site",
                  "quality_flag",
                  "station_adlershof", "station_adlershof_correction")
 
-test_views <- c("device_model_detail", "device_detail", "calibrated_device_detail",
+test_views <- c("device_model_detail", "device_detail", "calibration_state_detail",
                  "integration_detail",
                  "measurand_detail")
 

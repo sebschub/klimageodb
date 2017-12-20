@@ -218,80 +218,80 @@ test_that("Add_device", {
 
 
 
-calibrated_device_df <- data.frame(
-  caldev_id = 1,
+calibration_state_df <- data.frame(
+  calstate_id = 1,
   dev_id = 1,
-  caldev_datetime = as.POSIXct("2012-01-01 12:15:12", tz = "UTC"),
-  caldev_parameter = "a=10, b=99.12",
-  caldev_comment = as.character(NA))
+  calstate_datetime = as.POSIXct("2012-01-01 12:15:12", tz = "UTC"),
+  calstate_parameter = "a=10, b=99.12",
+  calstate_comment = as.character(NA))
 
-test_dbWriteTable_table(con, "calibrated_device", calibrated_device_df, 2:4)
+test_dbWriteTable_table(con, "calibration_state", calibration_state_df, 2:4)
 
 
 
-# add new entries to device and calibrated_device. CHECK IF NUMBER OF ROWS
+# add new entries to device and calibration_state. CHECK IF NUMBER OF ROWS
 # MODIFIES ABOVE!
-uncalibrated_device_df <- data.frame(
+device_uncalibrated_df <- data.frame(
   dev_id = c(4,5),
   dev_name = c("My other THERMO1000", "My third THERMO1000"),
   devmod_id = c(1, 1),
   dev_identifier = c("NCC1701-T1", "NCC1701-T2"),
   dev_comment = as.character(c(NA, NA)))
-device_df_new <- factor2character(uncalibrated_device_df)
+device_df_new <- factor2character(device_uncalibrated_df)
 # columns added by database and row from device above
 device_df <- rbind(factor2character(device_df),
                    device_df_new)
 
-calibrated_device_df_new <- data.frame(
-  caldev_id = as.integer(c(2, 3)),
+calibration_state_df_new <- data.frame(
+  calstate_id = as.integer(c(2, 3)),
   dev_id = device_df$dev_id[length(device_df$dev_id)-c(1,0)],
-  caldev_datetime = as.POSIXct(c(NA, NA)),
-  caldev_parameter = as.character(c(NA, NA)),
-  caldev_comment = as.character(c(NA, NA)),
+  calstate_datetime = as.POSIXct(c(NA, NA)),
+  calstate_parameter = as.character(c(NA, NA)),
+  calstate_comment = as.character(c(NA, NA)),
   stringsAsFactors = FALSE)
 
-calibrated_device_df <-
-  rbind(factor2character(calibrated_device_df),
-        calibrated_device_df_new
+calibration_state_df <-
+  rbind(factor2character(calibration_state_df),
+        calibration_state_df_new
   )
 
-test_that("dbAdd_uncalibrated_device", {
-  res <- dbAdd_uncalibrated_device(con,
-                                   dev_name = uncalibrated_device_df$dev_name,
-                                   devmod_name = device_model_df$devmod_name[uncalibrated_device_df$devmod_id],
-                                   dev_identifier = uncalibrated_device_df$dev_identifier)
+test_that("dbAdd_device_uncalibrated", {
+  res <- dbAdd_device_uncalibrated(con,
+                                   dev_name = device_uncalibrated_df$dev_name,
+                                   devmod_name = device_model_df$devmod_name[device_uncalibrated_df$devmod_id],
+                                   dev_identifier = device_uncalibrated_df$dev_identifier)
   # test the new rows output
   expect_equal(device_df_new, res$device)
-  expect_equal(calibrated_device_df_new, res$calibrated_device)
+  expect_equal(calibration_state_df_new, res$calibration_state)
   # test total tables
   df <- dbReadTable(con, "device")
   expect_equal(device_df, df)
-  dfcd <- dbReadTable(con, "calibrated_device")
-  expect_equal(calibrated_device_df, dfcd)
+  dfcd <- dbReadTable(con, "calibration_state")
+  expect_equal(calibration_state_df, dfcd)
   test_transaction_completed(con)
 })
 
 
 
-calibrated_device_df_new <- data.frame(
-  caldev_id = c(4, 5),
+calibration_state_df_new <- data.frame(
+  calstate_id = c(4, 5),
   dev_id = c(2, 1),
-  caldev_datetime = as.POSIXct(c("2013-01-01 12:15:12", "2013-06-01 12:15:12")),
-  caldev_parameter = as.character(c(NA, NA)),
-  caldev_comment = as.character(c(NA, NA)),
+  calstate_datetime = as.POSIXct(c("2013-01-01 12:15:12", "2013-06-01 12:15:12")),
+  calstate_parameter = as.character(c(NA, NA)),
+  calstate_comment = as.character(c(NA, NA)),
   stringsAsFactors = FALSE)
 
-calibrated_device_df <- rbind(calibrated_device_df, calibrated_device_df_new)
+calibration_state_df <- rbind(calibration_state_df, calibration_state_df_new)
 
-test_that("dbAdd_calibrated_device", {
-  res <- dbAdd_calibrated_device(con,
-                                 dev_name = device_df$dev_name[calibrated_device_df_new$dev_id],
-                                 caldev_datetime = calibrated_device_df_new$caldev_datetime,
-                                 caldev_parameter = calibrated_device_df_new$caldev_parameter,
-                                 caldev_comment = calibrated_device_df_new$caldev_comment)
-  expect_equal(calibrated_device_df_new, res)
-  df <- dbReadTable(con, "calibrated_device")
-  expect_equal(df, calibrated_device_df)
+test_that("dbAdd_calibration_state", {
+  res <- dbAdd_calibration_state(con,
+                                 dev_name = device_df$dev_name[calibration_state_df_new$dev_id],
+                                 calstate_datetime = calibration_state_df_new$calstate_datetime,
+                                 calstate_parameter = calibration_state_df_new$calstate_parameter,
+                                 calstate_comment = calibration_state_df_new$calstate_comment)
+  expect_equal(calibration_state_df_new, res)
+  df <- dbReadTable(con, "calibration_state")
+  expect_equal(df, calibration_state_df)
   test_transaction_completed(con)
 })
 
@@ -392,7 +392,7 @@ measurand_df <- data.frame(
     tz = "UTC"),
   pq_id = c(1, 1, 1),
   site_id = c(1, 1, 1),
-  caldev_id = c(1, 2, 2),
+  calstate_id = c(1, 2, 2),
   int_id = c(1, 1, 1),
   md_height = c(2., 2., 2.),
   md_orientation = as.numeric(c(NA, NA, NA)),
@@ -411,7 +411,7 @@ measurand_df_new <- data.frame(
     tz = "UTC"),
   pq_id = c(3, 2),
   site_id = c(1, 1),
-  caldev_id = c(4, 5),
+  calstate_id = c(4, 5),
   int_id = c(1, 1),
   md_height = c(2, 1),
   md_orientation = as.numeric(c(NA, NA)),
@@ -423,15 +423,15 @@ measurand_df_new <- data.frame(
 measurand_df <- rbind(measurand_df, factor2character(measurand_df_new))
 
 test_that("dbAdd_measurand", {
-  caldev_detail <- dbReadTable_calibrated_device_detail(con)
-  # sort by caldev_id
-  caldev_detail <- caldev_detail[order(caldev_detail$caldev_id), ]
+  calstate_detail <- dbReadTable_calibration_state_detail(con)
+  # sort by calstate_id
+  calstate_detail <- calstate_detail[order(calstate_detail$calstate_id), ]
   res <- dbAdd_measurand(con,
                          md_name = measurand_df_new$md_name,
                          md_setup_datetime = measurand_df_new$md_setup_datetime,
                          pq_name = physical_quantity_df$pq_name[measurand_df_new$pq_id],
                          site_name = site_df$site_name[measurand_df_new$site_id],
-                         dev_name = caldev_detail$dev_name[measurand_df_new$caldev_id],
+                         dev_name = calstate_detail$dev_name[measurand_df_new$calstate_id],
                          int_id = measurand_df_new$int_id,
                          md_height = measurand_df_new$md_height,
                          pers_name = person_df$pers_name[measurand_df_new$pers_id])

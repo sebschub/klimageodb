@@ -2,10 +2,10 @@
 #'
 #'
 #' @param conn Database connection.
-#' @param caldev_id Integer vector of \code{calibrated_device} ID.
-#' @param caldev_datetime POSIXct vector of date and time of calibration.
-#' @param caldev_parameter String vector of values of calibration parameters.
-#' @param caldev_comment String vector of additional comments.
+#' @param calstate_id Integer vector of \code{calibration_state} ID.
+#' @param calstate_datetime POSIXct vector of date and time of calibration.
+#' @param calstate_parameter String vector of values of calibration parameters.
+#' @param calstate_comment String vector of additional comments.
 #' @param dev_id Integer vector of \code{device} ID.
 #' @param dev_name String vector of name of device.
 #' @param dev_identifier String vector of device identifiers, e.g. serial
@@ -410,9 +410,9 @@ dbWriteTable_device_model <- function(conn,
 #' @inheritParams database_fields
 #'
 #' @return Data frame of newly added rows.
-#' @seealso \code{\link{dbAdd_uncalibrated_device}} for adding a device that
+#' @seealso \code{\link{dbAdd_device_uncalibrated}} for adding a device that
 #'   does not require calibration to both \code{device} and
-#'   \code{calibrated_device}
+#'   \code{calibration_state}
 #' @family custom dbWriteTable functions
 #' @export
 #'
@@ -458,17 +458,17 @@ dbWriteTable_device <- function(conn,
 }
 
 
-#' Add calibrated devices to \code{calibrated_device} table
+#' Add calibrated devices to \code{calibration_state} table
 #'
-#' \code{dbWriteTable_calibrated_device} requires a correct device id while
-#' \code{dbAdd_calibrated_device} derives that from the device name.
+#' \code{dbWriteTable_calibration_state} requires a correct device id while
+#' \code{dbAdd_calibration_state} derives that from the device name.
 #'
 #' @inheritParams database_fields
 #'
 #' @return Data frame of newly added rows.
-#' @seealso \code{\link{dbAdd_uncalibrated_device}} for adding a device that
+#' @seealso \code{\link{dbAdd_device_uncalibrated}} for adding a device that
 #'   does not require calibration to both \code{device} and
-#'   \code{calibrated_device}
+#'   \code{calibration_state}
 #' @family custom dbWriteTable functions
 #' @export
 #'
@@ -479,29 +479,29 @@ dbWriteTable_device <- function(conn,
 #' dbWriteTable_device_type(con, "thermometer")
 #' dbWriteTable_device_model(con, "THERMO1000", 1, 1)
 #' dbWriteTable_device(con, "My first THERMO1000", 1, "NCC1701-T")
-#' dbWriteTable_calibrated_device(con,
+#' dbWriteTable_calibration_state(con,
 #'                                1,
 #'                                as.POSIXct("2012-01-01 12:15:12", tz = "GMT"),
 #'                                "a=10, b=99.12")
 #' dbDisconnect(con)
 #' }
-dbAdd_calibrated_device <- function(conn,
+dbAdd_calibration_state <- function(conn,
                                     dev_name,
-                                    caldev_datetime = NULL,
-                                    caldev_parameter = NULL,
-                                    caldev_comment = NULL) {
+                                    calstate_datetime = NULL,
+                                    calstate_parameter = NULL,
+                                    calstate_comment = NULL) {
   dbWithTransaction_or_Savepoint(conn, {
     dev_id <- get_ids_from_unique_column(conn,
                                          table = "device",
                                          id_name = "dev_id",
                                          column_name = "dev_name",
                                          column_values = dev_name)
-    dbWriteTable_calibrated_device(conn,
+    dbWriteTable_calibration_state(conn,
                                    dev_id = dev_id,
-                                   caldev_datetime = caldev_datetime,
-                                   caldev_parameter = caldev_parameter,
-                                   caldev_comment = caldev_comment)
-  }, spname = "dbAdd_calibrated_device")
+                                   calstate_datetime = calstate_datetime,
+                                   calstate_parameter = calstate_parameter,
+                                   calstate_comment = calstate_comment)
+  }, spname = "dbAdd_calibration_state")
 
 }
 
@@ -509,38 +509,38 @@ dbAdd_calibrated_device <- function(conn,
 
 
 
-#' @rdname dbAdd_calibrated_device
+#' @rdname dbAdd_calibration_state
 #' @export
-dbWriteTable_calibrated_device <- function(conn,
+dbWriteTable_calibration_state <- function(conn,
                                            dev_id,
-                                           caldev_datetime = NULL,
-                                           caldev_parameter = NULL,
-                                           caldev_comment = NULL) {
-  # we need caldev_datetime to be POSIXct for consistent time zone storage
-  if (!is.null(caldev_datetime) & !inherits(caldev_datetime, "POSIXct")) {
-    stop("caldev_datetime is used but not POSIXct.")
+                                           calstate_datetime = NULL,
+                                           calstate_parameter = NULL,
+                                           calstate_comment = NULL) {
+  # we need calstate_datetime to be POSIXct for consistent time zone storage
+  if (!is.null(calstate_datetime) & !inherits(calstate_datetime, "POSIXct")) {
+    stop("calstate_datetime is used but not POSIXct.")
   }
-  write_table(name = "calibrated_device", as.list(environment()))
+  write_table(name = "calibration_state", as.list(environment()))
 }
 
 
 
 
 
-#' Insert data into \code{device} and \code{calibrated_device} without
+#' Insert data into \code{device} and \code{calibration_state} without
 #' calibration parameters
 #'
 #' This function adds new devices to the database that do not require any
 #' calibration. First, it adds the new devices into the \code{device} table. It
 #' then uses the respective created \code{device.dev_id} to add new entries in
-#' \code{calibrated_device} with both \code{calibrated_device.caldev_datetime}
-#' and \code{calibrated_device.caldev_parameter} being \code{NA}.
+#' \code{calibration_state} with both \code{calibration_state.calstate_datetime}
+#' and \code{calibration_state.calstate_parameter} being \code{NA}.
 #'
 #' @inheritParams database_fields
 #'
 #' @return List of data frames of newly added rows.
 #' @seealso \code{\link{dbWriteTable_device}} and
-#'   \code{\link{dbWriteTable_calibrated_device}} for the separate functions
+#'   \code{\link{dbWriteTable_calibration_state}} for the separate functions
 #'   called by this wrapper.
 #' @export
 #'
@@ -550,15 +550,15 @@ dbWriteTable_calibrated_device <- function(conn,
 #' dbWriteTable_device_manufacturer(con, "TSI")
 #' dbWriteTable_device_type(con, "thermometer")
 #' dbWriteTable_device_model(con, "THERMO1000", 1, 1)
-#' dbAdd_uncalibrated_device(con, "My first THERMO1000", 1, "NCC1701-T")
+#' dbAdd_device_uncalibrated(con, "My first THERMO1000", 1, "NCC1701-T")
 #' dbDisconnect(con)
 #' }
-dbAdd_uncalibrated_device <- function(conn,
+dbAdd_device_uncalibrated <- function(conn,
                                       dev_name,
                                       devmod_name,
                                       dev_identifier = NULL,
                                       dev_comment = NULL) {
-  # use transaction to ensure either both, device and calibrated_device, were
+  # use transaction to ensure either both, device and calibration_state, were
   # changed or none
   dbWithTransaction_or_Savepoint(conn, {
     # write device into "device" table
@@ -567,9 +567,9 @@ dbAdd_uncalibrated_device <- function(conn,
                                devmod_name = devmod_name,
                                dev_identifier = dev_identifier,
                                dev_comment = dev_comment)
-    new_calibrated_device <- dbWriteTable_calibrated_device(conn, dev_id = new_device$dev_id)
-  }, spname = "dbAdd_uncalibrated_device_savepoint")
-  list(device = new_device, calibrated_device = new_calibrated_device)
+    new_calibration_state <- dbWriteTable_calibration_state(conn, dev_id = new_device$dev_id)
+  }, spname = "dbAdd_device_uncalibrated_savepoint")
+  list(device = new_device, calibration_state = new_calibration_state)
 
 }
 
@@ -737,7 +737,7 @@ dbWriteTable_person <- function(conn,
 #' device id and person id from the respective names; integration id still have
 #' to be entered numerical as id. \strong{Note} that \code{dbAdd_measurand}
 #' derives the calibrated device id from the device id with the most recent
-#' calibration date \code{caldev_datetime}. Use
+#' calibration date \code{calstate_datetime}. Use
 #' \code{\link{dbReadTable_integration_detail}} to query the integration table
 #' and select the correct id.
 #'
@@ -755,7 +755,7 @@ dbWriteTable_person <- function(conn,
 #'                        md_setup_datetime = as.POSIXct("2012-01-01 12:15:12", tz = "UTC"),
 #'                        pq_id = 1,
 #'                        site_id = 1,
-#'                        caldev_id = 1,
+#'                        calstate_id = 1,
 #'                        int_id = 1,
 #'                        md_height = 2.,
 #'                        pers_id = 1,
@@ -786,12 +786,12 @@ dbAdd_measurand <- function(conn,
                                           column_name = "site_name",
                                           column_values = site_name)
     # use view to get correct id
-    caldev_id <- get_ids_from_datetime_column(conn,
-                                              table = "calibrated_device_detail",
-                                              id_name = "caldev_id",
+    calstate_id <- get_ids_from_datetime_column(conn,
+                                              table = "calibration_state_detail",
+                                              id_name = "calstate_id",
                                               column_name = "dev_name",
                                               column_values = dev_name,
-                                              column_datetime = "caldev_datetime")
+                                              column_datetime = "calstate_datetime")
     if (!is.null(pers_name)) {
       pers_id <- get_ids_from_unique_column(conn,
                                             table = "person",
@@ -806,7 +806,7 @@ dbAdd_measurand <- function(conn,
                            md_setup_datetime = md_setup_datetime,
                            pq_id = pq_id,
                            site_id = site_id,
-                           caldev_id = caldev_id,
+                           calstate_id = calstate_id,
                            int_id = int_id,
                            md_height = md_height,
                            md_orientation = md_orientation,
@@ -827,7 +827,7 @@ dbWriteTable_measurand <- function(conn,
                                    md_setup_datetime,
                                    pq_id,
                                    site_id,
-                                   caldev_id,
+                                   calstate_id,
                                    int_id,
                                    md_height = NULL,
                                    md_orientation = NULL,

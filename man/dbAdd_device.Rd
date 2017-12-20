@@ -43,12 +43,12 @@ dbDisconnect(con)
 }
 }
 \seealso{
-\code{\link{dbAdd_uncalibrated_device}} for adding a device that
+\code{\link{dbAdd_device_uncalibrated}} for adding a device that
   does not require calibration to both \code{device} and
-  \code{calibrated_device}
+  \code{calibration_state}
 
 Other custom dbWriteTable functions: \code{\link{dbAddCorrection_station_adlershof}},
-  \code{\link{dbAdd_calibrated_device}},
+  \code{\link{dbAdd_calibration_state}},
   \code{\link{dbAdd_device_model}},
   \code{\link{dbAdd_integration}},
   \code{\link{dbAdd_measurand}},

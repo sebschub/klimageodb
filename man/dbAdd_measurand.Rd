@@ -10,7 +10,7 @@ dbAdd_measurand(conn, md_name, md_setup_datetime, pq_name, site_name, dev_name,
   pers_name = NULL, md_comment = NULL)
 
 dbWriteTable_measurand(conn, md_name, md_setup_datetime, pq_id, site_id,
-  caldev_id, int_id, md_height = NULL, md_orientation = NULL,
+  calstate_id, int_id, md_height = NULL, md_orientation = NULL,
   md_tilt = NULL, pers_id = NULL, md_comment = NULL)
 }
 \arguments{
@@ -43,7 +43,7 @@ measurand.}
 
 \item{site_id}{Integer vector of \code{site} ID.}
 
-\item{caldev_id}{Integer vector of \code{calibrated_device} ID.}
+\item{calstate_id}{Integer vector of \code{calibration_state} ID.}
 
 \item{pers_id}{Integer vector of \code{person} ID.}
 }
@@ -57,7 +57,7 @@ id, calibrated device id, integration id and, optionally, person id.
 device id and person id from the respective names; integration id still have
 to be entered numerical as id. \strong{Note} that \code{dbAdd_measurand}
 derives the calibrated device id from the device id with the most recent
-calibration date \code{caldev_datetime}. Use
+calibration date \code{calstate_datetime}. Use
 \code{\link{dbReadTable_integration_detail}} to query the integration table
 and select the correct id.
 }
@@ -69,7 +69,7 @@ dbWriteTable_measurand(md_name = "TA2M_1",
                        md_setup_datetime = as.POSIXct("2012-01-01 12:15:12", tz = "UTC"),
                        pq_id = 1,
                        site_id = 1,
-                       caldev_id = 1,
+                       calstate_id = 1,
                        int_id = 1,
                        md_height = 2.,
                        pers_id = 1,
@@ -79,7 +79,7 @@ dbDisconnect(con)
 }
 \seealso{
 Other custom dbWriteTable functions: \code{\link{dbAddCorrection_station_adlershof}},
-  \code{\link{dbAdd_calibrated_device}},
+  \code{\link{dbAdd_calibration_state}},
   \code{\link{dbAdd_device_model}},
   \code{\link{dbAdd_device}},
   \code{\link{dbAdd_integration}},
