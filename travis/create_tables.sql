@@ -4,7 +4,7 @@ CREATE TABLE site (
     site_lat      double precision CHECK (site_lat      >=  -90. AND site_lat      <=    90.),
     site_lon      double precision CHECK (site_lon      >= -180. AND site_lat      <=   180.),
     site_altitude double precision CHECK (site_altitude >= -500. AND site_altitude <= 10000.),
-    site_comment  varchar(50),
+    site_comment  varchar(200),
     CONSTRAINT site_latlon_consistency_check
       CHECK( (site_lat IS NULL AND site_lon IS NULL) OR (site_lat IS NOT NULL AND site_lon IS NOT NULL) )
     );
@@ -20,7 +20,7 @@ CREATE TABLE site (
 CREATE TABLE device_manufacturer (
     devman_id      smallserial PRIMARY KEY,
     devman_name    varchar(30) NOT NULL UNIQUE,
-    devman_comment varchar(50)
+    devman_comment varchar(200)
     );
   COMMENT ON TABLE  device_manufacturer                IS 'device manufacturer';
   COMMENT ON COLUMN device_manufacturer.devman_id      IS 'ID';
@@ -31,7 +31,7 @@ CREATE TABLE device_manufacturer (
 CREATE TABLE device_type (
     devtype_id      smallserial PRIMARY KEY,
     devtype_name    varchar(50) NOT NULL UNIQUE,
-    devtype_comment varchar(50)
+    devtype_comment varchar(200)
     );
   COMMENT ON TABLE  device_type                 IS 'measurement device type';
   COMMENT ON COLUMN device_type.devtype_id      IS 'ID';
@@ -44,7 +44,7 @@ CREATE TABLE device_model (
     devmod_name    varchar(30) NOT NULL UNIQUE,
     devtype_id     smallint NOT NULL REFERENCES device_type(devtype_id),
     devman_id      smallint REFERENCES device_manufacturer(devman_id),
-    devmod_comment varchar(50)
+    devmod_comment varchar(200)
     );
   COMMENT ON TABLE  device_model                IS 'measurement device model';
   COMMENT ON COLUMN device_model.devmod_id      IS 'ID';
@@ -59,7 +59,7 @@ CREATE TABLE device (
     dev_name                   varchar(40) NOT NULL UNIQUE,
     devmod_id                  smallint NOT NULL REFERENCES device_model(devmod_id),
     dev_identifier             varchar(30) UNIQUE,
-    dev_comment                varchar(50)
+    dev_comment                varchar(200)
     );
   COMMENT ON TABLE  device                           IS 'measurement device';
   COMMENT ON COLUMN device.dev_id                    IS 'ID';
@@ -74,7 +74,7 @@ CREATE TABLE calibration_state (
     dev_id              smallint NOT NULL REFERENCES device(dev_id),
     calstate_datetime   timestamp WITH TIME ZONE CHECK (calstate_datetime >= '1980-01-01' AND calstate_datetime < NOW()),
     calstate_parameter  varchar(200),
-    calstate_comment    varchar(50)
+    calstate_comment    varchar(200)
     );
   -- there should be only one entry for each dev_id and calstate_datetime including NULL
   -- NULL calstate_datetime are mapped to '0001-01-01'; ensure that this is never a real value
@@ -91,7 +91,7 @@ CREATE TABLE physical_quantity (
     pq_name        varchar(200) NOT NULL,
     pq_unit        varchar(20) NOT NULL,
     pq_description varchar(3000),
-    pq_comment     varchar(50),
+    pq_comment     varchar(200),
     UNIQUE (pq_name)
     );
   COMMENT ON TABLE  physical_quantity                IS 'physical quantity following CF conventions';
@@ -107,7 +107,7 @@ CREATE TABLE integration_type (
     inttype_id          smallserial PRIMARY KEY,
     inttype_name        varchar(30) NOT NULL UNIQUE,
     inttype_description varchar(100) NOT NULL UNIQUE,
-    inttype_comment     varchar(50)
+    inttype_comment     varchar(200)
     );
   COMMENT ON TABLE  integration_type                     IS 'integration type';
   COMMENT ON COLUMN integration_type.inttype_id          IS 'ID';
@@ -124,7 +124,7 @@ CREATE TABLE integration (
       CHECK (int_measurement_interval > 0. AND int_measurement_interval <= 86400.),
     int_interval             double precision NOT NULL,
       CHECK (int_interval             > 0. AND int_interval             <= 86400.),
-    int_comment              varchar(50),
+    int_comment              varchar(200),
     UNIQUE (inttype_id, int_measurement_interval, int_interval),
     CONSTRAINT integration_intervals_consistency_check CHECK (int_measurement_interval <= int_interval),
     CONSTRAINT integration_single_measurement_consistency_check
@@ -141,7 +141,7 @@ CREATE TABLE integration (
 CREATE TABLE person (
     pers_id      smallserial PRIMARY KEY,
     pers_name    varchar(30) NOT NULL UNIQUE,
-    pers_comment varchar(50)
+    pers_comment varchar(200)
     );
   COMMENT ON TABLE  person              IS 'person';
   COMMENT ON COLUMN person.pers_id      IS 'ID';
@@ -161,7 +161,7 @@ CREATE TABLE measurand (
     md_orientation    double precision CHECK (md_orientation >= -180. AND md_orientation <= 180.),
     md_tilt           double precision CHECK (md_tilt >= 0. AND md_tilt <= 90.),
     pers_id           smallint REFERENCES person(pers_id),
-    md_comment        varchar(50),
+    md_comment        varchar(200),
     UNIQUE (md_name, md_setup_datetime),
     UNIQUE (md_setup_datetime, pq_id, site_id, calstate_id, md_height, md_orientation, md_tilt, int_id)
     -- if md_setup_datetime and dev_id equal, site_id unique
@@ -185,7 +185,7 @@ CREATE TABLE quality_flag (
     qf_id          smallint PRIMARY KEY CHECK (qf_id > 0), -- no serial, because we want to choose values here
     qf_name        varchar(30) NOT NULL UNIQUE,
     qf_description varchar(100) NOT NULL UNIQUE,
-    qf_comment     varchar(50) UNIQUE
+    qf_comment     varchar(200)
     );
   COMMENT ON TABLE  quality_flag                IS 'quality flags';
   COMMENT ON COLUMN quality_flag.qf_id          IS 'ID, 1<=qf_id<=9: value ok, qf_id>=10: value not ok, NULL: not analysed';
