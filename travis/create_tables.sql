@@ -73,7 +73,7 @@ CREATE TABLE calibrated_device (
     caldev_id         smallserial PRIMARY KEY,
     dev_id            smallint NOT NULL REFERENCES device(dev_id),
     caldev_datetime   timestamp WITH TIME ZONE CHECK (caldev_datetime >= '1980-01-01' AND caldev_datetime < NOW()),
-    caldev_parameter  varchar(50),
+    caldev_parameter  varchar(200),
     caldev_comment    varchar(50)
     );
   -- there should be only one entry for each dev_id and caldev_datetime including NULL
