@@ -151,7 +151,7 @@ CREATE TABLE person (
 
 CREATE TABLE measurand (
     md_id             smallserial PRIMARY KEY,
-    md_name           varchar(10) NOT NULL,
+    md_name           varchar(20) NOT NULL,
     md_setup_datetime timestamp with time zone NOT NULL CHECK (md_setup_datetime >= '1980-01-01' AND md_setup_datetime < NOW()),
     pq_id             smallint NOT NULL REFERENCES physical_quantity(pq_id),
     site_id           smallint NOT NULL REFERENCES site(site_id),
