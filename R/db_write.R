@@ -917,6 +917,7 @@ dbAdd_station_adlershof <- function(conn,
                                           column_name = "md_name",
                                           column_values = md_name,
                                           column_datetime = "md_setup_datetime")
+    if (any(is.na(md_id))) stop("No md_id for some md_name.")
     # stadl_datetime checked in dbWriteTable_station_adlershof
     dbWriteTable_station_adlershof(conn,
                                    stadl_datetime = stadl_datetime,
