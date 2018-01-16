@@ -81,6 +81,8 @@ CREATE TABLE calibration_state (
   CREATE UNIQUE INDEX calibration_state_dev_id_calstate_datetime ON calibration_state
     (dev_id, COALESCE(calstate_datetime, '0001-01-01+00'));
   COMMENT ON TABLE  calibration_state                    IS 'specific calibration of device';
+  COMMENT ON COLUMN calibration_state.calstate_id        IS 'ID';
+  COMMENT ON COLUMN calibration_state.dev_id             IS 'references device';
   COMMENT ON COLUMN calibration_state.calstate_datetime  IS 'date and time of calibration';
   COMMENT ON COLUMN calibration_state.calstate_parameter IS 'values of calibration parameters';
   COMMENT ON COLUMN calibration_state.calstate_comment   IS 'additional information';
