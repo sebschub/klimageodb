@@ -219,7 +219,7 @@ dbWithTransaction_or_Savepoint <- function(conn, code, spname) {
                             stop(e$message)
                           })
   dbCommit_or_Savepoint(conn, new_transaction, spname)
-  code_result
+  if (!is.null(code_result)) code_result
 }
 
 
