@@ -206,7 +206,7 @@ CREATE TABLE station_adlershof (
     qf_id          smallint REFERENCES quality_flag(qf_id),
     UNIQUE (stadl_datetime, md_id)
     );
-  COMMENT ON TABLE  station_adlershof                IS 'unchecked measurements at Adlershof sites';
+  COMMENT ON TABLE  station_adlershof                IS 'measurements at Adlershof sites';
   COMMENT ON COLUMN station_adlershof.stadl_id       IS 'ID';
   COMMENT ON COLUMN station_adlershof.stadl_datetime IS 'date and time (with time zone) of measurement';
   COMMENT ON COLUMN station_adlershof.md_id          IS 'reference to measurand that was measured';
@@ -222,7 +222,7 @@ CREATE TABLE station_adlershof_correction (
     stadlcor_value    double precision,
     UNIQUE (stadlcor_datetime, md_id)
     );
-  COMMENT ON TABLE  station_adlershof_correction                   IS 'corrected measurements at Adlershof sites';
+  COMMENT ON TABLE  station_adlershof_correction                   IS 'only corrected measurements at Adlershof sites';
   COMMENT ON COLUMN station_adlershof_correction.stadlcor_id       IS 'ID';
   COMMENT ON COLUMN station_adlershof_correction.stadl_id          IS 'references the measurement to correct in station adlershof';
   COMMENT ON COLUMN station_adlershof_correction.stadlcor_datetime IS 'date and time (with time zone) of corrected measurement';
@@ -260,3 +260,12 @@ CREATE VIEW measurand_detail AS
     LEFT OUTER JOIN integration_detail       USING (int_id)
     LEFT OUTER JOIN person                   USING (pers_id);
   COMMENT ON VIEW measurand_detail IS 'measurand with joined details';
+
+CREATE VIEW station_adlershof_corrected AS
+  SELECT orig.stadl_id,
+    CASE WHEN qf_id >= 10 THEN corr.stadlcor_datetime ELSE orig.stadl_datetime END AS stadl_datetime,
+    CASE WHEN qf_id >= 10 THEN corr.md_id             ELSE orig.md_id          END AS md_id,
+    CASE WHEN qf_id >= 10 THEN corr.stadlcor_value    ELSE orig.stadl_value    END AS stadl_value,
+    orig.qf_id
+    FROM station_adlershof orig LEFT OUTER JOIN station_adlershof_correction corr USING (stadl_id);
+  COMMENT ON VIEW station_adlershof_corrected IS 'corrected measurements of Adlershof site by joining station_adlershof and station_adlershof_correction';

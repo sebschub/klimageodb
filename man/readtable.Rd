@@ -21,6 +21,7 @@
 \alias{dbReadTable_calibration_state_detail}
 \alias{dbReadTable_integration_detail}
 \alias{dbReadTable_measurand_detail}
+\alias{dbReadTable_station_adlershof_corrected}
 \title{Table reading}
 \usage{
 dbReadTable_site(conn)
@@ -60,6 +61,8 @@ dbReadTable_calibration_state_detail(conn)
 dbReadTable_integration_detail(conn)
 
 dbReadTable_measurand_detail(conn)
+
+dbReadTable_station_adlershof_corrected(conn)
 }
 \arguments{
 \item{conn}{Database connection.}

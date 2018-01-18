@@ -506,16 +506,20 @@ test_that("dbUpdate_station_adlershof_qf_id", {
 })
 
 
-
 cor_stadl_id <- c(2, 3)
 station_adlershof_correction_df <-
   data.frame(stadlcor_id = c(1, 2),
              stadl_id = cor_stadl_id,
              stadlcor_datetime = as.POSIXct(c("2017-05-01 16:15:12", "2017-05-05 16:15:12"), tz = "UTC"),
-             md_id = c(1,1),
+             md_id = c(1,2),
              stadlcor_value = c(290.15, 278.15)
   )
 station_adlershof_df$qf_id[cor_stadl_id] <- 11
+
+station_adlershof_corrected_df <- station_adlershof_df
+station_adlershof_corrected_df$stadl_datetime[cor_stadl_id] <- station_adlershof_correction_df$stadlcor_datetime
+station_adlershof_corrected_df$md_id[cor_stadl_id]          <- station_adlershof_correction_df$md_id
+station_adlershof_corrected_df$stadl_value[cor_stadl_id]    <- station_adlershof_correction_df$stadlcor_value
 
 test_that("dbAddCorrection_station_adlershof", {
   dbAddCorrection_station_adlershof(con,
@@ -539,11 +543,23 @@ test_that("dbAddCorrection_station_adlershof", {
   test_transaction_completed(con)
 })
 
-test_that("dbReadTable_station_adlershof_correction", {
+test_that("dbReadTable_station_adlershof_*", {
+  # reading of only correction data
   df <- dbReadTable_station_adlershof_correction(con)
   expect_equal(station_adlershof_correction_df, df)
+
+  # reading of total corrected data (also check of correct VIEW definition)
+  df <- dbReadTable_station_adlershof_corrected(con)
+  # reorder df because UPDATE changes original order
+  df <- df[order(df$stadl_id), ]
+  rownames(df) <- 1:nrow(df)
+  expect_equal(station_adlershof_corrected_df, df)
+
   test_transaction_completed(con)
 })
+
+
+
 
 
 # all transaction should have been either committed or rollbacked

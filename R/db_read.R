@@ -144,3 +144,9 @@ dbReadTable_integration_detail <- function(conn){
 dbReadTable_measurand_detail <- function(conn){
   DBI::dbReadTable(conn, "measurand_detail")
 }
+
+#' @rdname readtable
+#' @export
+dbReadTable_station_adlershof_corrected <- function(conn){
+  DBI::dbReadTable(conn, "station_adlershof_corrected")
+}
