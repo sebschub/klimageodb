@@ -45,13 +45,13 @@ dbDisconnect(con)
 
 
 measurand_label <- list("Lufttemperatur" = 1,
-                        "Windgeschwindigkeit" = 2,
-                        "Relative Feuchte" = 3)
+                        "Relative Feuchte" = 2,
+                        "Windgeschwindigkeit" = 3)
 
 ui <- fluidPage(
 
   # Application title
-  titlePanel("Messtation der Klimageographie in Adlershof"),
+  titlePanel("Messstation der Klimageographie in Adlershof"),
 
   fluidRow(
     column(3,
@@ -106,14 +106,6 @@ server <- function(input, output) {
            theme_light() +
            theme(axis.title = element_text(size = 18),
                  axis.text = element_text(size = 16)),
-         windspeed =
-           ggplot(filter(data_statistics(), pq_name == "wind_speed"),
-                  aes(x = stadl_datetime, y = stadl_value)) +
-           geom_point() +
-           labs(x = "Datum/Uhrzeit", y = "Windgeschwindigkeit (m/s)") +
-           theme_light() +
-           theme(axis.title = element_text(size = 18),
-                 axis.text = element_text(size = 16)),
          relativehumidity =
            ggplot(filter(data_statistics(), pq_name == "relative_humidity"),
                   aes(x = stadl_datetime, y = stadl_value)) +
@@ -121,8 +113,16 @@ server <- function(input, output) {
            labs(x = "Datum/Uhrzeit", y = "Relative Feuchte (%)") +
            theme_light() +
            theme(axis.title = element_text(size = 18),
+                 axis.text = element_text(size = 16)),
+         windspeed =
+           ggplot(filter(data_statistics(), pq_name == "wind_speed"),
+                  aes(x = stadl_datetime, y = stadl_value)) +
+           geom_point() +
+           labs(x = "Datum/Uhrzeit", y = "Windgeschwindigkeit (m/s)") +
+           theme_light() +
+           theme(axis.title = element_text(size = 18),
                  axis.text = element_text(size = 16))
-    )
+         )
   })
 
   output$plot <- renderPlot({
