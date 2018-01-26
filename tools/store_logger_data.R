@@ -8,7 +8,7 @@ md_name_exclude <- c(
   )
 
 library(klimageodb)
- 
+
 logger_data <- read.csv(file = args[1])
 # logger_data <- read.csv(file = "test3.csv")
 logger_data$Datetime <- as.POSIXct(logger_data$Datetime, tz = "GMT")
@@ -34,12 +34,28 @@ for (icol in seq_along(logger_data)) {
   })
 }
 
-dbDisconnect(con)
-
 
 # sort (probably not required) and get latest data
 logger_data_sorted <- logger_data[order(logger_data$Datetime), ]
 display_line <- logger_data_sorted[nrow(logger_data_sorted), ]
+
+# get md_id of precipitation
+md_id_precip <- dbGetQuery(con, paste("SELECT md_id FROM measurand_detail",
+                                      "WHERE pq_name = 'rainfall_amount' AND site_name = 'Adlershof_Garden'",
+                                      "ORDER BY md_setup_datetime DESC LIMIT 1;"))[1,1]
+
+# time one hour before latest entry here
+time_1h_before <- display_line$Datetime - 60*60
+
+# sum up values in database
+precip_sum <- dbGetQuery(con, paste0("SELECT sum(stadl_value) FROM station_adlershof ",
+                                     "WHERE md_id = ", md_id_precip, " AND stadl_datetime > '",
+                                     strftime(time_1h_before, tz = "Europe/Berlin"), " +01:00';"))[1,1]
+
+
+dbDisconnect(con)
+
+
 display_df <- data.frame(
   Date = strftime(display_line$Datetime, format="%d.%m.%Y", tz = "Europe/Berlin"),
   Time = strftime(display_line$Datetime, format="%H:%M", tz = "Europe/Berlin"),
@@ -59,7 +75,7 @@ display_df <- data.frame(
   "Bilanz oben (W/m2 (Ave))"  = NA,
   "Bilanz unten (W/m2 (Ave))" = NA,
   "Bilanz Temp (degC (Ave))"  = NA,
-  "RM826-02 (mm)"             = round(display_line$GRain_mm_Tot, 1), # precipitation
+  "RM826-02 (mm)"             = round(precip_sum, 1), # precipitation
   "RFT2 Feuchte (% (Ave))"    = round(display_line$GRH_2*100, 0), # relative humidity
   "RFT2 Temp ( C (Ave))"      = round(display_line$GAirTC_2_Avg, 1), # 2m temperature
   stringsAsFactors = FALSE
