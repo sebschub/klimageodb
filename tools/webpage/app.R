@@ -29,6 +29,12 @@ measurand <- tbl(con, "measurand_detail") %>%
           md_height == 2.) |
          (pq_name == "relative_humidity" &
           site_name == "Adlershof_Garden" &
+          md_height == 2.) |
+         (pq_name == "surface_downwelling_shortwave_flux_in_air" &
+          site_name == "Adlershof_Garden" &
+          md_height == 2.) |
+         (pq_name == "surface_downwelling_longwave_flux_in_air" &
+          site_name == "Adlershof_Garden" &
           md_height == 2.)
            ) %>% collect()
 
@@ -46,7 +52,11 @@ dbDisconnect(con)
 
 measurand_label <- list("Lufttemperatur" = 1,
                         "Relative Feuchte" = 2,
-                        "Windgeschwindigkeit" = 3)
+                        "Windgeschwindigkeit" = 3,
+                        "Globalstrahlung" = 4,
+                        "Atmosphärische Gegenstrahlung" = 5)
+
+round_unit <- c("hours", "days", "weeks")
 
 ui <- fluidPage(
 
@@ -54,6 +64,7 @@ ui <- fluidPage(
   titlePanel("Messstation der Klimageographie in Adlershof"),
 
   fluidRow(
+    shinyjs::useShinyjs(),
     column(3,
            checkboxGroupInput("measurands", label = "Messgrößen",
                               choices = measurand_label,
@@ -70,6 +81,15 @@ ui <- fluidPage(
       radioButtons("kind", label = "Darstellungsart",
                    choices = list("Zeitreihe" = 1, "mittlerer Tagesgang" = 2),
                    selected = 1)
+    ),
+    column(2,
+           radioButtons("averaging", label = "Mittlung der Zeitreihe",
+                        choices = list("Original" = "original",
+                                       "Stunden" = "hours",
+                                       "Tage" = "days",
+                                       "Wochen" = "weeks"
+                                       ),
+                        selected = "original")
     )
   ),
 
@@ -88,12 +108,21 @@ server <- function(input, output) {
 
   data_statistics <- reactive({
     if (input$kind == 2) {
+      shinyjs::disable("averaging")
       data_range() %>%
         mutate(stadl_datetime = hour(stadl_datetime)) %>%
         group_by(pq_name, stadl_datetime) %>%
         summarise(stadl_value = mean(stadl_value, na.rm = TRUE))
     } else {
-      data_range()
+      shinyjs::enable("averaging")
+      if (input$averaging != "original") {
+        data_range() %>%
+          mutate(stadl_datetime = floor_date(stadl_datetime, unit = input$averaging)) %>%
+          group_by(pq_name, stadl_datetime) %>%
+          summarise(stadl_value = mean(stadl_value, na.rm = TRUE))
+      } else {
+        data_range()
+      }
     }
   })
 
@@ -101,7 +130,7 @@ server <- function(input, output) {
     list(temperature =
            ggplot(filter(data_statistics(), pq_name == "air_temperature"),
                   aes(x = stadl_datetime, y = stadl_value)) +
-           geom_point() +
+           geom_point() + geom_line() +
            labs(x = "Datum/Uhrzeit", y = "Lufttemperatur (°C)") +
            theme_light() +
            theme(axis.title = element_text(size = 18),
@@ -109,7 +138,7 @@ server <- function(input, output) {
          relativehumidity =
            ggplot(filter(data_statistics(), pq_name == "relative_humidity"),
                   aes(x = stadl_datetime, y = stadl_value)) +
-           geom_point() +
+           geom_point() + geom_line() +
            labs(x = "Datum/Uhrzeit", y = "Relative Feuchte (%)") +
            theme_light() +
            theme(axis.title = element_text(size = 18),
@@ -117,12 +146,31 @@ server <- function(input, output) {
          windspeed =
            ggplot(filter(data_statistics(), pq_name == "wind_speed"),
                   aes(x = stadl_datetime, y = stadl_value)) +
-           geom_point() +
+           geom_point() + geom_line() +
            labs(x = "Datum/Uhrzeit", y = "Windgeschwindigkeit (m/s)") +
            theme_light() +
            theme(axis.title = element_text(size = 18),
                  axis.text = element_text(size = 16))
-         )
+         ,
+         shortwaveincoming =
+           ggplot(filter(data_statistics(), pq_name == "surface_downwelling_shortwave_flux_in_air"),
+                  aes(x = stadl_datetime, y = stadl_value)) +
+           geom_point() + geom_line() +
+           labs(x = "Datum/Uhrzeit", y = "Globalstrahlung (W/m²)") +
+           theme_light() +
+           theme(axis.title = element_text(size = 18),
+                 axis.text = element_text(size = 16))
+         ,
+         longwaveincoming =
+           ggplot(filter(data_statistics(), pq_name == "surface_downwelling_longwave_flux_in_air"),
+                  aes(x = stadl_datetime, y = stadl_value)) +
+           geom_point() + geom_line() +
+           labs(x = "Datum/Uhrzeit", y = "Atmos. Gegenstrahlung (W/m²)") +
+           theme_light() +
+           theme(axis.title = element_text(size = 18),
+                 axis.text = element_text(size = 16))
+
+    )
   })
 
   output$plot <- renderPlot({
