@@ -83,7 +83,7 @@ ui <- fluidPage(
                    selected = 1)
     ),
     column(2,
-           radioButtons("averaging", label = "Mittlung der Zeitreihe",
+           radioButtons("averaging", label = "Mittelung der Zeitreihe",
                         choices = list("Original" = "original",
                                        "Stunden" = "hours",
                                        "Tage" = "days",
