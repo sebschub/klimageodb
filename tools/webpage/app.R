@@ -27,6 +27,9 @@ measurand <- tbl(con, "measurand_detail") %>%
          (pq_name == "wind_speed" &
           site_name == "Adlershof_Garden" &
           md_height == 2.) |
+         (pq_name == "wind_from_direction" &
+          site_name == "Adlershof_Garden" &
+          md_height == 2.) |
          (pq_name == "relative_humidity" &
           site_name == "Adlershof_Garden" &
           md_height == 2.) |
@@ -50,11 +53,12 @@ data_complete <- tbl(con, "station_adlershof_corrected") %>%
 dbDisconnect(con)
 
 
-measurand_label <- list("Lufttemperatur" = 1,
-                        "Relative Feuchte" = 2,
-                        "Windgeschwindigkeit" = 3,
-                        "Globalstrahlung" = 4,
-                        "Atmosphärische Gegenstrahlung" = 5)
+measurand_label <- list("Lufttemperatur (LT)" = 1,
+                        "Relative Feuchte (RF)" = 2,
+                        "Windgeschwindigkeit (WG)" = 3,
+                        "Windrichtung (WR)" = 4,
+                        "Globalstrahlung (GS)" = 5,
+                        "Atmosphärische Gegenstrahlung (AG)" = 6)
 
 round_unit <- c("hours", "days", "weeks")
 
@@ -131,7 +135,7 @@ server <- function(input, output) {
            ggplot(filter(data_statistics(), pq_name == "air_temperature"),
                   aes(x = stadl_datetime, y = stadl_value)) +
            geom_point() + geom_line() +
-           labs(x = "Datum/Uhrzeit", y = "Lufttemperatur (°C)") +
+           labs(x = "Datum/Uhrzeit", y = "LT (°C)") +
            theme_light() +
            theme(axis.title = element_text(size = 18),
                  axis.text = element_text(size = 16)),
@@ -139,7 +143,7 @@ server <- function(input, output) {
            ggplot(filter(data_statistics(), pq_name == "relative_humidity"),
                   aes(x = stadl_datetime, y = stadl_value)) +
            geom_point() + geom_line() +
-           labs(x = "Datum/Uhrzeit", y = "Relative Feuchte (%)") +
+           labs(x = "Datum/Uhrzeit", y = "RF (%)") +
            theme_light() +
            theme(axis.title = element_text(size = 18),
                  axis.text = element_text(size = 16)),
@@ -147,7 +151,16 @@ server <- function(input, output) {
            ggplot(filter(data_statistics(), pq_name == "wind_speed"),
                   aes(x = stadl_datetime, y = stadl_value)) +
            geom_point() + geom_line() +
-           labs(x = "Datum/Uhrzeit", y = "Windgeschwindigkeit (m/s)") +
+           labs(x = "Datum/Uhrzeit", y = "WG (m/s)") +
+           theme_light() +
+           theme(axis.title = element_text(size = 18),
+                 axis.text = element_text(size = 16))
+         ,
+         winddirection =
+           ggplot(filter(data_statistics(), pq_name == "wind_from_direction"),
+                  aes(x = stadl_datetime, y = stadl_value)) +
+           geom_point() + 
+           labs(x = "Datum/Uhrzeit", y = "WR (m/s)") +
            theme_light() +
            theme(axis.title = element_text(size = 18),
                  axis.text = element_text(size = 16))
@@ -156,7 +169,7 @@ server <- function(input, output) {
            ggplot(filter(data_statistics(), pq_name == "surface_downwelling_shortwave_flux_in_air"),
                   aes(x = stadl_datetime, y = stadl_value)) +
            geom_point() + geom_line() +
-           labs(x = "Datum/Uhrzeit", y = "Globalstrahlung (W/m²)") +
+           labs(x = "Datum/Uhrzeit", y = "GS (W/m²)") +
            theme_light() +
            theme(axis.title = element_text(size = 18),
                  axis.text = element_text(size = 16))
@@ -165,7 +178,7 @@ server <- function(input, output) {
            ggplot(filter(data_statistics(), pq_name == "surface_downwelling_longwave_flux_in_air"),
                   aes(x = stadl_datetime, y = stadl_value)) +
            geom_point() + geom_line() +
-           labs(x = "Datum/Uhrzeit", y = "Atmos. Gegenstrahlung (W/m²)") +
+           labs(x = "Datum/Uhrzeit", y = "AG (W/m²)") +
            theme_light() +
            theme(axis.title = element_text(size = 18),
                  axis.text = element_text(size = 16))
