@@ -52,8 +52,18 @@ precip_sum <- dbGetQuery(con, paste0("SELECT sum(stadl_value) FROM station_adler
                                      "WHERE md_id = ", md_id_precip, " AND stadl_datetime > '",
                                      strftime(time_1h_before, tz = "Europe/Berlin"), " +01:00';"))[1,1]
 
-
+# UV index
+tryCatch({
+  uv_df <- read.csv2(Sys.getenv("URL_UVINDEX"), header=FALSE, stringsAsFactors = FALSE)
+  dbAdd_station_adlershof(conn = con,
+                          md_name = "UV_sglux_A",
+                          stadl_datetime = as.POSIXct(paste(uv_df$V1, uv_df$V2), tz = "Europe/Berlin"),
+                          stadl_value = as.numeric(uv_df$V3))
+}, error = function(e) {
+  message(paste0("UV_sglux_A: ", e$message))
+})
 dbDisconnect(con)
+
 
 
 display_df <- data.frame(
@@ -61,8 +71,8 @@ display_df <- data.frame(
   Time = strftime(display_line$Datetime, format="%H:%M", tz = "Europe/Berlin"),
   uSec = NA,
   "GLOBAL 8135 (W/m2 (Ave))"  = max(0., round(display_line$GCM3Up_Avg, 0)), # incoming shortwave
-  "HFP01 00640 (W/m2 (Ave))"  = NA,
-  "HFP01 00639 (W/m2 (Ave))"  = NA,
+  "HFP01 00640 (W/m2 (Ave))"  = as.numeric(uv_df$V3), # UV index
+  "HFP01 00639 (W/m2 (Ave))"  = round(display_line$GCG3UpCo_Avg, 0), # incoming longwave
   "ML2X-1 (% (Ave))"          = round(display_line$GWS_ms_S_WVT, 1), # wind speed
   "ML2X-2 (% (Ave))"          = NA,
   "ML2X-3 (% (Ave))"          = NA,
