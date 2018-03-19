@@ -27,6 +27,9 @@ DATA_FILE=${DATA_FOLDER}/${CURRENT_TIME_full}.csv
 
 # set logger to current time
 pycr1000 settime ${ADDRESS_GARDEN} "${CURRENT_TIME}"
+if [ $? -ne 0 ]; then
+    exit 1
+fi
 
 if [ -f "last_access" ]; then
     LAST_ACCESS=$(cat last_access)
@@ -39,6 +42,9 @@ fi
 
 # get data
 pycr1000 getdata --start "${LAST_ACCESS}" --stop "${CURRENT_TIME_wo_s}" ${ADDRESS_GARDEN} 'Table1' ${DATA_FILE}
+if [ $? -ne 0 ]; then
+    exit 2
+fi
 
 echo "${CURRENT_TIME_wo_s}" > last_access
 
