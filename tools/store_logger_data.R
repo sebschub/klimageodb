@@ -50,7 +50,7 @@ time_1h_before <- display_line$Datetime - 60*60
 # sum up values in database
 precip_sum <- dbGetQuery(con, paste0("SELECT sum(stadl_value) FROM station_adlershof ",
                                      "WHERE md_id = ", md_id_precip, " AND stadl_datetime > '",
-                                     strftime(time_1h_before, tz = "Europe/Berlin"), " +01:00';"))[1,1]
+                                     strftime(time_1h_before, tz = "GMT"), " +00:00';"))[1,1]
 
 # UV index
 tryCatch({
