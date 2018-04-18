@@ -85,7 +85,7 @@ ui <- fluidPage(
     ),
     column(4,
            dateRangeInput("dateRange", label = "Darstellungszeitraum",
-                          start = "2018-01-16", end = Sys.Date(),
+                          start = Sys.Date()-14, end = Sys.Date(),
                           min = "2018-01-16", max = Sys.Date(),
                           language = 'de', weekstart = 1,
                           separator = " bis ")
@@ -126,7 +126,7 @@ server <- function(input, output) {
         mutate(stadl_datetime = hour(stadl_datetime)) %>%
         group_by(pq_name, stadl_datetime) %>%
         summarise(stadl_value = ifelse(
-          any(pq_name == "wind_from_direction"), 
+          any(pq_name == "wind_from_direction"),
           mean(circular(stadl_value, units = "degrees", modulo = "2pi"), na.rm = TRUE),
           mean(stadl_value, na.rm = TRUE))
         )
@@ -137,7 +137,7 @@ server <- function(input, output) {
           mutate(stadl_datetime = floor_date(stadl_datetime, unit = input$averaging)) %>%
           group_by(pq_name, stadl_datetime) %>%
           summarise(stadl_value = ifelse(
-            any(pq_name == "wind_from_direction"), 
+            any(pq_name == "wind_from_direction"),
             mean(circular(stadl_value, units = "degrees", modulo = "2pi"), na.rm = TRUE),
             mean(stadl_value, na.rm = TRUE))
           )
@@ -176,7 +176,7 @@ server <- function(input, output) {
          winddirection =
            ggplot(filter(data_statistics(), pq_name == "wind_from_direction"),
                   aes(x = stadl_datetime, y = stadl_value)) +
-           geom_point() + 
+           geom_point() +
            labs(x = "Datum/Uhrzeit", y = "WR (°)") +
            theme_light() +
            theme(axis.title = element_text(size = 18),
