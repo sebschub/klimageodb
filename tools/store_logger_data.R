@@ -61,6 +61,7 @@ tryCatch({
                           stadl_value = as.numeric(uv_df$V3))
 }, error = function(e) {
   message(paste0("UV_sglux_A: ", e$message))
+  uv_df <<- data.frame(V3 = NA)
 })
 dbDisconnect(con)
 
