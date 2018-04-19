@@ -19,17 +19,16 @@ CURRENT_TIME_wo_s=$(date -u --date="@${CURRENT_TIME_sepoch}" +"%Y-%m-%d %H:%M")
 # current time full string
 CURRENT_TIME_full=$(date -u --date="@${CURRENT_TIME_sepoch}" +"%Y%m%d_%H%M%S")
 
-DATA_FILE=${DATA_FOLDER}/${CURRENT_TIME_full}.csv
+DATA_FILE_GARDEN=${DATA_FOLDER}/${CURRENT_TIME_full}_garden.csv
+DATA_FILE_ROOF=${DATA_FOLDER}/${CURRENT_TIME_full}_roof.csv
 
 #echo ${CURRENT_TIME}
 #echo ${CURRENT_TIME_wo_s}
 #echo ${CURRENT_TIME_full}
 
 # set logger to current time
-pycr1000 settime ${ADDRESS_GARDEN} "${CURRENT_TIME}"
-if [ $? -ne 0 ]; then
-    exit 1
-fi
+pycr1000 settime ${ADDRESS_GARDEN} "${CURRENT_TIME}" &
+pycr1000 settime ${ADDRESS_ROOF}   "${CURRENT_TIME}"
 
 if [ -f "last_access" ]; then
     LAST_ACCESS=$(cat last_access)
@@ -41,7 +40,11 @@ fi
 #echo $LAST_ACCESS
 
 # get data
-pycr1000 getdata --start "${LAST_ACCESS}" --stop "${CURRENT_TIME_wo_s}" ${ADDRESS_GARDEN} 'Table1' ${DATA_FILE}
+pycr1000 getdata --start "${LAST_ACCESS}" --stop "${CURRENT_TIME_wo_s}" ${ADDRESS_GARDEN} 'Table1' ${DATA_FILE_GARDEN}
+if [ $? -ne 0 ]; then
+    exit 1
+fi
+pycr1000 getdata --start "${LAST_ACCESS}" --stop "${CURRENT_TIME_wo_s}" ${ADDRESS_ROOF}   'Table1' ${DATA_FILE_ROOF}
 if [ $? -ne 0 ]; then
     exit 2
 fi
@@ -49,9 +52,10 @@ fi
 echo "${CURRENT_TIME_wo_s}" > last_access
 
 #echo "${CURRENT_TIME_full}" >> ${LOG_FILE}
-Rscript --vanilla store_logger_data.R ${DATA_FILE} ${BOARD_FILE_TEMP} # >> ${LOG_FILE}
+Rscript --vanilla store_logger_data.R ${DATA_FILE_GARDEN} ${DATA_FILE_ROOF} ${BOARD_FILE_TEMP} # >> ${LOG_FILE}
 # convert to DOS end-of-line character
 unix2dos -n ${BOARD_FILE_TEMP} ${BOARD_FILE}
 
 
-xz ${DATA_FILE}
+xz ${DATA_FILE_GARDEN}
+xz ${DATA_FILE_ROOF}

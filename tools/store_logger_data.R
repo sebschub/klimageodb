@@ -1,5 +1,5 @@
 args <- commandArgs(trailingOnly=TRUE)
-if (length(args)!=2) stop(paste("Exactly two arguments required but got", length(args)))
+if (length(args) != 3) stop(paste("Exactly three arguments required but got", length(args)))
 
 md_name_exclude <- c(
   "Datetime",    # time is required for every other measurement
@@ -8,36 +8,42 @@ md_name_exclude <- c(
   )
 
 library(klimageodb)
-
-logger_data <- read.csv(file = args[1])
-# logger_data <- read.csv(file = "test3.csv")
-logger_data$Datetime <- as.POSIXct(logger_data$Datetime, tz = "GMT")
-
-
 con <- dbConnect_klimageo(user = "klimageo_1")
 
-for (icol in seq_along(logger_data)) {
+logger_data <- list()
+display_line <- list()
 
-  md_name <- names(logger_data)[icol]
+# read all stations
+station_names <- c("garden", "roof")
+for (station_index in seq_along(station_names)) {
+  
+  station_name <- station_names[station_index]
+  logger_data[[station_name]] <- read.csv(file = args[station_index])
 
-  # skip some columns
-  if (md_name %in% md_name_exclude) next
+  logger_data[[station_name]]$Datetime <- as.POSIXct(logger_data[[station_name]]$Datetime, tz = "GMT")
 
-  # try to add the data; errors are expected for not defined measurands
-  tryCatch({
-    dbAdd_station_adlershof(conn = con,
-                            md_name = md_name,
-                            stadl_datetime = logger_data$Datetime,
-                            stadl_value = logger_data[[icol]])
-  }, error = function(e) {
-    message(paste0(md_name, ": ", e$message))
-  })
+  for (icol in seq_along(logger_data[[station_name]])) {
+
+    md_name <- names(logger_data[[station_name]])[icol]
+    
+    # skip some columns
+    if (md_name %in% md_name_exclude) next
+    
+    # try to add the data; errors are expected for not defined measurands
+    tryCatch({
+      dbAdd_station_adlershof(conn = con,
+                              md_name = md_name,
+                              stadl_datetime = logger_data[[station_name]]$Datetime,
+                              stadl_value = logger_data[[station_name]][[icol]])
+    }, error = function(e) {
+      message(paste0(md_name, ": ", e$message))
+    })
+  }
+
+  # sort (probably not required) and get latest data
+  logger_data_sorted <- logger_data[[station_name]][order(logger_data[[station_name]]$Datetime), ]
+  display_line[[station_name]] <- logger_data_sorted[nrow(logger_data_sorted), ]
 }
-
-
-# sort (probably not required) and get latest data
-logger_data_sorted <- logger_data[order(logger_data$Datetime), ]
-display_line <- logger_data_sorted[nrow(logger_data_sorted), ]
 
 # get md_id of precipitation
 md_id_precip <- dbGetQuery(con, paste("SELECT md_id FROM measurand_detail",
@@ -45,7 +51,7 @@ md_id_precip <- dbGetQuery(con, paste("SELECT md_id FROM measurand_detail",
                                       "ORDER BY md_setup_datetime DESC LIMIT 1;"))[1,1]
 
 # time one hour before latest entry here
-time_1h_before <- display_line$Datetime - 60*60
+time_1h_before <- display_line[["garden"]]$Datetime - 60*60
 
 # sum up values in database
 precip_sum <- dbGetQuery(con, paste0("SELECT sum(stadl_value) FROM station_adlershof ",
@@ -68,13 +74,13 @@ dbDisconnect(con)
 
 
 display_df <- data.frame(
-  Date = strftime(display_line$Datetime, format="%d.%m.%Y", tz = "Europe/Berlin"),
-  Time = strftime(display_line$Datetime, format="%H:%M", tz = "Europe/Berlin"),
+  Date = strftime(display_line[["garden"]]$Datetime, format="%d.%m.%Y", tz = "Europe/Berlin"),
+  Time = strftime(display_line[["garden"]]$Datetime, format="%H:%M", tz = "Europe/Berlin"),
   uSec = NA,
-  "GLOBAL 8135 (W/m2 (Ave))"  = max(0., round(display_line$GCM3Up_Avg, 0)), # incoming shortwave
+  "GLOBAL 8135 (W/m2 (Ave))"  = max(0., round(display_line[["garden"]]$GCM3Up_Avg, 0)), # incoming shortwave
   "HFP01 00640 (W/m2 (Ave))"  = as.numeric(uv_df$V3), # UV index
-  "HFP01 00639 (W/m2 (Ave))"  = round(display_line$GCG3UpCo_Avg, 0), # incoming longwave
-  "ML2X-1 (% (Ave))"          = round(display_line$GWS_ms_S_WVT, 1), # wind speed
+  "HFP01 00639 (W/m2 (Ave))"  = round(display_line[["garden"]]$GCG3UpCo_Avg, 0), # incoming longwave
+  "ML2X-1 (% (Ave))"          = round(display_line[["garden"]]$GWS_ms_S_WVT, 1), # wind speed
   "ML2X-2 (% (Ave))"          = NA,
   "ML2X-3 (% (Ave))"          = NA,
   "ML2X-4 (% (Ave))"          = NA,
@@ -87,12 +93,12 @@ display_df <- data.frame(
   "Bilanz unten (W/m2 (Ave))" = NA,
   "Bilanz Temp (degC (Ave))"  = NA,
   "RM826-02 (mm)"             = round(precip_sum, 1), # precipitation
-  "RFT2 Feuchte (% (Ave))"    = round(display_line$GRH_2*100, 0), # relative humidity
-  "RFT2 Temp ( C (Ave))"      = round(display_line$GAirTC_2_Avg, 1), # 2m temperature
+  "RFT2 Feuchte (% (Ave))"    = round(display_line[["garden"]]$GRH_2*100, 0), # relative humidity
+  "RFT2 Temp ( C (Ave))"      = round(display_line[["garden"]]$GAirTC_2_Avg, 1), # 2m temperature
   stringsAsFactors = FALSE
 )
 
-filecon <- file(args[2], open = "wt")
+filecon <- file(args[3], open = "wt")
 writeLines(
   "Date,Time,uSec,GLOBAL 8135 (W/m2 (Ave)),HFP01 00640 (W/m2 (Ave)),HFP01 00639 (W/m2 (Ave)),ML2X-1 (% (Ave)),ML2X-2 (% (Ave)),ML2X-3 (% (Ave)),ML2X-4 (% (Ave)),TH2-1 (degC (Ave)),TH2-2 (degC (Ave)),TH2-3 (degC (Ave)),TH2-4 (degC (Ave)),TH2-6 (degC (Ave)),Bilanz oben (W/m2 (Ave)),Bilanz unten (W/m2 (Ave)),Bilanz Temp (degC (Ave)),RM826-02 (mm),RFT2 Feuchte (% (Ave)),RFT2 Temp ( C (Ave))",
   con = filecon)
