@@ -47,7 +47,7 @@ for (station_index in seq_along(station_names)) {
 
 # get md_id of precipitation
 md_id_precip <- dbGetQuery(con, paste("SELECT md_id FROM measurand_detail",
-                                      "WHERE pq_name = 'rainfall_amount' AND site_name = 'Adlershof_Garden'",
+                                      "WHERE pq_name = 'rainfall_amount' AND site_name = 'Adlershof_Roof'",
                                       "ORDER BY md_setup_datetime DESC LIMIT 1;"))[1,1]
 
 # time one hour before latest entry here
@@ -77,11 +77,11 @@ display_df <- data.frame(
   Date = strftime(display_line[["garden"]]$Datetime, format="%d.%m.%Y", tz = "Europe/Berlin"),
   Time = strftime(display_line[["garden"]]$Datetime, format="%H:%M", tz = "Europe/Berlin"),
   uSec = NA,
-  "GLOBAL 8135 (W/m2 (Ave))"  = max(0., round(display_line[["garden"]]$GCM3Up_Avg, 0)), # incoming shortwave
+  "GLOBAL 8135 (W/m2 (Ave))"  = max(0., round(display_line[["roof"]]$RSR01Up1_Avg, 0)), # incoming shortwave roof
   "HFP01 00640 (W/m2 (Ave))"  = as.numeric(uv_df$V3), # UV index
-  "HFP01 00639 (W/m2 (Ave))"  = round(display_line[["garden"]]$GCG3UpCo_Avg, 0), # incoming longwave
-  "ML2X-1 (% (Ave))"          = round(display_line[["garden"]]$GWS_ms_S_WVT, 1), # wind speed
-  "ML2X-2 (% (Ave))"          = NA,
+  "HFP01 00639 (W/m2 (Ave))"  = round(display_line[["roof"]]$RIR01UpCo1_Avg, 0), # incoming longwave roof
+  "ML2X-1 (% (Ave))"          = round(display_line[["roof"]]$RWS_ms_S_WVT, 1), # wind speed roof
+  "ML2X-2 (% (Ave))"          = round(display_line[["roof"]]$RBP_mbar_Avg, 0), # pressure roof
   "ML2X-3 (% (Ave))"          = NA,
   "ML2X-4 (% (Ave))"          = NA,
   "TH2-1 (degC (Ave))"        = NA,
@@ -92,9 +92,9 @@ display_df <- data.frame(
   "Bilanz oben (W/m2 (Ave))"  = NA,
   "Bilanz unten (W/m2 (Ave))" = NA,
   "Bilanz Temp (degC (Ave))"  = NA,
-  "RM826-02 (mm)"             = round(precip_sum, 1), # precipitation
-  "RFT2 Feuchte (% (Ave))"    = round(display_line[["garden"]]$GRH_2*100, 0), # relative humidity
-  "RFT2 Temp ( C (Ave))"      = round(display_line[["garden"]]$GAirTC_2_Avg, 1), # 2m temperature
+  "RM826-02 (mm)"             = round(precip_sum, 1), # precipitation roof
+  "RFT2 Feuchte (% (Ave))"    = round(display_line[["garden"]]$GRH_2*100, 0), # relative humidity garden
+  "RFT2 Temp ( C (Ave))"      = round(display_line[["garden"]]$GAirTC_2_Avg, 1), # 2m temperature garden
   stringsAsFactors = FALSE
 )
 
