@@ -86,7 +86,7 @@ ui <- fluidPage(
     column(4,
            dateRangeInput("dateRange", label = "Darstellungszeitraum",
                           start = Sys.Date()-7, end = Sys.Date(),
-                          min = "2018-01-16", max = Sys.Date(),
+                          min = "2017-12-23", max = Sys.Date(),
                           language = 'de', weekstart = 1,
                           separator = " bis ")
     ),
