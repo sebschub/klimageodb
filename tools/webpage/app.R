@@ -23,28 +23,26 @@ con <- dbConnect_klimageo(user = "klimageo_1")
 # get md_id
 measurand <- tbl(con, "measurand_detail") %>%
   filter((pq_name == "air_temperature" &
-          site_name == "Adlershof_Garden" &
+          site_name %in% c("Adlershof_Garden", "Adlershof_Roof") &
           md_height == 2.) |
          (pq_name == "wind_speed" &
-          site_name == "Adlershof_Garden" &
-          md_height == 2.) |
+          site_name %in% c("Adlershof_Garden", "Adlershof_Roof") ) |
          (pq_name == "wind_from_direction" &
-          site_name == "Adlershof_Garden" &
-          md_height == 2.) |
+          site_name %in% c("Adlershof_Garden", "Adlershof_Roof") ) |
          (pq_name == "relative_humidity" &
-          site_name == "Adlershof_Garden" &
+          site_name %in% c("Adlershof_Garden", "Adlershof_Roof") &
           md_height == 2.) |
          (pq_name == "surface_downwelling_shortwave_flux_in_air" &
-          site_name == "Adlershof_Garden" &
+          site_name %in% c("Adlershof_Garden", "Adlershof_Roof") &
           md_height == 2.) |
          (pq_name == "surface_upwelling_shortwave_flux_in_air" &
-          site_name == "Adlershof_Garden" &
+          site_name %in% c("Adlershof_Garden", "Adlershof_Roof") &
           md_height == 2.) |
          (pq_name == "surface_downwelling_longwave_flux_in_air" &
-          site_name == "Adlershof_Garden" &
+          site_name %in% c("Adlershof_Garden", "Adlershof_Roof") &
           md_height == 2.) |
          (pq_name == "surface_upwelling_longwave_flux_in_air" &
-          site_name == "Adlershof_Garden" &
+          site_name %in% c("Adlershof_Garden", "Adlershof_Roof") &
           md_height == 2.)
   ) %>% collect()
 
@@ -54,7 +52,9 @@ data_complete <- tbl(con, "station_adlershof_corrected") %>%
   filter(md_id %in% measurand$md_id) %>% collect() %>%
   left_join(measurand, by = "md_id") %>%
   mutate(stadl_value = if_else(pq_name == "air_temperature", stadl_value - 273.15, stadl_value)) %>%
-  mutate(stadl_value = if_else(pq_name == "relative_humidity", stadl_value * 100,  stadl_value))
+  mutate(stadl_value = if_else(pq_name == "relative_humidity", stadl_value * 100,  stadl_value)) %>%
+  mutate(site_name   = factor(if_else(site_name == "Adlershof_Garden", "Messgarten",  "Institutsdach"),
+                              levels = c("Messgarten",  "Institutsdach")))
 
 
 dbDisconnect(con)
@@ -85,7 +85,7 @@ ui <- fluidPage(
     ),
     column(4,
            dateRangeInput("dateRange", label = "Darstellungszeitraum",
-                          start = Sys.Date()-14, end = Sys.Date(),
+                          start = Sys.Date()-7, end = Sys.Date(),
                           min = "2018-01-16", max = Sys.Date(),
                           language = 'de', weekstart = 1,
                           separator = " bis ")
@@ -113,6 +113,20 @@ ui <- fluidPage(
 
 server <- function(input, output) {
 
+  plot_pq <- function(pq, ylab, line = TRUE) {
+    p <- ggplot(filter(data_statistics(), pq_name == pq),
+                aes(x = stadl_datetime, y = stadl_value, color = site_name)) +
+      geom_point() +
+      labs(x = "Datum/Uhrzeit", y = ylab, color = "Ort") +
+      theme_light() +
+      theme(axis.title = element_text(size = 18),
+            axis.text = element_text(size = 16),
+            legend.title = element_text(size = 18),
+            legend.text = element_text(size = 16))
+    if (line) p <- p + geom_line()
+    p
+  }
+  
   data_range <- reactive({
     data_complete %>%
       filter(stadl_datetime >= input$dateRange[1],
@@ -124,7 +138,7 @@ server <- function(input, output) {
       shinyjs::disable("averaging")
       data_range() %>%
         mutate(stadl_datetime = hour(stadl_datetime)) %>%
-        group_by(pq_name, stadl_datetime) %>%
+        group_by(pq_name, site_name, stadl_datetime) %>%
         summarise(stadl_value = ifelse(
           any(pq_name == "wind_from_direction"),
           mean(circular(stadl_value, units = "degrees", modulo = "2pi"), na.rm = TRUE),
@@ -135,7 +149,7 @@ server <- function(input, output) {
       if (input$averaging != "original") {
         data_range() %>%
           mutate(stadl_datetime = floor_date(stadl_datetime, unit = input$averaging)) %>%
-          group_by(pq_name, stadl_datetime) %>%
+          group_by(pq_name, site_name, stadl_datetime) %>%
           summarise(stadl_value = ifelse(
             any(pq_name == "wind_from_direction"),
             mean(circular(stadl_value, units = "degrees", modulo = "2pi"), na.rm = TRUE),
@@ -149,74 +163,28 @@ server <- function(input, output) {
 
   plots <- reactive({
     list(temperature =
-           ggplot(filter(data_statistics(), pq_name == "air_temperature"),
-                  aes(x = stadl_datetime, y = stadl_value)) +
-           geom_point() + geom_line() +
-           labs(x = "Datum/Uhrzeit", y = "T2m (°C)") +
-           theme_light() +
-           theme(axis.title = element_text(size = 18),
-                 axis.text = element_text(size = 16)),
+           plot_pq("air_temperature", "T2m (°C)")
+         ,
          relativehumidity =
-           ggplot(filter(data_statistics(), pq_name == "relative_humidity"),
-                  aes(x = stadl_datetime, y = stadl_value)) +
-           geom_point() + geom_line() +
-           labs(x = "Datum/Uhrzeit", y = "RF (%)") +
-           theme_light() +
-           theme(axis.title = element_text(size = 18),
-                 axis.text = element_text(size = 16)),
+           plot_pq("relative_humidity", "RF (%)")
+         ,
          windspeed =
-           ggplot(filter(data_statistics(), pq_name == "wind_speed"),
-                  aes(x = stadl_datetime, y = stadl_value)) +
-           geom_point() + geom_line() +
-           labs(x = "Datum/Uhrzeit", y = "WG (m/s)") +
-           theme_light() +
-           theme(axis.title = element_text(size = 18),
-                 axis.text = element_text(size = 16))
+           plot_pq("wind_speed", "WG (m/s)", line = FALSE)
          ,
          winddirection =
-           ggplot(filter(data_statistics(), pq_name == "wind_from_direction"),
-                  aes(x = stadl_datetime, y = stadl_value)) +
-           geom_point() +
-           labs(x = "Datum/Uhrzeit", y = "WR (°)") +
-           theme_light() +
-           theme(axis.title = element_text(size = 18),
-                 axis.text = element_text(size = 16))
+           plot_pq("wind_from_direction", "WR (°)", line = FALSE)
          ,
          shortwaveincoming =
-           ggplot(filter(data_statistics(), pq_name == "surface_downwelling_shortwave_flux_in_air"),
-                  aes(x = stadl_datetime, y = stadl_value)) +
-           geom_point() + geom_line() +
-           labs(x = "Datum/Uhrzeit", y = "KW↓ (W/m²)") +
-           theme_light() +
-           theme(axis.title = element_text(size = 18),
-                 axis.text = element_text(size = 16))
+           plot_pq("surface_downwelling_shortwave_flux_in_air", "KW↓ (W/m²)")
          ,
          shortwaveoutgoing =
-           ggplot(filter(data_statistics(), pq_name == "surface_upwelling_shortwave_flux_in_air"),
-                  aes(x = stadl_datetime, y = stadl_value)) +
-           geom_point() + geom_line() +
-           labs(x = "Datum/Uhrzeit", y = "KW↑ (W/m²)") +
-           theme_light() +
-           theme(axis.title = element_text(size = 18),
-                 axis.text = element_text(size = 16))
+           plot_pq("surface_upwelling_shortwave_flux_in_air", "KW↑ (W/m²)")
          ,
          longwaveincoming =
-           ggplot(filter(data_statistics(), pq_name == "surface_downwelling_longwave_flux_in_air"),
-                  aes(x = stadl_datetime, y = stadl_value)) +
-           geom_point() + geom_line() +
-           labs(x = "Datum/Uhrzeit", y = "LW↓ (W/m²)") +
-           theme_light() +
-           theme(axis.title = element_text(size = 18),
-                 axis.text = element_text(size = 16))
+           plot_pq("surface_downwelling_longwave_flux_in_air", "LW↓ (W/m²)")
          ,
          longwaveoutgoing =
-           ggplot(filter(data_statistics(), pq_name == "surface_upwelling_longwave_flux_in_air"),
-                  aes(x = stadl_datetime, y = stadl_value)) +
-           geom_point() + geom_line() +
-           labs(x = "Datum/Uhrzeit", y = "LW↑ (W/m²)") +
-           theme_light() +
-           theme(axis.title = element_text(size = 18),
-                 axis.text = element_text(size = 16))
+           plot_pq("surface_upwelling_longwave_flux_in_air", "LW↑ (W/m²)")
     )
   })
 
