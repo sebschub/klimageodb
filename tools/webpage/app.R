@@ -169,7 +169,7 @@ server <- function(input, output) {
            plot_pq("relative_humidity", "RF (%)")
          ,
          windspeed =
-           plot_pq("wind_speed", "WG (m/s)", line = FALSE)
+           plot_pq("wind_speed", "WG (m/s)")
          ,
          winddirection =
            plot_pq("wind_from_direction", "WR (°)", line = FALSE)
