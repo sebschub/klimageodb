@@ -77,25 +77,36 @@ ui <- fluidPage(
   titlePanel("Messstation der Klimageographie in Adlershof"),
 
   fluidRow(
+    # shinyjs::useShinyjs used for greying out in case of diurnal cycle
     shinyjs::useShinyjs(),
+    column(6,
+           # have the entries distributed into 2 columns
+           tags$head(tags$style(HTML(
+".multicol{font-size:12px;
+height:auto;
+-webkit-column-count: 2;
+-moz-column-count: 2;
+column-count: 2;
+}
+div.checkbox {margin-top: 0px;}"))),
+           strong(p("Messgrößen")),
+           tags$div(align = "left", 
+                    class = "multicol",
+                    checkboxGroupInput("measurands", label = NULL,
+                                       choices = measurand_label,
+                                       selected = c(1, 2, 3))
+           )),
     column(3,
-           checkboxGroupInput("measurands", label = "Messgrößen",
-                              choices = measurand_label,
-                              selected = 1)
-    ),
-    column(4,
            dateRangeInput("dateRange", label = "Darstellungszeitraum",
                           start = Sys.Date()-7, end = Sys.Date(),
                           min = "2017-12-23", max = Sys.Date(),
                           language = 'de', weekstart = 1,
-                          separator = " bis ")
+                          separator = " bis "),
+           radioButtons("kind", label = "Darstellungsart",
+                        choices = list("Zeitreihe" = 1, "mittlerer Tagesgang" = 2),
+                        selected = 1)
     ),
     column(3,
-      radioButtons("kind", label = "Darstellungsart",
-                   choices = list("Zeitreihe" = 1, "mittlerer Tagesgang" = 2),
-                   selected = 1)
-    ),
-    column(2,
            radioButtons("averaging", label = "Mittelung der Zeitreihe",
                         choices = list("Original" = "original",
                                        "Stunden" = "hours",
