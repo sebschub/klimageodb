@@ -130,7 +130,8 @@ server <- function(input, output) {
       geom_point() +
       labs(x = "Datum/Uhrzeit", y = ylab, color = "Ort") +
       theme_light() +
-      theme(axis.title = element_text(size = 18),
+      theme(axis.title.x = element_text(size = 18),
+            axis.title.y = element_text(size = 18, margin = margin(t = 0, r = 12, b = 0, l = 0)),
             axis.text = element_text(size = 16),
             legend.title = element_text(size = 18),
             legend.text = element_text(size = 16))
