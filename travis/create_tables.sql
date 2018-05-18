@@ -1,6 +1,7 @@
 CREATE SCHEMA metadata;
 CREATE SCHEMA adlershof;
-ALTER DATABASE klimageo SET search_path TO metadata,adlershof,public;
+SET search_path TO metadata,adlershof,public; -- for current session
+ALTER DATABASE klimageo SET search_path TO metadata,adlershof,public; -- for later
 
 CREATE TABLE metadata.site (
     site_id       smallserial PRIMARY KEY,
