@@ -1,4 +1,8 @@
-CREATE TABLE site (
+CREATE SCHEMA metadata;
+CREATE SCHEMA adlershof;
+ALTER DATABASE klimageo SET search_path TO metadata,adlershof,public;
+
+CREATE TABLE metadata.site (
     site_id       smallserial PRIMARY KEY,
     site_name     varchar(30) NOT NULL UNIQUE,
     site_lat      double precision CHECK (site_lat      >=  -90. AND site_lat      <=    90.),
@@ -17,7 +21,7 @@ CREATE TABLE site (
   COMMENT ON COLUMN site.site_comment  IS 'additional information';
 
 
-CREATE TABLE device_manufacturer (
+CREATE TABLE metadata.device_manufacturer (
     devman_id      smallserial PRIMARY KEY,
     devman_name    varchar(30) NOT NULL UNIQUE,
     devman_comment varchar(200)
@@ -28,7 +32,7 @@ CREATE TABLE device_manufacturer (
   COMMENT ON COLUMN device_manufacturer.devman_comment IS 'additional information';
 
 
-CREATE TABLE device_type (
+CREATE TABLE metadata.device_type (
     devtype_id      smallserial PRIMARY KEY,
     devtype_name    varchar(50) NOT NULL UNIQUE,
     devtype_comment varchar(200)
@@ -39,7 +43,7 @@ CREATE TABLE device_type (
   COMMENT ON COLUMN device_type.devtype_comment IS 'additional information';
 
 
-CREATE TABLE device_model (
+CREATE TABLE metadata.device_model (
     devmod_id      smallserial PRIMARY KEY,
     devmod_name    varchar(30) NOT NULL UNIQUE,
     devtype_id     smallint NOT NULL REFERENCES device_type(devtype_id),
@@ -54,7 +58,7 @@ CREATE TABLE device_model (
   COMMENT ON COLUMN device_model.devmod_comment IS 'additional information';
 
 
-CREATE TABLE device (
+CREATE TABLE metadata.device (
     dev_id                     smallserial PRIMARY KEY,
     dev_name                   varchar(40) NOT NULL UNIQUE,
     devmod_id                  smallint NOT NULL REFERENCES device_model(devmod_id),
@@ -69,7 +73,7 @@ CREATE TABLE device (
   COMMENT ON COLUMN device.dev_comment               IS 'additional information';
 
 
-CREATE TABLE calibration_state (
+CREATE TABLE metadata.calibration_state (
     calstate_id         smallserial PRIMARY KEY,
     dev_id              smallint NOT NULL REFERENCES device(dev_id),
     calstate_datetime   timestamp WITH TIME ZONE CHECK (calstate_datetime >= '1980-01-01' AND calstate_datetime < NOW()),
@@ -88,7 +92,7 @@ CREATE TABLE calibration_state (
   COMMENT ON COLUMN calibration_state.calstate_comment   IS 'additional information';
 
 
-CREATE TABLE physical_quantity (
+CREATE TABLE metadata.physical_quantity (
     pq_id          smallserial PRIMARY KEY,
     pq_name        varchar(200) NOT NULL,
     pq_unit        varchar(20) NOT NULL,
@@ -105,7 +109,7 @@ CREATE TABLE physical_quantity (
 
 
 
-CREATE TABLE integration_type (
+CREATE TABLE metadata.integration_type (
     inttype_id          smallserial PRIMARY KEY,
     inttype_name        varchar(30) NOT NULL UNIQUE,
     inttype_description varchar(100) NOT NULL UNIQUE,
@@ -119,7 +123,7 @@ CREATE TABLE integration_type (
 
 
 
-CREATE TABLE integration (
+CREATE TABLE metadata.integration (
     int_id                   smallserial PRIMARY KEY,
     inttype_id               smallint NOT NULL REFERENCES integration_type(inttype_id),
     int_measurement_interval double precision NOT NULL
@@ -140,7 +144,7 @@ CREATE TABLE integration (
   COMMENT ON COLUMN integration.int_comment              IS 'additional information';
 
 
-CREATE TABLE person (
+CREATE TABLE metadata.person (
     pers_id      smallserial PRIMARY KEY,
     pers_name    varchar(30) NOT NULL UNIQUE,
     pers_comment varchar(200)
@@ -151,7 +155,7 @@ CREATE TABLE person (
   COMMENT ON COLUMN person.pers_comment IS 'additional information';
 
 
-CREATE TABLE measurand (
+CREATE TABLE metadata.measurand (
     md_id             smallserial PRIMARY KEY,
     md_name           varchar(20) NOT NULL,
     md_setup_datetime timestamp with time zone NOT NULL CHECK (md_setup_datetime >= '1980-01-01' AND md_setup_datetime < NOW()),
@@ -183,7 +187,7 @@ CREATE TABLE measurand (
   COMMENT ON COLUMN measurand.md_comment        IS 'additional information';
 
 
-CREATE TABLE quality_flag (
+CREATE TABLE metadata.quality_flag (
     qf_id          smallint PRIMARY KEY CHECK (qf_id > 0), -- no serial, because we want to choose values here
     qf_name        varchar(30) NOT NULL UNIQUE,
     qf_description varchar(100) NOT NULL UNIQUE,
@@ -197,7 +201,7 @@ CREATE TABLE quality_flag (
 
 
 
-CREATE TABLE station_adlershof (
+CREATE TABLE adlershof.station_adlershof (
     stadl_id       serial PRIMARY KEY, -- conversion to bigserial might be required later
     stadl_datetime timestamp with time zone NOT NULL
       CHECK (stadl_datetime >= '2000-01-01' AND stadl_datetime < NOW()),
@@ -213,7 +217,7 @@ CREATE TABLE station_adlershof (
   COMMENT ON COLUMN station_adlershof.stadl_value    IS 'actual value of measurement';
   COMMENT ON COLUMN station_adlershof.qf_id          IS 'references quality flag, 1<=qf<=9: value ok, qf>=10: value not ok, NULL: not analysed';
 
-CREATE TABLE station_adlershof_correction (
+CREATE TABLE adlershof.station_adlershof_correction (
     stadlcor_id       serial PRIMARY KEY, -- conversion to bigserial might be required later
     stadl_id          integer NOT NULL UNIQUE REFERENCES station_adlershof(stadl_id), -- conversion to bigint might be required later
     stadlcor_datetime timestamp with time zone NOT NULL
@@ -231,28 +235,28 @@ CREATE TABLE station_adlershof_correction (
 
 
 
-CREATE VIEW device_model_detail AS
+CREATE VIEW metadata.device_model_detail AS
   SELECT devmod_id, devmod_name, devtype_name, devman_name, devmod_comment FROM device_model
     LEFT OUTER JOIN device_type         USING (devtype_id)
     LEFT OUTER JOIN device_manufacturer USING (devman_id);
   COMMENT ON VIEW device_model_detail IS 'measurement device model with joined details';
 
-CREATE VIEW device_detail AS
+CREATE VIEW metadata.device_detail AS
   SELECT dev_id, dev_name, devtype_name, devmod_name, devman_name, dev_comment FROM device
     LEFT OUTER JOIN device_model_detail USING (devmod_id);
   COMMENT ON VIEW device_detail IS 'measurement device with joined details';
 
-CREATE VIEW calibration_state_detail AS
+CREATE VIEW metadata.calibration_state_detail AS
   SELECT calstate_id, dev_name, devtype_name, devmod_name, devman_name, calstate_datetime, calstate_parameter, calstate_comment FROM calibration_state
     LEFT OUTER JOIN device_detail USING (dev_id);
   COMMENT ON VIEW calibration_state_detail IS 'calibrated measurement device with joined details';
 
-CREATE VIEW integration_detail AS
+CREATE VIEW metadata.integration_detail AS
   SELECT int_id, inttype_name, int_measurement_interval, int_interval, int_comment FROM integration
     LEFT OUTER JOIN integration_type USING (inttype_id);
   COMMENT ON VIEW integration_detail IS 'integration with joined details';
 
-CREATE VIEW measurand_detail AS
+CREATE VIEW metadata.measurand_detail AS
   SELECT md_id, md_name, md_setup_datetime, pq_name, pq_unit, site_name, dev_name, devmod_name, calstate_datetime, md_height, md_orientation, md_tilt, inttype_name, int_measurement_interval, int_interval, pers_name, md_comment FROM measurand
     LEFT OUTER JOIN physical_quantity        USING (pq_id)
     LEFT OUTER JOIN site                     USING (site_id)
@@ -261,7 +265,7 @@ CREATE VIEW measurand_detail AS
     LEFT OUTER JOIN person                   USING (pers_id);
   COMMENT ON VIEW measurand_detail IS 'measurand with joined details';
 
-CREATE VIEW station_adlershof_corrected AS
+CREATE VIEW adlershof.station_adlershof_corrected AS
   SELECT orig.stadl_id,
     CASE WHEN qf_id >= 10 THEN corr.stadlcor_datetime ELSE orig.stadl_datetime END AS stadl_datetime,
     CASE WHEN qf_id >= 10 THEN corr.md_id             ELSE orig.md_id          END AS md_id,
