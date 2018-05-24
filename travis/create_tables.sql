@@ -1,7 +1,8 @@
 CREATE SCHEMA metadata;
 CREATE SCHEMA adlershof;
-SET search_path TO metadata,adlershof,public; -- for current session
-ALTER DATABASE klimageo SET search_path TO metadata,adlershof,public; -- for later
+CREATE SCHEMA patagonia;
+SET search_path TO metadata,adlershof,patagonia,public; -- for current session
+ALTER DATABASE klimageo SET search_path TO metadata,adlershof,patagonia,public; -- for later
 
 CREATE TABLE metadata.site (
     site_id       smallserial PRIMARY KEY,
@@ -235,6 +236,40 @@ CREATE TABLE adlershof.station_adlershof_correction (
   COMMENT ON COLUMN station_adlershof_correction.stadlcor_value    IS 'actual value of corrected measurement';
 
 
+CREATE TABLE patagonia.station_patagonia (
+    stapa_id       serial PRIMARY KEY, -- conversion to bigserial might be required later
+    stapa_datetime timestamp with time zone NOT NULL
+      CHECK (stapa_datetime >= '2000-01-01' AND stapa_datetime < NOW()),
+    md_id          smallint NOT NULL REFERENCES measurand(md_id),
+    stapa_value    double precision,
+    qf_id          smallint REFERENCES quality_flag(qf_id),
+    UNIQUE (stapa_datetime, md_id)
+    );
+  COMMENT ON TABLE  station_patagonia                IS 'measurements at Patagonia sites';
+  COMMENT ON COLUMN station_patagonia.stapa_id       IS 'ID';
+  COMMENT ON COLUMN station_patagonia.stapa_datetime IS 'date and time (with time zone) of measurement';
+  COMMENT ON COLUMN station_patagonia.md_id          IS 'reference to measurand that was measured';
+  COMMENT ON COLUMN station_patagonia.stapa_value    IS 'actual value of measurement';
+  COMMENT ON COLUMN station_patagonia.qf_id          IS 'references quality flag, 1<=qf<=9: value ok, qf>=10: value not ok, NULL: not analysed';
+
+CREATE TABLE patagonia.station_patagonia_correction (
+    stapacor_id       serial PRIMARY KEY, -- conversion to bigserial might be required later
+    stapa_id          integer NOT NULL UNIQUE REFERENCES station_patagonia(stapa_id), -- conversion to bigint might be required later
+    stapacor_datetime timestamp with time zone NOT NULL
+      CHECK (stapacor_datetime >= '2000-01-01' AND stapacor_datetime < NOW()),
+    md_id             smallint NOT NULL REFERENCES measurand(md_id),
+    stapacor_value    double precision,
+    UNIQUE (stapacor_datetime, md_id)
+    );
+  COMMENT ON TABLE  station_patagonia_correction                   IS 'only corrected measurements at Patagonia sites';
+  COMMENT ON COLUMN station_patagonia_correction.stapacor_id       IS 'ID';
+  COMMENT ON COLUMN station_patagonia_correction.stapa_id          IS 'references the measurement to correct in station patagonia';
+  COMMENT ON COLUMN station_patagonia_correction.stapacor_datetime IS 'date and time (with time zone) of corrected measurement';
+  COMMENT ON COLUMN station_patagonia_correction.md_id             IS 'reference to measurand that was measured';
+  COMMENT ON COLUMN station_patagonia_correction.stapacor_value    IS 'actual value of corrected measurement';
+
+
+
 
 CREATE VIEW metadata.device_model_detail AS
   SELECT devmod_id, devmod_name, devtype_name, devman_name, devmod_comment FROM device_model
@@ -274,3 +309,12 @@ CREATE VIEW adlershof.station_adlershof_corrected AS
     orig.qf_id
     FROM station_adlershof orig LEFT OUTER JOIN station_adlershof_correction corr USING (stadl_id);
   COMMENT ON VIEW station_adlershof_corrected IS 'corrected measurements of Adlershof site by joining station_adlershof and station_adlershof_correction';
+
+CREATE VIEW patagonia.station_patagonia_corrected AS
+  SELECT orig.stapa_id,
+    CASE WHEN qf_id >= 10 THEN corr.stapacor_datetime ELSE orig.stapa_datetime END AS stapa_datetime,
+    CASE WHEN qf_id >= 10 THEN corr.md_id             ELSE orig.md_id          END AS md_id,
+    CASE WHEN qf_id >= 10 THEN corr.stapacor_value    ELSE orig.stapa_value    END AS stapa_value,
+    orig.qf_id
+    FROM station_patagonia orig LEFT OUTER JOIN station_patagonia_correction corr USING (stapa_id);
+  COMMENT ON VIEW station_patagonia_corrected IS 'corrected measurements of Patagonia site by joining station_patagonia and station_patagonia_correction';
