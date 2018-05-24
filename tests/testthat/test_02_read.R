@@ -36,12 +36,14 @@ test_tables <- c("site",
                  "person",
                  "measurand",
                  "quality_flag",
-                 "station_adlershof", "station_adlershof_correction")
+                 "station_adlershof", "station_adlershof_correction",
+                 "station_patagonia", "station_patagonia_correction")
 
 test_views <- c("device_model_detail", "device_detail", "calibration_state_detail",
                 "integration_detail",
                 "measurand_detail",
-                "station_adlershof_corrected")
+                "station_adlershof_corrected",
+                "station_patagonia_corrected")
 
 for (table in c(test_tables, test_views)) {
   simple_read_test(con, table)

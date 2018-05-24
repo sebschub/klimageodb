@@ -38,6 +38,7 @@ dbDisconnect(con)
 }
 \seealso{
 Other custom dbWriteTable functions: \code{\link{dbAddCorrection_station_adlershof}},
+  \code{\link{dbAddCorrection_station_patagonia}},
   \code{\link{dbAdd_calibration_state}},
   \code{\link{dbAdd_device_model}},
   \code{\link{dbAdd_device}},
@@ -45,6 +46,7 @@ Other custom dbWriteTable functions: \code{\link{dbAddCorrection_station_adlersh
   \code{\link{dbAdd_measurand}},
   \code{\link{dbAdd_physical_quantity}},
   \code{\link{dbAdd_station_adlershof}},
+  \code{\link{dbAdd_station_patagonia}},
   \code{\link{dbWriteTable_device_manufacturer}},
   \code{\link{dbWriteTable_device_type}},
   \code{\link{dbWriteTable_integration_type}},

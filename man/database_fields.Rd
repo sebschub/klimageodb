@@ -129,6 +129,17 @@ m.}
 measurement.}
 
 \item{stadlcor_value}{Numeric vector of corrected value of measurement.}
+
+\item{stapa_id}{Integer vector of \code{station_patagonia} ID.}
+
+\item{stapa_datetime}{POSIXct vector of date and time of measurement.}
+
+\item{stapa_value}{Numeric vector of measurement values.}
+
+\item{stapacor_datetime}{POSIXct vector of corrected date and time of
+measurement.}
+
+\item{stapacor_value}{Numeric vector of corrected value of measurement.}
 }
 \description{
 Collection of arguments to "@inheritParams" from

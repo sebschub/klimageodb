@@ -112,6 +112,18 @@ dbReadTable_station_adlershof_correction <- function(conn){
   DBI::dbReadTable(conn, "station_adlershof_correction")
 }
 
+#' @rdname readtable
+#' @export
+dbReadTable_station_patagonia <- function(conn){
+  DBI::dbReadTable(conn, "station_patagonia")
+}
+
+#' @rdname readtable
+#' @export
+dbReadTable_station_patagonia_correction <- function(conn){
+  DBI::dbReadTable(conn, "station_patagonia_correction")
+}
+
 
 # Views -------------------------------------------------------------------
 
@@ -149,4 +161,10 @@ dbReadTable_measurand_detail <- function(conn){
 #' @export
 dbReadTable_station_adlershof_corrected <- function(conn){
   DBI::dbReadTable(conn, "station_adlershof_corrected")
+}
+
+#' @rdname readtable
+#' @export
+dbReadTable_station_patagonia_corrected <- function(conn){
+  DBI::dbReadTable(conn, "station_patagonia_corrected")
 }

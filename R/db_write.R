@@ -69,6 +69,13 @@
 #' @param stadlcor_datetime POSIXct vector of corrected date and time of
 #'   measurement.
 #' @param stadlcor_value Numeric vector of corrected value of measurement.
+#' @param stapa_id Integer vector of \code{station_patagonia} ID.
+#' @param stapa_datetime POSIXct vector of date and time of measurement.
+#' @param stapa_value Numeric vector of measurement values.
+#' @param stapacor_datetime POSIXct vector of corrected date and time of
+#'   measurement.
+#' @param stapacor_value Numeric vector of corrected value of measurement.
+
 #'
 #' @name database_fields
 #' @keywords internal
@@ -942,6 +949,77 @@ dbWriteTable_station_adlershof <- function(conn,
 }
 
 
+#' Add measurements to \code{station_patagonia} table
+#'
+#' \code{dbWriteTable_station_patagonia} requires a correct measurand id while
+#' \code{dbAdd_station_patagonia} derives that from the measurand name.
+#'
+#' \code{dbWriteTable_station_patagonia} requires a correct measurand id
+#' \code{md_id} to write measurements to station_patagonia.
+#' \code{dbAdd_station_patagonia} finds \code{md_id} from a given measurand name
+#' \code{md_name}. To this end, it queries the table \code{measurand} and
+#' selects the according to \code{md_setup_datetime} the most recent
+#' \code{md_id}.
+#'
+#' @inheritParams database_fields
+#'
+#' @export
+#'
+#' @return For performance reason, contrary to the meta data table functions,
+#'   this function does not return anything.
+#' @family custom dbWriteTable functions
+#' @examples
+#' \dontrun{
+#' con <- dbConnect_klimageo()
+#' # add all required entries before with the respective dbWriteTable_*
+#' dbAdd_station_patagonia(con,
+#'                         md_name = "TA2M_1"
+#'                         stapa_datetime = as.POSIXct("2017-01-01 12:05:12", tz = "UTC"),
+#'                         stapa_value = 272.15)
+#' dbWriteTable_station_patagonia(con,
+#'                                stapa_datetime = as.POSIXct("2017-01-01 12:15:12", tz = "UTC"),
+#'                                md_id = 1,
+#'                                stapa_value = 273.15)
+#' dbDisconnect(con)
+#' }
+dbAdd_station_patagonia <- function(conn,
+                                    md_name,
+                                    stapa_datetime,
+                                    stapa_value,
+                                    qf_id = NULL) {
+
+  dbWithTransaction_or_Savepoint(conn, {
+    md_id <- get_ids_from_datetime_column(conn,
+                                          table = "measurand", id_name = "md_id",
+                                          column_name = "md_name",
+                                          column_values = md_name,
+                                          column_datetime = "md_setup_datetime")
+    if (any(is.na(md_id))) stop("No md_id for some md_name.")
+    # stapa_datetime checked in dbWriteTable_station_patagonia
+    dbWriteTable_station_patagonia(conn,
+                                   stapa_datetime = stapa_datetime,
+                                   md_id = md_id,
+                                   stapa_value = stapa_value,
+                                   qf_id = qf_id)
+  }, spname = "dbAddMeasurement_station_patagonia_savepoint")
+}
+
+
+#' @rdname dbAdd_station_patagonia
+#' @export
+dbWriteTable_station_patagonia <- function(conn,
+                                           stapa_datetime,
+                                           md_id,
+                                           stapa_value,
+                                           qf_id = NULL) {
+  if (!inherits(stapa_datetime, "POSIXct")) {
+    stop("stapa_datetime is not POSIXct.")
+  }
+  write_table(name = "station_patagonia", as.list(environment()), return_newrows = FALSE)
+}
+
+
+
 
 #' Add corrections of \code{station_adlershof} measurements
 #'
@@ -1027,3 +1105,90 @@ dbWriteTable_station_adlershof_correction <- function(conn,
               as.list(environment()),
               return_newrows = FALSE)
 }
+
+
+#' Add corrections of \code{station_patagonia} measurements
+#'
+#' In general, use \code{dbAddCorrection_station_patagonia} to consistently add
+#' the corrected measurement values to \code{station_patagonia_correction} and
+#' to modify the quality flags in \code{station_patagonia}.
+#' \code{dbWriteTable_station_patagonia_correction} and
+#' \code{dbUpdate_station_patagonia_qf_id} do the respective single actions.
+#'
+#' By design, qf_id with values >= 10 in \code{station_patagonia} indicates that
+#' entries in \code{station_patagonia} are corrected in
+#' \code{station_patagonia_correction}. Thus,
+#' \code{dbAddCorrection_station_patagonia} imposes the constraint qf_id >= 10.
+#' \code{dbUpdate_station_patagonia_qf_id}, on the other hand, allows general
+#' values of qf_id (further checks are done by the database).
+#'
+#'
+#' @inheritParams database_fields
+#'
+#' @return For performance reason, contrary to the meta data table functions,
+#'   these functions do not return anything.
+#' @family custom dbWriteTable functions
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' con <- dbConnect_klimageo()
+#' add all required entries before with the respective dbWriteTable_*
+#' dbAddCorrection_station_patagonia(
+#'   con,
+#'   stapa_id = c(1,2),
+#'   qf_id = c(11,11),
+#'   stapacor_datetime =
+#'   as.POSIXct(c("2017-01-01 12:15:12", "2017-01-01 12:15:12"), tz = "UTC"),
+#'   md_id = c(1,1),
+#'   stapacor_value = c(290.12, 289.23))
+#' dbDisconnect(con)
+#' }
+dbAddCorrection_station_patagonia <- function(conn,
+                                              stapa_id, qf_id,
+                                              stapacor_datetime,
+                                              md_id,
+                                              stapacor_value) {
+  if (!all(qf_id >= 10)) {
+    stop("Not all qf_id values are larger or equal 10.")
+  }
+  dbWithTransaction_or_Savepoint(conn, {
+    dbWriteTable_station_patagonia_correction(conn = conn,
+                                              stapa_id = stapa_id,
+                                              stapacor_datetime = stapacor_datetime,
+                                              md_id = md_id,
+                                              stapacor_value = stapacor_value)
+    dbUpdate_station_patagonia_qf_id(conn, stapa_id, qf_id)
+  }, spname = "dbAddCorrection_station_patagonia_savepoint")
+}
+
+
+
+#' @rdname dbAddCorrection_station_patagonia
+#' @export
+dbUpdate_station_patagonia_qf_id <- function(conn, stapa_id, qf_id) {
+  dbWithTransaction_or_Savepoint(conn, {
+    qf_id_update <-
+      DBI::dbSendStatement(conn,
+                           statement = 'UPDATE station_patagonia SET "qf_id"=$1 WHERE stapa_id=$2',
+                           params = list(qf_id, stapa_id))
+    DBI::dbClearResult(qf_id_update)
+  }, spname = "dbUpdateQF_station_patagonia_savepoint")
+}
+
+
+#' @rdname dbAddCorrection_station_patagonia
+#' @export
+dbWriteTable_station_patagonia_correction <- function(conn,
+                                                      stapa_id,
+                                                      stapacor_datetime,
+                                                      md_id,
+                                                      stapacor_value) {
+  if (!inherits(stapacor_datetime, "POSIXct")) {
+    stop("stapacor_datetime is not POSIXct.")
+  }
+  write_table(name = "station_patagonia_correction",
+              as.list(environment()),
+              return_newrows = FALSE)
+}
+

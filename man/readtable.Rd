@@ -16,12 +16,15 @@
 \alias{dbReadTable_quality_flag}
 \alias{dbReadTable_station_adlershof}
 \alias{dbReadTable_station_adlershof_correction}
+\alias{dbReadTable_station_patagonia}
+\alias{dbReadTable_station_patagonia_correction}
 \alias{dbReadTable_device_model_detail}
 \alias{dbReadTable_device_detail}
 \alias{dbReadTable_calibration_state_detail}
 \alias{dbReadTable_integration_detail}
 \alias{dbReadTable_measurand_detail}
 \alias{dbReadTable_station_adlershof_corrected}
+\alias{dbReadTable_station_patagonia_corrected}
 \title{Table reading}
 \usage{
 dbReadTable_site(conn)
@@ -52,6 +55,10 @@ dbReadTable_station_adlershof(conn)
 
 dbReadTable_station_adlershof_correction(conn)
 
+dbReadTable_station_patagonia(conn)
+
+dbReadTable_station_patagonia_correction(conn)
+
 dbReadTable_device_model_detail(conn)
 
 dbReadTable_device_detail(conn)
@@ -63,6 +70,8 @@ dbReadTable_integration_detail(conn)
 dbReadTable_measurand_detail(conn)
 
 dbReadTable_station_adlershof_corrected(conn)
+
+dbReadTable_station_patagonia_corrected(conn)
 }
 \arguments{
 \item{conn}{Database connection.}

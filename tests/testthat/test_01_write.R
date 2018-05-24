@@ -46,7 +46,8 @@ test_dbWriteTable_table <- function(conn, table, df, args_ind) {
     # call test function
     res <- do.call(write_function, write_args)
 
-    if (table %in% c("station_adlershof", "station_adlershof_correction")) {
+    if (table %in% c("station_adlershof", "station_adlershof_correction",
+                     "station_patagonia", "station_patagonia_correction")) {
       # get table from database because these functions don't get new data
       # THIS ONLY WORKS WHEN APPLIED TO EMPTY DATABASE!
       df_db <- dbReadTable(conn, table)
@@ -557,6 +558,114 @@ test_that("dbReadTable_station_adlershof_*", {
 
   test_transaction_completed(con)
 })
+
+
+
+station_patagonia_df <- data.frame(
+  stapa_id = c(1, 2, 3),
+  stapa_datetime = c(as.POSIXct("2017-01-01 12:15:12", tz = "UTC"),
+                     as.POSIXct("2017-01-01 16:15:12", tz = "CET"),
+                     as.POSIXct("2017-01-05 16:15:12", tz = "GMT")),
+  md_id = c(1, 1, 1),
+  stapa_value = c(293.15, 294.15, 270.15),
+  qf_id = as.integer(NA, NA, NA))
+
+test_dbWriteTable_table(con, "station_patagonia", station_patagonia_df, 2:4)
+
+md_name <- c("TA2M_1", "TA2M_1", "TA2M_2")
+station_patagonia_df_new <- data.frame(
+  stapa_id = c(4, 5, 6),
+  stapa_datetime = c(as.POSIXct("2017-02-01 12:15:12", tz = "UTC"),
+                     as.POSIXct("2017-02-01 16:15:12", tz = "CET"),
+                     as.POSIXct("2017-02-05 16:15:12", tz = "GMT")),
+  md_id = c(2, 2, 3),
+  stapa_value = c(293.15, 294.15, 270.15),
+  qf_id = as.integer(NA, NA, NA))
+
+station_patagonia_df <- rbind(station_patagonia_df, station_patagonia_df_new)
+
+test_that("dbAdd_station_patagonia", {
+  dbAdd_station_patagonia(
+    con,
+    md_name = md_name,
+    stapa_datetime = station_patagonia_df_new$stapa_datetime,
+    stapa_value = station_patagonia_df_new$stapa_value)
+  df <- dbReadTable_station_patagonia(con)
+  expect_equal(df, station_patagonia_df)
+  test_transaction_completed(con)
+})
+
+
+
+cor_stapa_id <- 1
+station_patagonia_df$qf_id[cor_stapa_id] <- 1
+test_that("dbUpdate_station_patagonia_qf_id", {
+  dbUpdate_station_patagonia_qf_id(con,
+                                   stapa_id = cor_stapa_id,
+                                   qf_id = station_patagonia_df$qf_id[cor_stapa_id])
+  df <- dbReadTable(con, "station_patagonia")
+  # reorder df because UPDATE changes original order
+  df <- df[order(df$stapa_id), ]
+  rownames(df) <- 1:nrow(df)
+  expect_equal(station_patagonia_df, df)
+  test_transaction_completed(con)
+})
+
+
+cor_stapa_id <- c(2, 3)
+station_patagonia_correction_df <-
+  data.frame(stapacor_id = c(1, 2),
+             stapa_id = cor_stapa_id,
+             stapacor_datetime = as.POSIXct(c("2017-05-01 16:15:12", "2017-05-05 16:15:12"), tz = "UTC"),
+             md_id = c(1,2),
+             stapacor_value = c(290.15, 278.15)
+  )
+station_patagonia_df$qf_id[cor_stapa_id] <- 11
+
+station_patagonia_corrected_df <- station_patagonia_df
+station_patagonia_corrected_df$stapa_datetime[cor_stapa_id] <- station_patagonia_correction_df$stapacor_datetime
+station_patagonia_corrected_df$md_id[cor_stapa_id]          <- station_patagonia_correction_df$md_id
+station_patagonia_corrected_df$stapa_value[cor_stapa_id]    <- station_patagonia_correction_df$stapacor_value
+
+test_that("dbAddCorrection_station_patagonia", {
+  dbAddCorrection_station_patagonia(con,
+                                    stapa_id = station_patagonia_correction_df$stapa_id,
+                                    qf_id = station_patagonia_df$qf_id[cor_stapa_id],
+                                    stapacor_datetime = station_patagonia_correction_df$stapacor_datetime,
+                                    md_id = station_patagonia_correction_df$md_id,
+                                    stapacor_value = station_patagonia_correction_df$stapacor_value)
+  df <- dbReadTable(con, "station_patagonia_correction")
+  expect_equal(station_patagonia_correction_df, df)
+  # no POSIXct should give error
+  expect_error(
+    dbAddCorrection_station_patagonia(con,
+                                      stapa_id = station_patagonia_correction_df$stapa_id,
+                                      qf_id = station_patagonia_df$qf_id[cor_stapa_id],
+                                      stapacor_datetime = as.character(station_patagonia_correction_df$stapacor_datetime),
+                                      md_id = station_patagonia_correction_df$md_id,
+                                      stapacor_value = station_patagonia_correction_df$stapacor_value),
+    "POSIXct"
+  )
+  test_transaction_completed(con)
+})
+
+test_that("dbReadTable_station_patagonia_*", {
+  # reading of only correction data
+  df <- dbReadTable_station_patagonia_correction(con)
+  expect_equal(station_patagonia_correction_df, df)
+
+  # reading of total corrected data (also check of correct VIEW definition)
+  df <- dbReadTable_station_patagonia_corrected(con)
+  # reorder df because UPDATE changes original order
+  df <- df[order(df$stapa_id), ]
+  rownames(df) <- 1:nrow(df)
+  expect_equal(station_patagonia_corrected_df, df)
+
+  test_transaction_completed(con)
+})
+
+
+
 
 
 
