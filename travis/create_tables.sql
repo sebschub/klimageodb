@@ -239,7 +239,7 @@ CREATE TABLE adlershof.station_adlershof_correction (
 CREATE TABLE patagonia.station_patagonia (
     stapa_id       serial PRIMARY KEY, -- conversion to bigserial might be required later
     stapa_datetime timestamp with time zone NOT NULL
-      CHECK (stapa_datetime >= '2000-01-01' AND stapa_datetime < NOW()),
+      CHECK (stapa_datetime >= '2015-01-01' AND stapa_datetime < NOW()),
     md_id          smallint NOT NULL REFERENCES measurand(md_id),
     stapa_value    double precision,
     qf_id          smallint REFERENCES quality_flag(qf_id),
