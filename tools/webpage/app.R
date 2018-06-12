@@ -127,7 +127,7 @@ server <- function(input, output) {
   plot_pq <- function(pq, ylab, line = TRUE) {
     p <- ggplot(filter(data_statistics(), pq_name == pq),
                 aes(x = stadl_datetime, y = stadl_value, color = site_name)) +
-      geom_point() +
+      #geom_point() +
       labs(x = "Datum/Uhrzeit", y = ylab, color = "Ort") +
       theme_light() +
       theme(axis.title.x = element_text(size = 18),
