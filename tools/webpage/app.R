@@ -18,7 +18,7 @@ library(klimageodb)
 #  poolClose(pool)
 #})
 
-con <- dbConnect_klimageo(user = "klimageo_1")
+con <- dbConnect_klimageo(user = "klimageo_6")
 
 # get md_id
 measurand <- tbl(con, "measurand_detail") %>%
