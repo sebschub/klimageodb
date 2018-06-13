@@ -128,13 +128,15 @@ server <- function(input, output) {
   plot_pq <- function(pq, ylab, line = TRUE) {
     p <- ggplot(filter(data_statistics(), pq_name == pq),
                 aes(x = stadl_datetime, y = stadl_value, color = site_name)) +
-      labs(x = NULL, y = ylab, color = "Ort") +
+      labs(x = NULL, y = ylab, color = NULL) +
       theme_light() +
       theme(axis.title.x = element_text(size = 18),
             axis.title.y = element_text(size = 18, margin = margin(t = 0, r = 12, b = 0, l = 0)),
             axis.text = element_text(size = 16),
-            legend.title = element_text(size = 18),
-            legend.text = element_text(size = 16))
+            #legend.title = element_text(size = 20, margin = margin(r = 30, unit = "pt")),
+            # margin is only supported with ggplot2 >= 2.3
+            legend.text = element_text(size = 18, margin = margin(r = 20, unit = "pt")),
+            legend.position="bottom")
     if (line) {
       p <- p + geom_line()
     } else {
@@ -221,7 +223,7 @@ server <- function(input, output) {
       # shown or not
       legend_plots <- get_legend(plots()[[1]])
       # add legend to plot
-      plot_grid(grid_plots, legend_plots, rel_widths = c(3, .5))
+      plot_grid(legend_plots, grid_plots, ncol = 1, align = "v", rel_heights = c(.5, 10))
     }
   })
 
