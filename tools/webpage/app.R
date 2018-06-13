@@ -127,7 +127,6 @@ server <- function(input, output) {
   plot_pq <- function(pq, ylab, line = TRUE) {
     p <- ggplot(filter(data_statistics(), pq_name == pq),
                 aes(x = stadl_datetime, y = stadl_value, color = site_name)) +
-      #geom_point() +
       labs(x = "Datum/Uhrzeit", y = ylab, color = "Ort") +
       theme_light() +
       theme(axis.title.x = element_text(size = 18),
@@ -135,7 +134,11 @@ server <- function(input, output) {
             axis.text = element_text(size = 16),
             legend.title = element_text(size = 18),
             legend.text = element_text(size = 16))
-    if (line) p <- p + geom_line()
+    if (line) {
+      p <- p + geom_line()
+    } else {
+      p <- p + geom_point(size = 0.8)
+    }
     p
   }
   
