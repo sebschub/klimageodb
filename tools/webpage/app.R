@@ -2,6 +2,7 @@ library(shiny)
 #library(pool)
 library(dplyr)
 library(ggplot2)
+library(cowplot)
 library(grid)
 library(lubridate)
 library(circular)
@@ -90,7 +91,7 @@ column-count: 2;
 }
 div.checkbox {margin-top: 0px;}"))),
            strong(p("Messgrößen")),
-           tags$div(align = "left", 
+           tags$div(align = "left",
                     class = "multicol",
                     checkboxGroupInput("measurands", label = NULL,
                                        choices = measurand_label,
@@ -127,7 +128,7 @@ server <- function(input, output) {
   plot_pq <- function(pq, ylab, line = TRUE) {
     p <- ggplot(filter(data_statistics(), pq_name == pq),
                 aes(x = stadl_datetime, y = stadl_value, color = site_name)) +
-      labs(x = "Datum/Uhrzeit", y = ylab, color = "Ort") +
+      labs(x = NULL, y = ylab, color = "Ort") +
       theme_light() +
       theme(axis.title.x = element_text(size = 18),
             axis.title.y = element_text(size = 18, margin = margin(t = 0, r = 12, b = 0, l = 0)),
@@ -141,7 +142,7 @@ server <- function(input, output) {
     }
     p
   }
-  
+
   data_range <- reactive({
     data_complete %>%
       filter(stadl_datetime >= input$dateRange[1],
@@ -205,19 +206,23 @@ server <- function(input, output) {
 
   output$plot <- renderPlot({
 
-    # show plots sith alignes x axis following https://gist.github.com/tomhopper/faa24797bb44addeba79
-    grobs <- NULL
-    for (m in seq_along(measurand_label)) {
-      if (m %in% input$measurands) {
-        if (is.null(grobs)) {
-          grobs <- ggplotGrob(plots()[[m]])
-        } else {
-          grobs <- rbind(grobs, ggplotGrob(plots()[[m]]), size = "last")
-        }
-      }
+    if (length(input$measurands > 0)) {
+      # list of plots to show
+      plot_grid_args <- plots()[as.integer(input$measurands)]
+      # remove legend
+      plot_grid_args <- lapply(plot_grid_args, function(p) {p + theme(legend.position = "none")})
+      # more arguments for plot_grid
+      plot_grid_args[["ncol"]] <- 1
+      plot_grid_args[["align"]] <- "v"
+      # all plots without legend
+      grid_plots <- do.call(plot_grid, plot_grid_args)
+
+      # get legend from first plot (has both sites), not important if it is
+      # shown or not
+      legend_plots <- get_legend(plots()[[1]])
+      # add legend to plot
+      plot_grid(grid_plots, legend_plots, rel_widths = c(3, .5))
     }
-    grid.newpage()
-    grid.draw(grobs)
   })
 
   #output$plot.ui <- renderUI({
