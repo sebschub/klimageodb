@@ -110,14 +110,22 @@ close(filecon)
 # data for webpage as small html
 library(xtable)
 
+# webpage parts
+names_lst <- list(german = c("Lufttemperatur", 
+                             "Windgeschwindigkeit", 
+                             "relative Feuchte", 
+                             "Luftdruck", 
+                             "kurzwellige Strahlung", 
+                             "langwellige Strahlung"), 
+                  english = c("Air temperature", 
+                              "Wind velocity", 
+                              "Relative Humidity", 
+                              "Air pressure", 
+                              "Shortwave radiation", 
+                              "Longwave radiation")
+)
+
 webpage_df <- data.frame(
-  name = c("Lufttemperatur", 
-           "Windgeschwindigkeit", 
-           "relative Feuchte", 
-           "Luftdruck", 
-           "kurzwellige Strahlung", 
-           "langwellige Strahlung"
-  ), 
   value = c(display_line[["garden"]]$GAirTC_2_Avg,
             display_line[["roof"]]$RWS_ms_S_WVT,
             display_line[["garden"]]$GRH_2*100,
@@ -126,29 +134,46 @@ webpage_df <- data.frame(
             display_line[["roof"]]$RIR01UpCo1_Avg
   ), 
   unit = c("°C", "m/s", "%", "hPa", "W/m²", "W/m²")
-  )
+)
 
-html_head <- paste("<!DOCTYPE html>", 
-                   "<html lang=\"de\">", 
-                   "<head>", 
-                   "<meta charset=\"utf-8\" />",
-                   "<title>Messdaten Adlershof</title>",
-                   "</head>",
-                   "<body>", 
-                   sep="\n")
-
-html_intro <- paste("Messstation Adlershof</br>Stand:", 
-                    strftime(display_line[["garden"]]$Datetime, format="%d.%m.%Y %H:%M", tz = "Europe/Berlin"))
-
-html_table <- paste(
-  print(
-    xtable(webpage_df, 
-           digits = matrix(c(NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 1, 1, 0, 0, 0, 0, NA, NA, NA, NA, NA, NA), ncol = 4)
-           ), 
-    "html", include.rownames=FALSE, include.colnames = FALSE,
-    html.table.attributes=""), 
-  collapse = "\n")
+html_head_lst <- list(german = paste("<!DOCTYPE html>", 
+                                     "<html lang=\"de\">", 
+                                     "<head>", 
+                                     "<meta charset=\"utf-8\" />",
+                                     "<title>Wetter Adlershof</title>",
+                                     "</head>",
+                                     "<body>", 
+                                     sep="\n"),
+                      english = paste("<!DOCTYPE html>", 
+                                      "<html lang=\"de\">", 
+                                      "<head>", 
+                                      "<meta charset=\"utf-8\" />",
+                                      "<title>Weather Adlershof</title>",
+                                      "</head>",
+                                      "<body>", 
+                                      sep="\n")
+)
+                      
+html_intro_lst <- list(german = paste("Messstation Adlershof</br>Stand:", 
+                                      strftime(display_line[["garden"]]$Datetime, format="%d.%m.%Y %H:%M", tz = "Europe/Berlin")),
+                       english = paste("Station Adlershof</br>Stand:", 
+                                       strftime(display_line[["garden"]]$Datetime, format="%d/%m/%Y %H:%M", tz = "Europe/Berlin"))
+)
 
 html_tail <- paste("</body>", "</html>", sep="\n")
-## the html file
-write(paste(html_head, html_intro, html_table, html_tail, sep="\n"), "/var/www/html/aws/aws.html")
+
+## the html files
+for (lang in c("german", "english")) {
+  html_table <- paste(
+    print(
+      xtable(cbind(names_lst[[lang]], webpage_df), 
+             digits = matrix(c(NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 1, 1, 0, 0, 0, 0, NA, NA, NA, NA, NA, NA), ncol = 4)
+      ), 
+      "html", include.rownames=FALSE, include.colnames = FALSE,
+      html.table.attributes=""), 
+    collapse = "\n")
+  
+  write(paste(html_head_lst[[lang]], html_intro_lst[[lang]], html_table, html_tail, sep="\n"), 
+        paste0("/var/www/html/aws/aws_", lang, ".html")
+  )
+}
