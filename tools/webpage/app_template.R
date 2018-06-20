@@ -44,7 +44,11 @@ measurand <- tbl(con, "measurand_detail") %>%
           md_height == 2.) |
          (pq_name == "surface_upwelling_longwave_flux_in_air" &
           site_name %in% c("Adlershof_Garden", "Adlershof_Roof") &
-          md_height == 2.)
+          md_height == 2.) |
+#         (pq_name == "rainfall_amount" &
+#          site_name %in% c("Adlershof_Garden", "Adlershof_Roof")) |
+         (pq_name == "air_pressure") |
+         (pq_name == "ultraviolet_index")
   ) %>% collect()
 
 # get whole data (CHANGE THIS LATER IF IT IS TOO MUCH)
@@ -54,6 +58,7 @@ data_complete <- tbl(con, "station_adlershof_corrected") %>%
   left_join(measurand, by = "md_id") %>%
   mutate(stadl_value = if_else(pq_name == "air_temperature", stadl_value - 273.15, stadl_value)) %>%
   mutate(stadl_value = if_else(pq_name == "relative_humidity", stadl_value * 100,  stadl_value)) %>%
+  mutate(stadl_value = if_else(pq_name == "air_pressure", stadl_value / 100,  stadl_value)) %>%
   mutate(site_name   = factor(if_else(site_name == "Adlershof_Garden", garden_label, roof_label),
                               levels = c(garden_label, roof_label)))
 
@@ -112,6 +117,8 @@ div.checkbox {margin-top: 0px;}"))),
 server <- function(input, output) {
 
   plot_pq <- function(pq, line = TRUE) {
+    colors_legend <- scale_colour_hue()$palette(2)
+    names(colors_legend) <- c(garden_label, roof_label)
     p <- ggplot(filter(data_statistics(), pq_name == pq),
                 aes(x = stadl_datetime, y = stadl_value, color = site_name)) +
       labs(x = NULL, y = plot_y_label[[pq]], color = NULL) +
@@ -122,7 +129,8 @@ server <- function(input, output) {
             #legend.title = element_text(size = 20, margin = margin(r = 30, unit = "pt")),
             # margin is only supported with ggplot2 >= 2.3
             legend.text = element_text(size = 18, margin = margin(r = 20, unit = "pt")),
-            legend.position = "bottom")
+            legend.position = "bottom") +
+      scale_color_manual(values = colors_legend)
     if (line) {
       p <- p + geom_line()
     } else {
@@ -146,8 +154,10 @@ server <- function(input, output) {
         summarise(stadl_value = ifelse(
           any(pq_name == "wind_from_direction"),
           mean(circular(stadl_value, units = "degrees", modulo = "2pi"), na.rm = TRUE),
-          mean(stadl_value, na.rm = TRUE))
-        )
+          ifelse(any(pq_name == "rainfall_amount"),
+                 sum(stadl_value, na.rm = TRUE),
+                 mean(stadl_value, na.rm = TRUE))
+        ))
     } else {
       shinyjs::enable("averaging")
       if (input$averaging != "original") {
@@ -157,8 +167,10 @@ server <- function(input, output) {
           summarise(stadl_value = ifelse(
             any(pq_name == "wind_from_direction"),
             mean(circular(stadl_value, units = "degrees", modulo = "2pi"), na.rm = TRUE),
-            mean(stadl_value, na.rm = TRUE))
-          )
+            ifelse(any(pq_name == "rainfall_amount"),
+                   sum(stadl_value, na.rm = TRUE),
+                   mean(stadl_value, na.rm = TRUE))
+          ))
       } else {
         data_range()
       }
@@ -170,10 +182,13 @@ server <- function(input, output) {
          relativehumidity = plot_pq("relative_humidity"),
          windspeed = plot_pq("wind_speed"),
          winddirection = plot_pq("wind_from_direction", line = FALSE),
+#         precipitation = plot_pq("rainfall_amount", line = FALSE),
+         pressure = plot_pq("air_pressure"),
          shortwaveincoming = plot_pq("surface_downwelling_shortwave_flux_in_air"),
          shortwaveoutgoing = plot_pq("surface_upwelling_shortwave_flux_in_air"),
          longwaveincoming = plot_pq("surface_downwelling_longwave_flux_in_air"),
-         longwaveoutgoing = plot_pq("surface_upwelling_longwave_flux_in_air")
+         longwaveoutgoing = plot_pq("surface_upwelling_longwave_flux_in_air"),
+         uvindex = plot_pq("ultraviolet_index")
     )
   })
 

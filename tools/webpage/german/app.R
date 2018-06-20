@@ -2,10 +2,13 @@ measurand_label <- list("2m Lufttemperatur (T2m)" = 1,
                         "Relative Feuchte (RF)" = 2,
                         "Windgeschwindigkeit (WG)" = 3,
                         "Windrichtung (WR)" = 4,
-                        "Globalstrahlung (KW↓)" = 5,
-                        "Reflektierte Solarstrahlung (KW↑)" = 6,
-                        "Atmosphärische Gegenstrahlung (LW↓)" = 7,
-                        "Refl. und emittierte langwellige Str. (LW↑)" = 8)
+#                        "Niederschlag (PP)" = 5,
+                        "Luftdruck (LD)" = 5,
+                        "Globalstrahlung (KW↓)" = 6,
+                        "Reflektierte Solarstrahlung (KW↑)" = 7,
+                        "Atmosphärische Gegenstrahlung (LW↓)" = 8,
+                        "Emittierte und refl. langwellige Str. (LW↑)" = 9,
+                        "UV-Index (UVI)" = 10)
 
 titlePanel_label <- "Messstation der Klimageographie in Adlershof"
 
@@ -23,17 +26,20 @@ averaging_choices <- list("Original" = "original",
 )
 averaging_label <- "Mittelung der Zeitreihe"
 
-garden_label <- "Messgarten"
-roof_label <- "Institutsdach"
+garden_label <- "Garten"
+roof_label <- "Dach"
 
 plot_y_label <- list("air_temperature" = "T2m (°C)",
                      "relative_humidity" = "RF (%)",
                      "wind_speed" = "WG (m/s)",
                      "wind_from_direction" = "WR (°)",
+                     #"rainfall_amount" = "PP (mm)",
+                     "air_pressure" = "LD (hPa)",
                      "surface_downwelling_shortwave_flux_in_air" = "KW↓ (W/m²)",
                      "surface_upwelling_shortwave_flux_in_air" = "KW↑ (W/m²)",
                      "surface_downwelling_longwave_flux_in_air" = "LW↓ (W/m²)",
-                     "surface_upwelling_longwave_flux_in_air" = "LW↑ (W/m²)")
+                     "surface_upwelling_longwave_flux_in_air" = "LW↑ (W/m²)",
+                     "ultraviolet_index" = "UVI")
 
 source("../app_template.R", local = TRUE)
 
