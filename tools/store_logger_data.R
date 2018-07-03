@@ -113,16 +113,18 @@ library(xtable)
 # webpage parts
 names_lst <- list(german = c("Lufttemperatur", 
                              "Windgeschwindigkeit", 
-                             "relative Feuchte", 
+                             "Relative Feuchte", 
                              "Luftdruck", 
-                             "kurzwellige Strahlung", 
-                             "langwellige Strahlung"), 
+                             "Einfallende Solarstrahlung", 
+                             "Atmosphärische Gegenstrahlung",
+                             "UV-Index"), 
                   english = c("Air temperature", 
                               "Wind velocity", 
                               "Relative Humidity", 
                               "Air pressure", 
-                              "Shortwave radiation", 
-                              "Longwave radiation")
+                              "Incoming solar radiation", 
+                              "Incoming longwave radiation",
+                              "UV index")
 )
 
 webpage_df <- data.frame(
@@ -131,9 +133,10 @@ webpage_df <- data.frame(
             display_line[["garden"]]$GRH_2*100,
             display_line[["roof"]]$RBP_mbar_Avg,
             max(0., display_line[["roof"]]$RSR01Up1_Avg),
-            display_line[["roof"]]$RIR01UpCo1_Avg
+            display_line[["roof"]]$RIR01UpCo1_Avg,
+            as.numeric(uv_df$V3)
   ), 
-  unit = c("°C", "m/s", "%", "hPa", "W/m²", "W/m²")
+  unit = c("°C", "m/s", "%", "hPa", "W/m²", "W/m²", "")
 )
 
 html_head_lst <- list(german = paste("<!DOCTYPE html>", 
@@ -142,7 +145,7 @@ html_head_lst <- list(german = paste("<!DOCTYPE html>",
                                      "<meta charset=\"utf-8\" />",
                                      "<title>Wetter Adlershof</title>",
                                      "</head>",
-                                     "<body>", 
+                                     "<body style=\"font-family: Verdana,Helvetica,Arial; font-size: 0.8em;\">", 
                                      sep="\n"),
                       english = paste("<!DOCTYPE html>", 
                                       "<html lang=\"de\">", 
@@ -150,7 +153,7 @@ html_head_lst <- list(german = paste("<!DOCTYPE html>",
                                       "<meta charset=\"utf-8\" />",
                                       "<title>Weather Adlershof</title>",
                                       "</head>",
-                                      "<body>", 
+                                      "<body style=\"font-family: Verdana,Helvetica,Arial; font-size: 0.8em;\">", 
                                       sep="\n")
 )
                       
@@ -167,7 +170,7 @@ for (lang in c("german", "english")) {
   html_table <- paste(
     print(
       xtable(cbind(names_lst[[lang]], webpage_df), 
-             digits = matrix(c(NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 1, 1, 0, 0, 0, 0, NA, NA, NA, NA, NA, NA), ncol = 4)
+             digits = matrix(c(NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 1, 1, 0, 0, 0, 0, 1, NA, NA, NA, NA, NA, NA, NA), ncol = 4)
       ), 
       "html", include.rownames=FALSE, include.colnames = FALSE,
       html.table.attributes=""), 
