@@ -1,28 +1,24 @@
 library(shiny)
-#library(pool)
+library(pool)
 library(dplyr)
 library(ggplot2)
 library(cowplot)
-library(grid)
 library(lubridate)
 library(circular)
-library(klimageodb)
 
-#pool <- dbPool(
-#  RPostgres::Postgres(),
-#  dbname = "klimageo",
-#  host = "blobdb.cms.hu-berlin.de",
-#  port = 5432,
-#  user = "klimageo_1"
-#)
-#onStop(function() {
-#  poolClose(pool)
-#})
-
-con <- dbConnect_klimageo(user = "klimageo_6")
+pool <- dbPool(
+  RPostgres::Postgres(),
+  dbname = "klimageo",
+  host = "blobdb.cms.hu-berlin.de",
+  port = 5432,
+  user = "klimageo_6"
+)
+onStop(function() {
+  poolClose(pool)
+})
 
 # get md_id
-measurand <- tbl(con, "measurand_detail") %>%
+measurand <- tbl(pool, "measurand_detail") %>%
   filter((pq_name == "air_temperature" &
           site_name %in% c("Adlershof_Garden", "Adlershof_Roof") &
           md_height == 2.) |
@@ -50,20 +46,6 @@ measurand <- tbl(con, "measurand_detail") %>%
          (pq_name == "air_pressure") |
          (pq_name == "ultraviolet_index")
   ) %>% collect()
-
-# get whole data (CHANGE THIS LATER IF IT IS TOO MUCH)
-# and apply some modifications for display
-data_complete <- tbl(con, "station_adlershof_corrected") %>%
-  filter(md_id %in% measurand$md_id) %>% collect() %>%
-  left_join(measurand, by = "md_id") %>%
-  mutate(stadl_value = if_else(pq_name == "air_temperature", stadl_value - 273.15, stadl_value)) %>%
-  mutate(stadl_value = if_else(pq_name == "relative_humidity", stadl_value * 100,  stadl_value)) %>%
-  mutate(stadl_value = if_else(pq_name == "air_pressure", stadl_value / 100,  stadl_value)) %>%
-  mutate(site_name   = factor(if_else(site_name == "Adlershof_Garden", garden_label, roof_label),
-                              levels = c(garden_label, roof_label)))
-
-
-dbDisconnect(con)
 
 round_unit <- c("hours", "days", "weeks")
 
@@ -139,10 +121,20 @@ server <- function(input, output) {
     p
   }
 
+  # get data and apply some modifications for display
   data_range <- reactive({
-    data_complete %>%
-      filter(stadl_datetime >= input$dateRange[1],
-             stadl_datetime <= (input$dateRange[2] + 1))
+    start_date <- paste(input$dateRange[1], "00:00:00 Europe/Berlin")
+    end_date <- paste(input$dateRange[2] + 1, "00:00:00 Europe/Berlin")
+    tbl(pool, "station_adlershof_corrected") %>%
+      filter(md_id %in% measurand$md_id) %>%
+      filter(stadl_datetime >= start_date, stadl_datetime <= end_date) %>%
+      collect() %>%
+      left_join(measurand, by = "md_id") %>%
+      mutate(stadl_value = if_else(pq_name == "air_temperature", stadl_value - 273.15, stadl_value)) %>%
+      mutate(stadl_value = if_else(pq_name == "relative_humidity", stadl_value * 100,  stadl_value)) %>%
+      mutate(stadl_value = if_else(pq_name == "air_pressure", stadl_value / 100,  stadl_value)) %>%
+      mutate(site_name   = factor(if_else(site_name == "Adlershof_Garden", garden_label, roof_label),
+                                  levels = c(garden_label, roof_label)))
   })
 
   data_statistics <- reactive({
