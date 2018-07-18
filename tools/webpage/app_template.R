@@ -96,7 +96,7 @@ div.checkbox {margin-top: 0px;}"))),
 )
 
 
-server <- function(input, output) {
+server <- function(input, output, session) {
 
   plot_pq <- function(pq, line = TRUE) {
     colors_legend <- scale_colour_hue()$palette(2)
@@ -121,13 +121,32 @@ server <- function(input, output) {
     p
   }
 
+  # define date range reactive values as a buffer for the values in
+  # input$dateRange; using input$dateRange _and_ updateDateRangeInput() creates
+  # the plot quickly twice
+  date_range <- reactiveValues()
+
+  # store and possibly correct selected date range
+  observe({
+    start_date <- input$dateRange[1]
+    end_date <- input$dateRange[2]
+    if (start_date > end_date) {
+      start_date <- end_date
+      updateDateRangeInput(session, "dateRange", start = end_date)
+    }
+
+    date_range$start <- start_date
+    date_range$end <- end_date
+  })
+
   # get data and apply some modifications for display
-  data_range <- reactive({
-    start_date <- paste(input$dateRange[1], "00:00:00 Europe/Berlin")
-    end_date <- paste(input$dateRange[2] + 1, "00:00:00 Europe/Berlin")
+  data_plot <- reactive({
+    start_date_string <- paste(date_range$start, "00:00:00 Europe/Berlin")
+    end_date_string <- paste(date_range$end + 1, "00:00:00 Europe/Berlin")
     tbl(pool, "station_adlershof_corrected") %>%
       filter(md_id %in% measurand$md_id) %>%
-      filter(stadl_datetime >= start_date, stadl_datetime <= end_date) %>%
+      filter(stadl_datetime >= start_date_string,
+             stadl_datetime <= end_date_string) %>%
       collect() %>%
       left_join(measurand, by = "md_id") %>%
       mutate(stadl_value = if_else(pq_name == "air_temperature", stadl_value - 273.15, stadl_value)) %>%
@@ -140,7 +159,7 @@ server <- function(input, output) {
   data_statistics <- reactive({
     if (input$kind == 2) {
       shinyjs::disable("averaging")
-      data_range() %>%
+      data_plot() %>%
         mutate(stadl_datetime = hour(stadl_datetime)) %>%
         group_by(pq_name, site_name, stadl_datetime) %>%
         summarise(stadl_value = ifelse(
@@ -153,7 +172,7 @@ server <- function(input, output) {
     } else {
       shinyjs::enable("averaging")
       if (input$averaging != "original") {
-        data_range() %>%
+        data_plot() %>%
           mutate(stadl_datetime = floor_date(stadl_datetime, unit = input$averaging)) %>%
           group_by(pq_name, site_name, stadl_datetime) %>%
           summarise(stadl_value = ifelse(
@@ -164,7 +183,7 @@ server <- function(input, output) {
                    mean(stadl_value, na.rm = TRUE))
           ))
       } else {
-        data_range()
+        data_plot()
       }
     }
   })
