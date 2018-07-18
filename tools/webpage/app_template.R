@@ -139,6 +139,13 @@ server <- function(input, output, session) {
     date_range$end <- end_date
   })
 
+  # correct maximum end date regularly
+  observe({
+    # force update every 10 minutes (60*10*1000 ms)
+    invalidateLater(600000, session)
+    updateDateRangeInput(session, "dateRange", max = Sys.Date())
+  })
+
   # get data and apply some modifications for display
   data_plot <- reactive({
     start_date_string <- paste(date_range$start, "00:00:00 Europe/Berlin")
