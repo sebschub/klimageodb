@@ -36,6 +36,10 @@ data$TIMESTAMP <- as.POSIXct(data$TIMESTAMP, tz = "Etc/GMT+3")
 # select only new observations
 
 data <- data[data$TIMESTAMP > timestamp_in, ]
+
+if (nrow(data) == 0) {
+  stop("No new data found!")
+}
  
 
 # Add data table for Schiaparelli (Patagonia) station ---------------------
