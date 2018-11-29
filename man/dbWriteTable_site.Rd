@@ -51,3 +51,4 @@ Other custom dbWriteTable functions: \code{\link{dbAddCorrection_station_adlersh
   \code{\link{dbWriteTable_person}},
   \code{\link{dbWriteTable_quality_flag}}
 }
+\concept{custom dbWriteTable functions}

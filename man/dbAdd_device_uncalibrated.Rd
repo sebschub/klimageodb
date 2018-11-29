@@ -5,8 +5,8 @@
 \title{Insert data into \code{device} and \code{calibration_state} without
 calibration parameters}
 \usage{
-dbAdd_device_uncalibrated(conn, dev_name, devmod_name, dev_identifier = NULL,
-  dev_comment = NULL)
+dbAdd_device_uncalibrated(conn, dev_name, devmod_name,
+  dev_identifier = NULL, dev_comment = NULL)
 }
 \arguments{
 \item{conn}{Database connection.}

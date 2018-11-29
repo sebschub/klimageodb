@@ -16,4 +16,4 @@ Imports: RPostgres,
     xml2
 Suggests: testthat,
     covr
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1

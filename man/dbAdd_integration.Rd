@@ -5,8 +5,8 @@
 \alias{dbWriteTable_integration}
 \title{Add integration kind to \code{integration} table}
 \usage{
-dbAdd_integration(conn, inttype_name, int_measurement_interval, int_interval,
-  int_comment = NULL)
+dbAdd_integration(conn, inttype_name, int_measurement_interval,
+  int_interval, int_comment = NULL)
 
 dbWriteTable_integration(conn, inttype_id, int_measurement_interval,
   int_interval, int_comment = NULL)
@@ -58,3 +58,4 @@ Other custom dbWriteTable functions: \code{\link{dbAddCorrection_station_adlersh
   \code{\link{dbWriteTable_quality_flag}},
   \code{\link{dbWriteTable_site}}
 }
+\concept{custom dbWriteTable functions}

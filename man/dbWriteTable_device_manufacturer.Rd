@@ -4,7 +4,8 @@
 \alias{dbWriteTable_device_manufacturer}
 \title{Insert data into \code{device_manufacturer} table}
 \usage{
-dbWriteTable_device_manufacturer(conn, devman_name, devman_comment = NULL)
+dbWriteTable_device_manufacturer(conn, devman_name,
+  devman_comment = NULL)
 }
 \arguments{
 \item{conn}{Database connection.}
@@ -43,3 +44,4 @@ Other custom dbWriteTable functions: \code{\link{dbAddCorrection_station_adlersh
   \code{\link{dbWriteTable_quality_flag}},
   \code{\link{dbWriteTable_site}}
 }
+\concept{custom dbWriteTable functions}

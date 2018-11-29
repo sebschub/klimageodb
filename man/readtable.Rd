@@ -51,13 +51,17 @@ dbReadTable_measurand(conn)
 
 dbReadTable_quality_flag(conn)
 
-dbReadTable_station_adlershof(conn)
+dbReadTable_station_adlershof(conn, start_datetime = NULL,
+  end_datetime = NULL, md_id = NULL)
 
-dbReadTable_station_adlershof_correction(conn)
+dbReadTable_station_adlershof_correction(conn, start_datetime = NULL,
+  end_datetime = NULL, md_id = NULL)
 
-dbReadTable_station_patagonia(conn)
+dbReadTable_station_patagonia(conn, start_datetime = NULL,
+  end_datetime = NULL, md_id = NULL)
 
-dbReadTable_station_patagonia_correction(conn)
+dbReadTable_station_patagonia_correction(conn, start_datetime = NULL,
+  end_datetime = NULL, md_id = NULL)
 
 dbReadTable_device_model_detail(conn)
 
@@ -69,17 +73,28 @@ dbReadTable_integration_detail(conn)
 
 dbReadTable_measurand_detail(conn)
 
-dbReadTable_station_adlershof_corrected(conn)
+dbReadTable_station_adlershof_corrected(conn, start_datetime = NULL,
+  end_datetime = NULL, md_id = NULL)
 
-dbReadTable_station_patagonia_corrected(conn)
+dbReadTable_station_patagonia_corrected(conn, start_datetime = NULL,
+  end_datetime = NULL, md_id = NULL)
 }
 \arguments{
 \item{conn}{Database connection.}
+
+\item{start_datetime}{Start date and time as a single POSIXct value.}
+
+\item{end_datetime}{End date and time as a single POSIXct value.}
+
+\item{md_id}{Integer vector of measurand ID.}
 }
 \value{
-The functions return a data frame that contains the complete data
-  from the respective remote table, effectively the result of calling
-  \code{\link[DBI]{dbGetQuery}} with \code{SELECT * FROM <name>}. An error is
+The functions return a data frame that contains the data from the
+  respective remote table, effectively the result of calling
+  \code{\link[DBI]{dbGetQuery}} with \code{SELECT * FROM <name>}. Commands
+  that retrieve measurement data (\code{dbReadTable_station_*}) allow a
+  preselection of the data with \code{start_datetime}, \code{end_datetime}
+  and \code{md_id}; all other tables are retrieved completely. An error is
   raised if the table does not exist. An empty table is returned as a data
   frame with zero rows.
 }
@@ -93,7 +108,9 @@ convinience, function of the form \code{dbReadTable_*_detail} receive the
 views which join different database tables together. For example,
 \code{dbReadTable_measurand_detail} retrieves the \code{measurand} table with
 all id fields replaced by the corresponding information in
-\code{physical_quantity}, \code{calibration_state}, etc.
+\code{physical_quantity}, \code{calibration_state}, etc. Only the tables that
+include measurement data allow a preselection of the data to retrieve only a
+part of the data set.
 }
 \seealso{
 \code{\link[DBI]{dbReadTable}} for the general function to retrieve

@@ -20,6 +20,7 @@
 #' @param devtype_id Integer vector of \code{device_type} IDs.
 #' @param devtype_name String vector of name of device type.
 #' @param devtype_comment String vector of additional comments.
+#' @param end_datetime End date and time as a single POSIXct value.
 #' @param int_id Integer vector of \code{integration} ID.
 #' @param int_measurement_interval Numeric vector of intervals between
 #'   measurements in s.
@@ -75,6 +76,7 @@
 #' @param stapacor_datetime POSIXct vector of corrected date and time of
 #'   measurement.
 #' @param stapacor_value Numeric vector of corrected value of measurement.
+#' @param start_datetime Start date and time as a single POSIXct value.
 
 #'
 #' @name database_fields

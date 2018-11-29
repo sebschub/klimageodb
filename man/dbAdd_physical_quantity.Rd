@@ -7,8 +7,8 @@
 \usage{
 dbAdd_physical_quantity(conn, pq_name, pq_comment = NULL)
 
-dbWriteTable_physical_quantity(conn, pq_name, pq_unit, pq_description = NULL,
-  pq_comment = NULL)
+dbWriteTable_physical_quantity(conn, pq_name, pq_unit,
+  pq_description = NULL, pq_comment = NULL)
 }
 \arguments{
 \item{conn}{Database connection.}
@@ -63,3 +63,4 @@ Other custom dbWriteTable functions: \code{\link{dbAddCorrection_station_adlersh
   \code{\link{dbWriteTable_quality_flag}},
   \code{\link{dbWriteTable_site}}
 }
+\concept{custom dbWriteTable functions}

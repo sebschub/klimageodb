@@ -8,13 +8,18 @@
 #' views which join different database tables together. For example,
 #' \code{dbReadTable_measurand_detail} retrieves the \code{measurand} table with
 #' all id fields replaced by the corresponding information in
-#' \code{physical_quantity}, \code{calibration_state}, etc.
+#' \code{physical_quantity}, \code{calibration_state}, etc. Only the tables that
+#' include measurement data allow a preselection of the data to retrieve only a
+#' part of the data set.
 #'
 #' @inheritParams database_fields
 #'
-#' @return The functions return a data frame that contains the complete data
-#'   from the respective remote table, effectively the result of calling
-#'   \code{\link[DBI]{dbGetQuery}} with \code{SELECT * FROM <name>}. An error is
+#' @return The functions return a data frame that contains the data from the
+#'   respective remote table, effectively the result of calling
+#'   \code{\link[DBI]{dbGetQuery}} with \code{SELECT * FROM <name>}. Commands
+#'   that retrieve measurement data (\code{dbReadTable_station_*}) allow a
+#'   preselection of the data with \code{start_datetime}, \code{end_datetime}
+#'   and \code{md_id}; all other tables are retrieved completely. An error is
 #'   raised if the table does not exist. An empty table is returned as a data
 #'   frame with zero rows.
 #' @name readtable
@@ -100,28 +105,81 @@ dbReadTable_quality_flag <- function(conn){
   DBI::dbReadTable(conn, "quality_flag")
 }
 
-#' @rdname readtable
-#' @export
-dbReadTable_station_adlershof <- function(conn){
-  DBI::dbReadTable(conn, "station_adlershof")
+
+dbGetQuery_table <- function(conn, name, column_datetime,
+                             start_datetime,
+                             end_datetime,
+                             md_id) {
+
+  # build string for WHERE depending on which arguments are !NULL
+  where_list <- list()
+  if (!is.null(start_datetime)) {
+    if (!inherits(start_datetime, "POSIXct")) {
+      stop("start_datetime is used but it is not POSIXct.")
+    }
+    where_list[["start_datetime"]] <-
+      paste0(column_datetime, " >= '", format.POSIXct(start_datetime, format = "%F %T%z"), "'")
+  }
+  if (!is.null(end_datetime)) {
+    if (!inherits(end_datetime, "POSIXct")) {
+      stop("end_datetime is used but it is not POSIXct.")
+    }
+    where_list[["end_datetime"]] <-
+      paste0(column_datetime, " <= '", format.POSIXct(end_datetime, format = "%F %T%z"), "'")
+  }
+  if (!is.null(md_id)) {
+    where_list[["md_id"]] <- paste0("md_id IN (", paste(md_id, collapse = ", "), ")")
+  }
+
+  if (length(where_list) > 0) {
+    where_string <- paste("WHERE", paste(where_list, collapse = " AND "))
+  } else {
+    where_string <- ""
+  }
+
+  DBI::dbGetQuery(conn,
+                  paste("SELECT * FROM", name,
+                        where_string, ";"))
 }
 
 #' @rdname readtable
 #' @export
-dbReadTable_station_adlershof_correction <- function(conn){
-  DBI::dbReadTable(conn, "station_adlershof_correction")
+dbReadTable_station_adlershof <- function(conn,
+                                          start_datetime = NULL,
+                                          end_datetime = NULL,
+                                          md_id = NULL){
+  dbGetQuery_table(conn, "station_adlershof", "stadl_datetime",
+                   start_datetime, end_datetime, md_id)
 }
 
 #' @rdname readtable
 #' @export
-dbReadTable_station_patagonia <- function(conn){
-  DBI::dbReadTable(conn, "station_patagonia")
+dbReadTable_station_adlershof_correction <- function(conn,
+                                                     start_datetime = NULL,
+                                                     end_datetime = NULL,
+                                                     md_id = NULL){
+  dbGetQuery_table(conn, "station_adlershof_correction", "stadlcor_datetime",
+                   start_datetime, end_datetime, md_id)
 }
 
 #' @rdname readtable
 #' @export
-dbReadTable_station_patagonia_correction <- function(conn){
-  DBI::dbReadTable(conn, "station_patagonia_correction")
+dbReadTable_station_patagonia <- function(conn,
+                                          start_datetime = NULL,
+                                          end_datetime = NULL,
+                                          md_id = NULL){
+  dbGetQuery_table(conn, "station_patagonia", "stapa_datetime",
+                   start_datetime, end_datetime, md_id)
+}
+
+#' @rdname readtable
+#' @export
+dbReadTable_station_patagonia_correction <- function(conn,
+                                                     start_datetime = NULL,
+                                                     end_datetime = NULL,
+                                                     md_id = NULL){
+  dbGetQuery_table(conn, "station_patagonia_correction", "stapacor_datetime",
+                   start_datetime, end_datetime, md_id)
 }
 
 
@@ -159,12 +217,20 @@ dbReadTable_measurand_detail <- function(conn){
 
 #' @rdname readtable
 #' @export
-dbReadTable_station_adlershof_corrected <- function(conn){
-  DBI::dbReadTable(conn, "station_adlershof_corrected")
+dbReadTable_station_adlershof_corrected <- function(conn,
+                                                    start_datetime = NULL,
+                                                    end_datetime = NULL,
+                                                    md_id = NULL){
+  dbGetQuery_table(conn, "station_adlershof_corrected", "stadl_datetime",
+                   start_datetime, end_datetime, md_id)
 }
 
 #' @rdname readtable
 #' @export
-dbReadTable_station_patagonia_corrected <- function(conn){
-  DBI::dbReadTable(conn, "station_patagonia_corrected")
+dbReadTable_station_patagonia_corrected <- function(conn,
+                                                    start_datetime = NULL,
+                                                    end_datetime = NULL,
+                                                    md_id = NULL){
+  dbGetQuery_table(conn, "station_patagonia_corrected", "stapa_datetime",
+                   start_datetime, end_datetime, md_id)
 }

@@ -8,8 +8,8 @@
 dbAdd_device_model(conn, devmod_name, devtype_name, devman_name = NULL,
   devmod_comment = NULL)
 
-dbWriteTable_device_model(conn, devmod_name, devtype_id, devman_id = NULL,
-  devmod_comment = NULL)
+dbWriteTable_device_model(conn, devmod_name, devtype_id,
+  devman_id = NULL, devmod_comment = NULL)
 }
 \arguments{
 \item{conn}{Database connection.}
@@ -61,3 +61,4 @@ Other custom dbWriteTable functions: \code{\link{dbAddCorrection_station_adlersh
   \code{\link{dbWriteTable_quality_flag}},
   \code{\link{dbWriteTable_site}}
 }
+\concept{custom dbWriteTable functions}

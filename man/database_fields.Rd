@@ -41,6 +41,8 @@ numbers.}
 
 \item{devtype_comment}{String vector of additional comments.}
 
+\item{end_datetime}{End date and time as a single POSIXct value.}
+
 \item{int_id}{Integer vector of \code{integration} ID.}
 
 \item{int_measurement_interval}{Numeric vector of intervals between
@@ -140,6 +142,8 @@ measurement.}
 measurement.}
 
 \item{stapacor_value}{Numeric vector of corrected value of measurement.}
+
+\item{start_datetime}{Start date and time as a single POSIXct value.}
 }
 \description{
 Collection of arguments to "@inheritParams" from

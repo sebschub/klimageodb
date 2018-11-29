@@ -11,8 +11,8 @@ dbAddCorrection_station_adlershof(conn, stadl_id, qf_id, stadlcor_datetime,
 
 dbUpdate_station_adlershof_qf_id(conn, stadl_id, qf_id)
 
-dbWriteTable_station_adlershof_correction(conn, stadl_id, stadlcor_datetime,
-  md_id, stadlcor_value)
+dbWriteTable_station_adlershof_correction(conn, stadl_id,
+  stadlcor_datetime, md_id, stadlcor_value)
 }
 \arguments{
 \item{conn}{Database connection.}
@@ -80,3 +80,4 @@ Other custom dbWriteTable functions: \code{\link{dbAddCorrection_station_patagon
   \code{\link{dbWriteTable_quality_flag}},
   \code{\link{dbWriteTable_site}}
 }
+\concept{custom dbWriteTable functions}

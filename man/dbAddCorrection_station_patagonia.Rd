@@ -11,8 +11,8 @@ dbAddCorrection_station_patagonia(conn, stapa_id, qf_id, stapacor_datetime,
 
 dbUpdate_station_patagonia_qf_id(conn, stapa_id, qf_id)
 
-dbWriteTable_station_patagonia_correction(conn, stapa_id, stapacor_datetime,
-  md_id, stapacor_value)
+dbWriteTable_station_patagonia_correction(conn, stapa_id,
+  stapacor_datetime, md_id, stapacor_value)
 }
 \arguments{
 \item{conn}{Database connection.}
@@ -80,3 +80,4 @@ Other custom dbWriteTable functions: \code{\link{dbAddCorrection_station_adlersh
   \code{\link{dbWriteTable_quality_flag}},
   \code{\link{dbWriteTable_site}}
 }
+\concept{custom dbWriteTable functions}
