@@ -4,17 +4,24 @@ language: R
 sudo: false
 cache: packages
 addons:
-  postgresql: "9.4"
+  postgresql: "10"
+  apt:
+    packages:
+    - postgresql-10
+    - postgresql-client-10
+env:
+  global:
+  - PGPORT=5433
 services:
   - postgresql
 before_script:
-  - psql -U postgres -c 'CREATE DATABASE klimageo;'
-  - psql -U postgres -c "ALTER USER postgres WITH PASSWORD 'password';"
-  - psql -U postgres klimageo -f ${TRAVIS_BUILD_DIR}/travis/create_tables.sql
+  - psql -U travis -c 'CREATE DATABASE klimageo;'
+  - psql -U travis -c "ALTER USER travis WITH PASSWORD 'password';"
+  - psql -U travis klimageo -f ${TRAVIS_BUILD_DIR}/travis/create_tables.sql
   - cp ${TRAVIS_BUILD_DIR}/travis/pgpass ~/.pgpass
   - chmod 0600 ~/.pgpass
 after_success:
-  - psql -U postgres -c 'DROP DATABASE klimageo;'
-  - psql -U postgres -c 'CREATE DATABASE klimageo;'
-  - psql -U postgres klimageo -f ${TRAVIS_BUILD_DIR}/travis/create_tables.sql
+  - psql -U travis -c 'DROP DATABASE klimageo;'
+  - psql -U travis -c 'CREATE DATABASE klimageo;'
+  - psql -U travis klimageo -f ${TRAVIS_BUILD_DIR}/travis/create_tables.sql
   - Rscript -e 'covr::codecov()'
