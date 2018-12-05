@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# get passwords and addresses
+source /home/aws/.bash_profile
+
 CURRENT_TIME=$(date -u +"%Y%m%d_%H%M%S")
 
 DATA_FOLDER="/home/aws/schiaparelli/data_files/"
