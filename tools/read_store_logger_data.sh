@@ -49,10 +49,14 @@ if [ $? -ne 0 ]; then
     exit 2
 fi
 
-echo "${CURRENT_TIME_wo_s}" > last_access
-
 #echo "${CURRENT_TIME_full}" >> ${LOG_FILE}
 Rscript --vanilla store_logger_data.R ${DATA_FILE_GARDEN} ${DATA_FILE_ROOF} ${BOARD_FILE_TEMP} # >> ${LOG_FILE}
+if [ $? -ne 0 ]; then
+    exit 3
+fi
+
+echo "${CURRENT_TIME_wo_s}" > last_access
+
 # convert to DOS end-of-line character
 unix2dos -n ${BOARD_FILE_TEMP} ${BOARD_FILE}
 
