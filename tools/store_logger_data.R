@@ -3,8 +3,8 @@ if (length(args) != 3) stop(paste("Exactly three arguments required but got", le
 
 md_name_exclude <- c(
   "Datetime",    # time is required for every other measurement
-  "RecNbr"       # we don't need the logger measurement number
-  #"GRain_m_Tot"  # rain sensor not installed yet
+  "RecNbr",      # we don't need the logger measurement number
+  "RRain_mm_Tot" # roof rain sensor not working
   )
 
 library(klimageodb)
