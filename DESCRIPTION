@@ -1,18 +1,21 @@
 Package: klimageodb
 Type: Package
 Title: Tools for the Klimageographie database
-Version: 0.3.1
+Version: 0.4.0
 Author: Sebastian Schubert
 Maintainer: Sebastian Schubert <sebastian.schubert@geo.hu-berlin.de>
 Description: This package provides commands to easily store and retrieve
     data from the Klimageographie database.
 Depends:
-    R (>= 3.1.0),
+    R (>= 3.5.0),
     DBI
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Imports: RPostgres,
+Imports: 
+    utils,
+    graphics,
+    RPostgres,
     xml2
 Suggests: testthat,
     covr

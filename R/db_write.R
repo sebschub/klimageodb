@@ -54,6 +54,10 @@
 #' @param pq_comment String vector of additional comments.
 #' @param qf_id Integer vector with 1 <= qf_id <= 9 indicating value ok and
 #'   qf_id >= 10 indicating value not ok.
+#' @param qf_id_good Integer value with 1 <= qf_id_good <= 9 that will be
+#'   written to the non-selected points indicating value ok.
+#' @param qf_id_bad Integer value with qf_id_bad >= 10 that will be written to
+#'   the selected points indicating value not ok and incorrectable.
 #' @param qf_name Character vector of quality_flag name.
 #' @param qf_description Character vector of quality_flag description.
 #' @param qf_comment Character vector of of additional information.
