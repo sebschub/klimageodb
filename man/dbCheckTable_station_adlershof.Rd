@@ -46,17 +46,23 @@ overwrite them.
 }
 \examples{
 \dontrun{
-con <- dbConnect_klimageo()
-# add all required entries before with the respective dbWriteTable_*
-dbWriteTable_measurand(md_name = "TA2M_1",
-                       md_setup_datetime = as.POSIXct("2012-01-01 12:15:12", tz = "UTC"),
-                       pq_id = 1,
-                       site_id = 1,
-                       calstate_id = 1,
-                       int_id = 1,
-                       md_height = 2.,
-                       pers_id = 1,
-                       md_comment = "the 2m temperature"))
+library(lubridate)
+
+con <- dbConnect_klimageo(user = "klimageo_1")
+
+start_datetime <- ymd_h("2018-12-17 00")
+end_datetime <- ymd_h("2019-01-01 00")
+
+# air temperature
+dbCheckTable_station_adlershof(con, md_id = 5,
+                               start_datetime = start_datetime,
+                               end_datetime = end_datetime)
+dbCheckTable_station_adlershof(con, md_id = 7,
+                               start_datetime = start_datetime,
+                               end_datetime = end_datetime)
+dbCheckTable_station_adlershof(con, md_id = 9,
+                               start_datetime = start_datetime,
+                               end_datetime = end_datetime)
 dbDisconnect(con)
 }
 }
