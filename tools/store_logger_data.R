@@ -74,6 +74,12 @@ dbDisconnect(con)
 
 # data for board
 
+# height corrected pressure with measurement height of 56m
+lapse_rate <- 0.0065
+height_pressure <- 56
+pressure_corrected <- display_line[["roof"]]$RBP_mbar_Avg * 
+  (1. - lapse_rate * height_pressure / (display_line[["roof"]]$RAirTK_Avg + lapse_rate * height_pressure))^-5.257
+
 display_df <- data.frame(
   Date = strftime(display_line[["garden"]]$Datetime, format="%d.%m.%Y", tz = "Europe/Berlin"),
   Time = strftime(display_line[["garden"]]$Datetime, format="%H:%M", tz = "Europe/Berlin"),
@@ -82,7 +88,7 @@ display_df <- data.frame(
   "HFP01 00640 (W/m2 (Ave))"  = as.numeric(uv_df$V3), # UV index
   "HFP01 00639 (W/m2 (Ave))"  = round(display_line[["roof"]]$RIR01UpCo1_Avg, 0), # incoming longwave roof
   "ML2X-1 (% (Ave))"          = round(display_line[["roof"]]$RWS_ms_S_WVT, 1), # wind speed roof
-  "ML2X-2 (% (Ave))"          = round(display_line[["roof"]]$RBP_mbar_Avg, 0), # pressure roof
+  "ML2X-2 (% (Ave))"          = round(pressure_corrected, 0), # pressure roof
   "ML2X-3 (% (Ave))"          = NA,
   "ML2X-4 (% (Ave))"          = NA,
   "TH2-1 (degC (Ave))"        = NA,
@@ -131,7 +137,7 @@ webpage_df <- data.frame(
   value = c(display_line[["garden"]]$GAirTC_2_Avg,
             display_line[["roof"]]$RWS_ms_S_WVT,
             display_line[["garden"]]$GRH_2*100,
-            display_line[["roof"]]$RBP_mbar_Avg,
+            pressure_corrected,
             max(0., display_line[["roof"]]$RSR01Up1_Avg),
             display_line[["roof"]]$RIR01UpCo1_Avg,
             as.numeric(uv_df$V3)
