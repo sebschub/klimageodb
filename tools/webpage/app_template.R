@@ -151,7 +151,7 @@ server <- function(input, output, session) {
     start_date_string <- paste(date_range$start, "00:00:00 Europe/Berlin")
     end_date_string <- paste(date_range$end + 1, "00:00:00 Europe/Berlin")
     tbl(pool, "station_adlershof_corrected") %>%
-      filter(md_id %in% measurand$md_id) %>%
+      filter(md_id %in% local(measurand$md_id)) %>%
       filter(stadl_datetime >= start_date_string,
              stadl_datetime <= end_date_string) %>%
       collect() %>%
