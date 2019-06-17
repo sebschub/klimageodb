@@ -102,6 +102,12 @@ unitless quantities.}
 \item{qf_id}{Integer vector with 1 <= qf_id <= 9 indicating value ok and
 qf_id >= 10 indicating value not ok.}
 
+\item{qf_id_good}{Integer value with 1 <= qf_id_good <= 9 that will be
+written to the non-selected points indicating value ok.}
+
+\item{qf_id_bad}{Integer value with qf_id_bad >= 10 that will be written to
+the selected points indicating value not ok and incorrectable.}
+
 \item{qf_name}{Character vector of quality_flag name.}
 
 \item{qf_description}{Character vector of quality_flag description.}
