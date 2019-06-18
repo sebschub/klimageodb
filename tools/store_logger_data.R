@@ -47,7 +47,7 @@ for (station_index in seq_along(station_names)) {
 
 # get md_id of precipitation
 md_id_precip <- dbGetQuery(con, paste("SELECT md_id FROM measurand_detail",
-                                      "WHERE pq_name = 'rainfall_amount' AND site_name = 'Adlershof_Garden'",
+                                      "WHERE pq_name = 'rainfall_amount' AND site_name = 'Adlershof_Roof'",
                                       "ORDER BY md_setup_datetime DESC LIMIT 1;"))[1,1]
 
 # time 12 hours before latest entry here
