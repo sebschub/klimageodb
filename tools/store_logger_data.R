@@ -50,13 +50,13 @@ md_id_precip <- dbGetQuery(con, paste("SELECT md_id FROM measurand_detail",
                                       "WHERE pq_name = 'rainfall_amount' AND site_name = 'Adlershof_Garden'",
                                       "ORDER BY md_setup_datetime DESC LIMIT 1;"))[1,1]
 
-# time one hour before latest entry here
-time_1h_before <- display_line[["garden"]]$Datetime - 60*60
+# time 12 hours before latest entry here
+time_start <- display_line[["garden"]]$Datetime - 60*60*12
 
 # sum up values in database
 precip_sum <- dbGetQuery(con, paste0("SELECT sum(stadl_value) FROM station_adlershof ",
                                      "WHERE md_id = ", md_id_precip, " AND stadl_datetime > '",
-                                     strftime(time_1h_before, tz = "GMT"), " +00:00';"))[1,1]
+                                     strftime(time_start, tz = "GMT"), " +00:00';"))[1,1]
 
 # UV index
 tryCatch({
