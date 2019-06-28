@@ -50,6 +50,11 @@ md_id_precip <- dbGetQuery(con, paste("SELECT md_id FROM measurand_detail",
                                       "WHERE pq_name = 'rainfall_amount' AND site_name = 'Adlershof_Roof'",
                                       "ORDER BY md_setup_datetime DESC LIMIT 1;"))[1,1]
 
+md_id_t2m <- dbGetQuery(con, paste("SELECT md_id FROM measurand_detail",
+                                   "WHERE pq_name = 'air_temperature' AND site_name = 'Adlershof_Garden' AND md_height = 2.00",
+                                   "ORDER BY md_setup_datetime DESC LIMIT 1;"))[1,1]
+
+
 # time 12 hours before latest entry here
 time_start <- display_line[["garden"]]$Datetime - 60*60*12
 
@@ -57,6 +62,21 @@ time_start <- display_line[["garden"]]$Datetime - 60*60*12
 precip_sum <- dbGetQuery(con, paste0("SELECT sum(stadl_value) FROM station_adlershof ",
                                      "WHERE md_id = ", md_id_precip, " AND stadl_datetime > '",
                                      strftime(time_start, tz = "GMT"), " +00:00';"))[1,1]
+
+# time 24 hours before latest entry here
+time_start <- display_line[["garden"]]$Datetime - 60*60*24
+
+# sum up values in database
+temperature_max <- dbGetQuery(con, paste0("SELECT max(stadl_value) FROM station_adlershof ",
+                                          "WHERE md_id = ", md_id_t2m, " AND stadl_datetime > '",
+                                          strftime(time_start, tz = "GMT"), " +00:00';"))[1,1]
+
+# sum up values in database
+temperature_min <- dbGetQuery(con, paste0("SELECT min(stadl_value) FROM station_adlershof ",
+                                          "WHERE md_id = ", md_id_t2m, " AND stadl_datetime > '",
+                                          strftime(time_start, tz = "GMT"), " +00:00';"))[1,1]
+
+
 
 # UV index
 tryCatch({
@@ -88,7 +108,7 @@ display_df <- data.frame(
   "HFP01 00640 (W/m2 (Ave))"  = as.numeric(uv_df$V3), # UV index
   "HFP01 00639 (W/m2 (Ave))"  = round(display_line[["roof"]]$RIR01UpCo1_Avg, 0), # incoming longwave roof
   "ML2X-1 (% (Ave))"          = round(display_line[["roof"]]$RWS_ms_S_WVT, 1), # wind speed roof
-  "ML2X-2 (% (Ave))"          = round(pressure_corrected, 0), # pressure roof
+  "ML2X-2 (% (Ave))"          = round(pressure_corrected, 1), # pressure roof
   "ML2X-3 (% (Ave))"          = NA,
   "ML2X-4 (% (Ave))"          = NA,
   "TH2-1 (degC (Ave))"        = NA,
@@ -118,6 +138,8 @@ library(xtable)
 
 # webpage parts
 names_lst <- list(german = c("Lufttemperatur", 
+                             "  Minimum letzte 24h",
+                             "  Maximum letzte 24h",
                              "Windgeschwindigkeit", 
                              "Relative Feuchte", 
                              "Luftdruck", 
@@ -125,6 +147,8 @@ names_lst <- list(german = c("Lufttemperatur",
                              "Atmosphärische Gegenstrahlung",
                              "UV-Index"), 
                   english = c("Air temperature", 
+                              "  Minimum last 24h",
+                              "  Maximum last 24h",
                               "Wind velocity", 
                               "Relative Humidity", 
                               "Air pressure", 
@@ -135,6 +159,8 @@ names_lst <- list(german = c("Lufttemperatur",
 
 webpage_df <- data.frame(
   value = c(display_line[["garden"]]$GAirTC_2_Avg,
+            temperature_min - 273.15,
+            temperature_max - 273.15,
             display_line[["roof"]]$RWS_ms_S_WVT,
             display_line[["garden"]]$GRH_2*100,
             pressure_corrected,
@@ -142,7 +168,7 @@ webpage_df <- data.frame(
             display_line[["roof"]]$RIR01UpCo1_Avg,
             as.numeric(uv_df$V3)
   ), 
-  unit = c("°C", "m/s", "%", "hPa", "W/m²", "W/m²", "")
+  unit = c("°C", "°C", "°C", "m/s", "%", "hPa", "W/m²", "W/m²", "")
 )
 
 html_head_lst <- list(german = paste("<!DOCTYPE html>", 
@@ -176,7 +202,7 @@ for (lang in c("german", "english")) {
   html_table <- paste(
     print(
       xtable(cbind(names_lst[[lang]], webpage_df), 
-             digits = matrix(c(NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 1, 1, 0, 0, 0, 0, 1, NA, NA, NA, NA, NA, NA, NA), ncol = 4)
+             digits = matrix(c(NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 1, 1, 1, 1, 0, 1, 0, 0, 1, NA, NA, NA, NA, NA, NA, NA, NA, NA), ncol = 4)
       ), 
       "html", include.rownames=FALSE, include.colnames = FALSE,
       html.table.attributes=""), 
