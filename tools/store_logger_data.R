@@ -140,6 +140,7 @@ library(xtable)
 names_lst <- list(german = c("Lufttemperatur", 
                              "  Minimum letzte 24h",
                              "  Maximum letzte 24h",
+                             "Niederschlag in 12h",
                              "Windgeschwindigkeit", 
                              "Relative Feuchte", 
                              "Luftdruck", 
@@ -149,6 +150,7 @@ names_lst <- list(german = c("Lufttemperatur",
                   english = c("Air temperature", 
                               "  Minimum last 24h",
                               "  Maximum last 24h",
+                              "Precipitation in 12h",
                               "Wind velocity", 
                               "Relative Humidity", 
                               "Air pressure", 
@@ -161,6 +163,7 @@ webpage_df <- data.frame(
   value = c(display_line[["garden"]]$GAirTC_2_Avg,
             temperature_min - 273.15,
             temperature_max - 273.15,
+            precip_sum,
             display_line[["roof"]]$RWS_ms_S_WVT,
             display_line[["garden"]]$GRH_2*100,
             pressure_corrected,
@@ -168,7 +171,7 @@ webpage_df <- data.frame(
             display_line[["roof"]]$RIR01UpCo1_Avg,
             as.numeric(uv_df$V3)
   ), 
-  unit = c("°C", "°C", "°C", "m/s", "%", "hPa", "W/m²", "W/m²", "")
+  unit = c("°C", "°C", "°C", "mm", "m/s", "%", "hPa", "W/m²", "W/m²", "")
 )
 
 html_head_lst <- list(german = paste("<!DOCTYPE html>", 
@@ -202,7 +205,7 @@ for (lang in c("german", "english")) {
   html_table <- paste(
     print(
       xtable(cbind(names_lst[[lang]], webpage_df), 
-             digits = matrix(c(NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 1, 1, 1, 1, 0, 1, 0, 0, 1, NA, NA, NA, NA, NA, NA, NA, NA, NA), ncol = 4)
+             digits = matrix(c(NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA), ncol = 4)
       ), 
       "html", include.rownames=FALSE, include.colnames = FALSE,
       html.table.attributes=""), 

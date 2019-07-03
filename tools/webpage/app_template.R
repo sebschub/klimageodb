@@ -41,8 +41,8 @@ measurand <- tbl(pool, "measurand_detail") %>%
          (pq_name == "surface_upwelling_longwave_flux_in_air" &
           site_name %in% c("Adlershof_Garden", "Adlershof_Roof") &
           md_height == 2.) |
-#         (pq_name == "rainfall_amount" &
-#          site_name %in% c("Adlershof_Garden", "Adlershof_Roof")) |
+         (pq_name == "rainfall_amount" &
+          site_name %in% c("Adlershof_Garden", "Adlershof_Roof")) |
          (pq_name == "air_pressure") |
          (pq_name == "ultraviolet_index")
   ) %>% collect()
@@ -200,7 +200,7 @@ server <- function(input, output, session) {
          relativehumidity = plot_pq("relative_humidity"),
          windspeed = plot_pq("wind_speed"),
          winddirection = plot_pq("wind_from_direction", line = FALSE),
-#         precipitation = plot_pq("rainfall_amount", line = FALSE),
+         precipitation = plot_pq("rainfall_amount", line = FALSE),
          pressure = plot_pq("air_pressure"),
          shortwaveincoming = plot_pq("surface_downwelling_shortwave_flux_in_air"),
          shortwaveoutgoing = plot_pq("surface_upwelling_shortwave_flux_in_air"),
