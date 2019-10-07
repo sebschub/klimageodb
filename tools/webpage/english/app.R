@@ -19,7 +19,7 @@ dateRange_separator <- " til "
 kind_label <- "Type"
 kind_choices <- list("Time series" = 1, "Average diurnal cycle" = 2)
 
-averaging_choices <- list("Original" = "original",
+averaging_choices <- list("10min values" = "original",
                      "Hours" = "hours",
                      "Days" = "days",
                      "Weeks" = "weeks"

@@ -19,7 +19,7 @@ dateRange_separator <- " bis "
 kind_label <- "Darstellungsart"
 kind_choices <- list("Zeitreihe" = 1, "mittlerer Tagesgang" = 2)
 
-averaging_choices <- list("Original" = "original",
+averaging_choices <- list("10min-Werte" = "original",
                      "Stunden" = "hours",
                      "Tage" = "days",
                      "Wochen" = "weeks"
