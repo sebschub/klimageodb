@@ -1,7 +1,7 @@
 ## Tests for interactive function not working yet
 # context("Correction of data")
 #
-# con <- dbConnect_klimageo(host = "localhost", port = 5433)
+# con <- dbConnect_klimageo(host = "localhost", port = 5432)
 # test_that("dbConnect_klimageo2", {
 #   expect_is(con, "DBIConnection")
 # })
