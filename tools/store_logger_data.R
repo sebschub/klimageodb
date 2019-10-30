@@ -101,7 +101,7 @@ pressure_corrected <- display_line[["roof"]]$RBP_mbar_Avg *
   (1. - lapse_rate * height_pressure / (display_line[["roof"]]$RAirTK_Avg + lapse_rate * height_pressure))^-5.257
 
 display_df <- data.frame(
-  Date = strftime(display_line[["garden"]]$Datetime, format="%d.%m.%Y", tz = "Europe/Berlin"),
+  Date = strftime(display_line[["garden"]]$Datetime, format="%d.%m.", tz = "Europe/Berlin"),
   Time = strftime(display_line[["garden"]]$Datetime, format="%H:%M", tz = "Europe/Berlin"),
   uSec = NA,
   "GLOBAL 8135 (W/m2 (Ave))"  = max(0., round(display_line[["roof"]]$RSR01Up1_Avg, 0)), # incoming shortwave roof
