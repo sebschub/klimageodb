@@ -219,9 +219,8 @@ dbRollback_or_Savepoint <- function(conn, transaction, spname) {
 #' @param spname String of the possibly required savpoint.
 #' @param transaction Use standard transactions or use Savepoints?
 #'
-#' @return \code{dbWithTransaction()} returns the value of the executed code.
-#'   Failure to initiate the transaction (e.g. if the connection is closed)
-#'   gives an error.
+#' @return \code{dbWithTransaction_or_Savepoint()} returns the value of the
+#'   executed code.
 #' @export
 #' @keywords internal
 dbWithTransaction_or_Savepoint <- function(conn, code, spname) {
