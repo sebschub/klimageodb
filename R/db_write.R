@@ -1043,6 +1043,8 @@ dbWriteTable_station_patagonia <- function(conn,
 #'
 #'
 #' @inheritParams database_fields
+#' @param overwrite Overwrite non-null qf_id values. If \code{FALSE}, only null
+#'   qf_id values are modified.
 #'
 #' @return For performance reason, contrary to the meta data table functions,
 #'   these functions do not return anything.
@@ -1085,13 +1087,35 @@ dbAddCorrection_station_adlershof <- function(conn,
 
 #' @rdname dbAddCorrection_station_adlershof
 #' @export
-dbUpdate_station_adlershof_qf_id <- function(conn, stadl_id, qf_id) {
+dbUpdate_station_adlershof_qf_id <- function(conn, stadl_id, qf_id,
+                                             overwrite = TRUE) {
+  if (!overwrite) {
+    # get stadl_ids out of argument list for which qf_id is null
+    stadl_id_qf_id_null <-
+      DBI::dbGetQuery(conn,
+                      paste("SELECT stadl_id FROM station_adlershof WHERE",
+                            paste0("stadl_id IN (", paste(stadl_id, collapse = ", "), ")"),
+                            "AND qf_id IS NULL;")
+      )[, 1]
+    # these entries can be modified, the rest not
+    towrite <- stadl_id %in% stadl_id_qf_id_null
+    stadl_id_notwritten <- stadl_id[!towrite]
+    stadl_id <- stadl_id[towrite]
+    qf_id <- qf_id[towrite]
+  }
   dbWithTransaction_or_Savepoint(conn, {
     qf_id_update <-
       DBI::dbSendStatement(conn,
                            statement = 'UPDATE station_adlershof SET "qf_id"=$1 WHERE stadl_id=$2',
                            params = list(qf_id, stadl_id))
     DBI::dbClearResult(qf_id_update)
+    if (!overwrite) {
+      if (!all(towrite)) {
+        message(paste("Did not update entries with stadl_id",
+                      paste(stadl_id_notwritten, collapse = ", "),
+                      "because of non-null qf_id."))
+      }
+    }
   }, spname = "dbUpdateQF_station_adlershof_savepoint")
 }
 
