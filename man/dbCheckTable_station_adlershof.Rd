@@ -4,8 +4,14 @@
 \alias{dbCheckTable_station_adlershof}
 \title{Check data in the \code{station_adlershof} table and flag bad data points}
 \usage{
-dbCheckTable_station_adlershof(conn, start_datetime = NULL,
-  end_datetime = NULL, md_id, qf_id_good = 1, qf_id_bad = 10)
+dbCheckTable_station_adlershof(
+  conn,
+  start_datetime = NULL,
+  end_datetime = NULL,
+  md_id,
+  qf_id_good = 1,
+  qf_id_bad = 10
+)
 }
 \arguments{
 \item{conn}{Database connection.}

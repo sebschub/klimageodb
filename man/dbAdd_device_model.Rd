@@ -5,11 +5,21 @@
 \alias{dbWriteTable_device_model}
 \title{Add device models to \code{device_model} table}
 \usage{
-dbAdd_device_model(conn, devmod_name, devtype_name, devman_name = NULL,
-  devmod_comment = NULL)
+dbAdd_device_model(
+  conn,
+  devmod_name,
+  devtype_name,
+  devman_name = NULL,
+  devmod_comment = NULL
+)
 
-dbWriteTable_device_model(conn, devmod_name, devtype_id,
-  devman_id = NULL, devmod_comment = NULL)
+dbWriteTable_device_model(
+  conn,
+  devmod_name,
+  devtype_id,
+  devman_id = NULL,
+  devmod_comment = NULL
+)
 }
 \arguments{
 \item{conn}{Database connection.}
@@ -45,20 +55,21 @@ dbDisconnect(con)
 }
 }
 \seealso{
-Other custom dbWriteTable functions: \code{\link{dbAddCorrection_station_adlershof}},
-  \code{\link{dbAddCorrection_station_patagonia}},
-  \code{\link{dbAdd_calibration_state}},
-  \code{\link{dbAdd_device}},
-  \code{\link{dbAdd_integration}},
-  \code{\link{dbAdd_measurand}},
-  \code{\link{dbAdd_physical_quantity}},
-  \code{\link{dbAdd_station_adlershof}},
-  \code{\link{dbAdd_station_patagonia}},
-  \code{\link{dbWriteTable_device_manufacturer}},
-  \code{\link{dbWriteTable_device_type}},
-  \code{\link{dbWriteTable_integration_type}},
-  \code{\link{dbWriteTable_person}},
-  \code{\link{dbWriteTable_quality_flag}},
-  \code{\link{dbWriteTable_site}}
+Other custom dbWriteTable functions: 
+\code{\link{dbAddCorrection_station_adlershof}()},
+\code{\link{dbAddCorrection_station_patagonia}()},
+\code{\link{dbAdd_calibration_state}()},
+\code{\link{dbAdd_device}()},
+\code{\link{dbAdd_integration}()},
+\code{\link{dbAdd_measurand}()},
+\code{\link{dbAdd_physical_quantity}()},
+\code{\link{dbAdd_station_adlershof}()},
+\code{\link{dbAdd_station_patagonia}()},
+\code{\link{dbWriteTable_device_manufacturer}()},
+\code{\link{dbWriteTable_device_type}()},
+\code{\link{dbWriteTable_integration_type}()},
+\code{\link{dbWriteTable_person}()},
+\code{\link{dbWriteTable_quality_flag}()},
+\code{\link{dbWriteTable_site}()}
 }
 \concept{custom dbWriteTable functions}

@@ -5,13 +5,35 @@
 \alias{dbWriteTable_measurand}
 \title{Add measurand to \code{measurand} table}
 \usage{
-dbAdd_measurand(conn, md_name, md_setup_datetime, pq_name, site_name,
-  dev_name, int_id, md_height = NULL, md_orientation = NULL,
-  md_tilt = NULL, pers_name = NULL, md_comment = NULL)
+dbAdd_measurand(
+  conn,
+  md_name,
+  md_setup_datetime,
+  pq_name,
+  site_name,
+  dev_name,
+  int_id,
+  md_height = NULL,
+  md_orientation = NULL,
+  md_tilt = NULL,
+  pers_name = NULL,
+  md_comment = NULL
+)
 
-dbWriteTable_measurand(conn, md_name, md_setup_datetime, pq_id, site_id,
-  calstate_id, int_id, md_height = NULL, md_orientation = NULL,
-  md_tilt = NULL, pers_id = NULL, md_comment = NULL)
+dbWriteTable_measurand(
+  conn,
+  md_name,
+  md_setup_datetime,
+  pq_id,
+  site_id,
+  calstate_id,
+  int_id,
+  md_height = NULL,
+  md_orientation = NULL,
+  md_tilt = NULL,
+  pers_id = NULL,
+  md_comment = NULL
+)
 }
 \arguments{
 \item{conn}{Database connection.}
@@ -78,20 +100,21 @@ dbDisconnect(con)
 }
 }
 \seealso{
-Other custom dbWriteTable functions: \code{\link{dbAddCorrection_station_adlershof}},
-  \code{\link{dbAddCorrection_station_patagonia}},
-  \code{\link{dbAdd_calibration_state}},
-  \code{\link{dbAdd_device_model}},
-  \code{\link{dbAdd_device}},
-  \code{\link{dbAdd_integration}},
-  \code{\link{dbAdd_physical_quantity}},
-  \code{\link{dbAdd_station_adlershof}},
-  \code{\link{dbAdd_station_patagonia}},
-  \code{\link{dbWriteTable_device_manufacturer}},
-  \code{\link{dbWriteTable_device_type}},
-  \code{\link{dbWriteTable_integration_type}},
-  \code{\link{dbWriteTable_person}},
-  \code{\link{dbWriteTable_quality_flag}},
-  \code{\link{dbWriteTable_site}}
+Other custom dbWriteTable functions: 
+\code{\link{dbAddCorrection_station_adlershof}()},
+\code{\link{dbAddCorrection_station_patagonia}()},
+\code{\link{dbAdd_calibration_state}()},
+\code{\link{dbAdd_device_model}()},
+\code{\link{dbAdd_device}()},
+\code{\link{dbAdd_integration}()},
+\code{\link{dbAdd_physical_quantity}()},
+\code{\link{dbAdd_station_adlershof}()},
+\code{\link{dbAdd_station_patagonia}()},
+\code{\link{dbWriteTable_device_manufacturer}()},
+\code{\link{dbWriteTable_device_type}()},
+\code{\link{dbWriteTable_integration_type}()},
+\code{\link{dbWriteTable_person}()},
+\code{\link{dbWriteTable_quality_flag}()},
+\code{\link{dbWriteTable_site}()}
 }
 \concept{custom dbWriteTable functions}

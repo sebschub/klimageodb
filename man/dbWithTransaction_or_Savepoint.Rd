@@ -26,9 +26,8 @@ dbWithTransaction_or_Savepoint(conn, code, spname)
 \item{code}{An arbitrary block of R code.}
 }
 \value{
-\code{dbWithTransaction()} returns the value of the executed code.
-  Failure to initiate the transaction (e.g. if the connection is closed)
-  gives an error.
+\code{dbWithTransaction_or_Savepoint()} returns the value of the
+  executed code.
 }
 \description{
 The function \code{dbWithTransaction_or_Savepoint()} starts a new transaction

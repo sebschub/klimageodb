@@ -6,13 +6,24 @@
 \alias{dbWriteTable_station_patagonia_correction}
 \title{Add corrections of \code{station_patagonia} measurements}
 \usage{
-dbAddCorrection_station_patagonia(conn, stapa_id, qf_id, stapacor_datetime,
-  md_id, stapacor_value)
+dbAddCorrection_station_patagonia(
+  conn,
+  stapa_id,
+  qf_id,
+  stapacor_datetime,
+  md_id,
+  stapacor_value
+)
 
 dbUpdate_station_patagonia_qf_id(conn, stapa_id, qf_id)
 
-dbWriteTable_station_patagonia_correction(conn, stapa_id,
-  stapacor_datetime, md_id, stapacor_value)
+dbWriteTable_station_patagonia_correction(
+  conn,
+  stapa_id,
+  stapacor_datetime,
+  md_id,
+  stapacor_value
+)
 }
 \arguments{
 \item{conn}{Database connection.}
@@ -64,20 +75,21 @@ dbDisconnect(con)
 }
 }
 \seealso{
-Other custom dbWriteTable functions: \code{\link{dbAddCorrection_station_adlershof}},
-  \code{\link{dbAdd_calibration_state}},
-  \code{\link{dbAdd_device_model}},
-  \code{\link{dbAdd_device}},
-  \code{\link{dbAdd_integration}},
-  \code{\link{dbAdd_measurand}},
-  \code{\link{dbAdd_physical_quantity}},
-  \code{\link{dbAdd_station_adlershof}},
-  \code{\link{dbAdd_station_patagonia}},
-  \code{\link{dbWriteTable_device_manufacturer}},
-  \code{\link{dbWriteTable_device_type}},
-  \code{\link{dbWriteTable_integration_type}},
-  \code{\link{dbWriteTable_person}},
-  \code{\link{dbWriteTable_quality_flag}},
-  \code{\link{dbWriteTable_site}}
+Other custom dbWriteTable functions: 
+\code{\link{dbAddCorrection_station_adlershof}()},
+\code{\link{dbAdd_calibration_state}()},
+\code{\link{dbAdd_device_model}()},
+\code{\link{dbAdd_device}()},
+\code{\link{dbAdd_integration}()},
+\code{\link{dbAdd_measurand}()},
+\code{\link{dbAdd_physical_quantity}()},
+\code{\link{dbAdd_station_adlershof}()},
+\code{\link{dbAdd_station_patagonia}()},
+\code{\link{dbWriteTable_device_manufacturer}()},
+\code{\link{dbWriteTable_device_type}()},
+\code{\link{dbWriteTable_integration_type}()},
+\code{\link{dbWriteTable_person}()},
+\code{\link{dbWriteTable_quality_flag}()},
+\code{\link{dbWriteTable_site}()}
 }
 \concept{custom dbWriteTable functions}
