@@ -1079,7 +1079,7 @@ dbAddCorrection_station_adlershof <- function(conn,
                      stadlcor_datetime = stadlcor_datetime,
                      md_id = md_id,
                      stadlcor_value = stadlcor_value)
-    dbUpdate_station_adlershof_qf_id(conn, stadl_id, qf_id)
+    dbUpdate_station_adlershof_qf_id(conn, stadl_id, qf_id, overwrite = TRUE)
   }, spname = "dbAddCorrection_station_adlershof_savepoint")
 }
 
@@ -1089,7 +1089,7 @@ dbAddCorrection_station_adlershof <- function(conn,
 #' @keywords internal
 dbUpdate_qf_id <- function(conn,
                            table_string, id_string, spname,
-                           id, qf_id, overwrite = TRUE) {
+                           id, qf_id, overwrite = FALSE) {
   if (!overwrite) {
     # get stadl_ids out of argument list for which qf_id is null
     id_qf_id_null <-
@@ -1205,7 +1205,7 @@ dbAddCorrection_station_patagonia <- function(conn,
                                               stapacor_datetime = stapacor_datetime,
                                               md_id = md_id,
                                               stapacor_value = stapacor_value)
-    dbUpdate_station_patagonia_qf_id(conn, stapa_id, qf_id)
+    dbUpdate_station_patagonia_qf_id(conn, stapa_id, qf_id, overwrite = TRUE)
   }, spname = "dbAddCorrection_station_patagonia_savepoint")
 }
 
