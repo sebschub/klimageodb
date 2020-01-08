@@ -5,11 +5,21 @@
 \alias{dbWriteTable_device}
 \title{Add devices to \code{device} table}
 \usage{
-dbAdd_device(conn, dev_name, devmod_name, dev_identifier = NULL,
-  dev_comment = NULL)
+dbAdd_device(
+  conn,
+  dev_name,
+  devmod_name,
+  dev_identifier = NULL,
+  dev_comment = NULL
+)
 
-dbWriteTable_device(conn, dev_name, devmod_id, dev_identifier = NULL,
-  dev_comment = NULL)
+dbWriteTable_device(
+  conn,
+  dev_name,
+  devmod_id,
+  dev_identifier = NULL,
+  dev_comment = NULL
+)
 }
 \arguments{
 \item{conn}{Database connection.}
@@ -47,20 +57,21 @@ dbDisconnect(con)
   does not require calibration to both \code{device} and
   \code{calibration_state}
 
-Other custom dbWriteTable functions: \code{\link{dbAddCorrection_station_adlershof}},
-  \code{\link{dbAddCorrection_station_patagonia}},
-  \code{\link{dbAdd_calibration_state}},
-  \code{\link{dbAdd_device_model}},
-  \code{\link{dbAdd_integration}},
-  \code{\link{dbAdd_measurand}},
-  \code{\link{dbAdd_physical_quantity}},
-  \code{\link{dbAdd_station_adlershof}},
-  \code{\link{dbAdd_station_patagonia}},
-  \code{\link{dbWriteTable_device_manufacturer}},
-  \code{\link{dbWriteTable_device_type}},
-  \code{\link{dbWriteTable_integration_type}},
-  \code{\link{dbWriteTable_person}},
-  \code{\link{dbWriteTable_quality_flag}},
-  \code{\link{dbWriteTable_site}}
+Other custom dbWriteTable functions: 
+\code{\link{dbAddCorrection_station_adlershof}()},
+\code{\link{dbAddCorrection_station_patagonia}()},
+\code{\link{dbAdd_calibration_state}()},
+\code{\link{dbAdd_device_model}()},
+\code{\link{dbAdd_integration}()},
+\code{\link{dbAdd_measurand}()},
+\code{\link{dbAdd_physical_quantity}()},
+\code{\link{dbAdd_station_adlershof}()},
+\code{\link{dbAdd_station_patagonia}()},
+\code{\link{dbWriteTable_device_manufacturer}()},
+\code{\link{dbWriteTable_device_type}()},
+\code{\link{dbWriteTable_integration_type}()},
+\code{\link{dbWriteTable_person}()},
+\code{\link{dbWriteTable_quality_flag}()},
+\code{\link{dbWriteTable_site}()}
 }
 \concept{custom dbWriteTable functions}

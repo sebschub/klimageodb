@@ -51,17 +51,33 @@ dbReadTable_measurand(conn)
 
 dbReadTable_quality_flag(conn)
 
-dbReadTable_station_adlershof(conn, start_datetime = NULL,
-  end_datetime = NULL, md_id = NULL)
+dbReadTable_station_adlershof(
+  conn,
+  start_datetime = NULL,
+  end_datetime = NULL,
+  md_id = NULL
+)
 
-dbReadTable_station_adlershof_correction(conn, start_datetime = NULL,
-  end_datetime = NULL, md_id = NULL)
+dbReadTable_station_adlershof_correction(
+  conn,
+  start_datetime = NULL,
+  end_datetime = NULL,
+  md_id = NULL
+)
 
-dbReadTable_station_patagonia(conn, start_datetime = NULL,
-  end_datetime = NULL, md_id = NULL)
+dbReadTable_station_patagonia(
+  conn,
+  start_datetime = NULL,
+  end_datetime = NULL,
+  md_id = NULL
+)
 
-dbReadTable_station_patagonia_correction(conn, start_datetime = NULL,
-  end_datetime = NULL, md_id = NULL)
+dbReadTable_station_patagonia_correction(
+  conn,
+  start_datetime = NULL,
+  end_datetime = NULL,
+  md_id = NULL
+)
 
 dbReadTable_device_model_detail(conn)
 
@@ -73,11 +89,19 @@ dbReadTable_integration_detail(conn)
 
 dbReadTable_measurand_detail(conn)
 
-dbReadTable_station_adlershof_corrected(conn, start_datetime = NULL,
-  end_datetime = NULL, md_id = NULL)
+dbReadTable_station_adlershof_corrected(
+  conn,
+  start_datetime = NULL,
+  end_datetime = NULL,
+  md_id = NULL
+)
 
-dbReadTable_station_patagonia_corrected(conn, start_datetime = NULL,
-  end_datetime = NULL, md_id = NULL)
+dbReadTable_station_patagonia_corrected(
+  conn,
+  start_datetime = NULL,
+  end_datetime = NULL,
+  md_id = NULL
+)
 }
 \arguments{
 \item{conn}{Database connection.}

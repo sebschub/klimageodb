@@ -4,9 +4,13 @@
 \alias{dbConnect_klimageo}
 \title{Connect to klimageo database}
 \usage{
-dbConnect_klimageo(dbname = "klimageo",
-  host = "blobdb.cms.hu-berlin.de", port = 5432, user = NULL,
-  password = NULL)
+dbConnect_klimageo(
+  dbname = "klimageo",
+  host = "blobdb.cms.hu-berlin.de",
+  port = 5432,
+  user = NULL,
+  password = NULL
+)
 }
 \arguments{
 \item{dbname}{Database name.}
