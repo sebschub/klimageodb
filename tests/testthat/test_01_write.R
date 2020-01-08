@@ -446,11 +446,13 @@ test_that("dbAdd_measurand", {
 
 
 quality_flag_df <- data.frame(
-  qf_id = c(1,11),
-  qf_name = c("value ok, automatic qc", "corrected calculation constant"),
+  qf_id = c(1,2,11),
+  qf_name = c("value ok, automatic qc", "value ok, manual qc",
+              "corrected calculation constant"),
   qf_description = c("value ok, automatically checked for consistency",
+                     "value ok, manually checked for consistency",
                      "original value used from calculation constant"),
-  qf_comment = as.character(c(NA, NA)))
+  qf_comment = as.character(c(NA, NA, NA)))
 
 test_dbWriteTable_table(con, "quality_flag", quality_flag_df, 1:3)
 
@@ -490,14 +492,42 @@ test_that("dbAdd_station_adlershof", {
   test_transaction_completed(con)
 })
 
-
-
 cor_stadl_id <- 1
 station_adlershof_df$qf_id[cor_stadl_id] <- 1
-test_that("dbUpdate_station_adlershof_qf_id", {
+test_that("dbUpdate_station_adlershof_qf_id 1", {
+  # replace NA
   dbUpdate_station_adlershof_qf_id(con,
-                               stadl_id = cor_stadl_id,
-                               qf_id = station_adlershof_df$qf_id[cor_stadl_id])
+                                   stadl_id = cor_stadl_id,
+                                   qf_id = station_adlershof_df$qf_id[cor_stadl_id])
+  df <- dbReadTable(con, "station_adlershof")
+  # reorder df because UPDATE changes original order
+  df <- df[order(df$stadl_id), ]
+  rownames(df) <- 1:nrow(df)
+  expect_equal(station_adlershof_df, df)
+  test_transaction_completed(con)
+})
+
+test_that("dbUpdate_station_adlershof_qf_id 2", {
+  # no overwrite
+  dbUpdate_station_adlershof_qf_id(con,
+                                   stadl_id = cor_stadl_id,
+                                   qf_id = 2,
+                                   overwrite = FALSE)
+  df <- dbReadTable(con, "station_adlershof")
+  # reorder df because UPDATE changes original order
+  df <- df[order(df$stadl_id), ]
+  rownames(df) <- 1:nrow(df)
+  expect_equal(station_adlershof_df, df)
+  test_transaction_completed(con)
+})
+
+station_adlershof_df$qf_id[4] <- 2
+test_that("dbUpdate_station_adlershof_qf_id 3", {
+  # no overwrite but with one change
+  dbUpdate_station_adlershof_qf_id(con,
+                                   stadl_id = c(1,4),
+                                   qf_id = c(2, 2),
+                                   overwrite = FALSE)
   df <- dbReadTable(con, "station_adlershof")
   # reorder df because UPDATE changes original order
   df <- df[order(df$stadl_id), ]

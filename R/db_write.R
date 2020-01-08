@@ -1043,6 +1043,8 @@ dbWriteTable_station_patagonia <- function(conn,
 #'
 #'
 #' @inheritParams database_fields
+#' @param overwrite Overwrite non-null qf_id values. If \code{FALSE}, only null
+#'   qf_id values are modified.
 #'
 #' @return For performance reason, contrary to the meta data table functions,
 #'   these functions do not return anything.
@@ -1082,17 +1084,55 @@ dbAddCorrection_station_adlershof <- function(conn,
 }
 
 
+#' General routine for Updating qf_id
+#'
+#' @keywords internal
+dbUpdate_qf_id <- function(conn,
+                           table_string, id_string, spname,
+                           id, qf_id, overwrite = TRUE) {
+  if (!overwrite) {
+    # get stadl_ids out of argument list for which qf_id is null
+    id_qf_id_null <-
+      DBI::dbGetQuery(conn,
+                      paste("SELECT", id_string, "FROM", table_string, "WHERE",
+                            paste0(id_string, " IN (", paste(id, collapse = ", "), ")"),
+                            "AND qf_id IS NULL;")
+      )[, 1]
+    # these entries can be modified, the rest not
+    towrite <- id %in% id_qf_id_null
+    id_notwritten <- id[!towrite]
+    id <- id[towrite]
+    qf_id <- qf_id[towrite]
+  }
+  dbWithTransaction_or_Savepoint(conn, {
+    # update necessary qf_id in database
+    qf_id_update <-
+      DBI::dbSendStatement(conn,
+                           statement = paste("UPDATE", table_string,
+                           "SET \"qf_id\"=$1 WHERE", id_string, "=$2"),
+                           params = list(qf_id, id))
+    DBI::dbClearResult(qf_id_update)
+    # output message if not all values were written
+    if (!overwrite) {
+      if (!all(towrite)) {
+        message(paste("Did not update entries with", id_string,
+                      paste(id_notwritten, collapse = ", "),
+                      "because of non-null qf_id."))
+      }
+    }
+  }, spname = spname)
+}
+
 
 #' @rdname dbAddCorrection_station_adlershof
 #' @export
-dbUpdate_station_adlershof_qf_id <- function(conn, stadl_id, qf_id) {
-  dbWithTransaction_or_Savepoint(conn, {
-    qf_id_update <-
-      DBI::dbSendStatement(conn,
-                           statement = 'UPDATE station_adlershof SET "qf_id"=$1 WHERE stadl_id=$2',
-                           params = list(qf_id, stadl_id))
-    DBI::dbClearResult(qf_id_update)
-  }, spname = "dbUpdateQF_station_adlershof_savepoint")
+dbUpdate_station_adlershof_qf_id <- function(conn, stadl_id, qf_id,
+                                             overwrite = TRUE) {
+  dbUpdate_qf_id(conn,
+                 table_string = "station_adlershof", id_string = "stadl_id",
+                 spname = "dbUpdateQF_station_adlershof_savepoint",
+                 id = stadl_id, qf_id = qf_id,
+                 overwrite = overwrite)
 }
 
 
@@ -1129,6 +1169,8 @@ dbWriteTable_station_adlershof_correction <- function(conn,
 #'
 #'
 #' @inheritParams database_fields
+#' @param overwrite Overwrite non-null qf_id values. If \code{FALSE}, only null
+#'   qf_id values are modified.
 #'
 #' @return For performance reason, contrary to the meta data table functions,
 #'   these functions do not return anything.
@@ -1171,14 +1213,13 @@ dbAddCorrection_station_patagonia <- function(conn,
 
 #' @rdname dbAddCorrection_station_patagonia
 #' @export
-dbUpdate_station_patagonia_qf_id <- function(conn, stapa_id, qf_id) {
-  dbWithTransaction_or_Savepoint(conn, {
-    qf_id_update <-
-      DBI::dbSendStatement(conn,
-                           statement = 'UPDATE station_patagonia SET "qf_id"=$1 WHERE stapa_id=$2',
-                           params = list(qf_id, stapa_id))
-    DBI::dbClearResult(qf_id_update)
-  }, spname = "dbUpdateQF_station_patagonia_savepoint")
+dbUpdate_station_patagonia_qf_id <- function(conn, stapa_id, qf_id,
+                                             overwrite = TRUE) {
+  dbUpdate_qf_id(conn,
+                 table_string = "station_patagonia", id_string = "stapa_id",
+                 spname = "dbUpdateQF_station_patagonia_savepoint",
+                 id = stapa_id, qf_id = qf_id,
+                 overwrite = overwrite)
 }
 
 

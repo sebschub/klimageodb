@@ -15,7 +15,7 @@ dbAddCorrection_station_patagonia(
   stapacor_value
 )
 
-dbUpdate_station_patagonia_qf_id(conn, stapa_id, qf_id)
+dbUpdate_station_patagonia_qf_id(conn, stapa_id, qf_id, overwrite = TRUE)
 
 dbWriteTable_station_patagonia_correction(
   conn,
@@ -39,6 +39,9 @@ measurement.}
 \item{md_id}{Integer vector of measurand ID.}
 
 \item{stapacor_value}{Numeric vector of corrected value of measurement.}
+
+\item{overwrite}{Overwrite non-null qf_id values. If \code{FALSE}, only null
+qf_id values are modified.}
 }
 \value{
 For performance reason, contrary to the meta data table functions,
