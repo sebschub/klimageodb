@@ -1,5 +1,5 @@
 args <- commandArgs(trailingOnly=TRUE)
-if (length(args) != 3) stop(paste("Exactly three arguments required but got", length(args)))
+if (length(args) != 4) stop(paste("Exactly four arguments required but got", length(args)))
 
 md_name_exclude <- c(
   "Datetime",    # time is required for every other measurement
@@ -212,6 +212,6 @@ for (lang in c("german", "english")) {
     collapse = "\n")
   
   write(paste(html_head_lst[[lang]], html_intro_lst[[lang]], html_table, html_tail, sep="\n"), 
-        paste0("/var/www/html/aws/aws_", lang, ".html")
+        paste0(args[4], "/aws_", lang, ".html")
   )
 }
