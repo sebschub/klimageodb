@@ -7,6 +7,7 @@ DATA_FOLDER="/home/aws/logger_data/"
 LOG_FILE="/home/aws/read_store.log"
 BOARD_FILE="/home/aws/board.csv"
 BOARD_FILE_TEMP="/home/aws/board_temp.csv"
+WEBPAGE_FOLDER="/home/aws/webpage_simple/"
 
 # times are UTC throughout the script
 
@@ -50,7 +51,7 @@ if [ $? -ne 0 ]; then
 fi
 
 #echo "${CURRENT_TIME_full}" >> ${LOG_FILE}
-Rscript --vanilla store_logger_data.R ${DATA_FILE_GARDEN} ${DATA_FILE_ROOF} ${BOARD_FILE_TEMP} # >> ${LOG_FILE}
+Rscript --vanilla store_logger_data.R ${DATA_FILE_GARDEN} ${DATA_FILE_ROOF} ${BOARD_FILE_TEMP} ${WEBPAGE_FOLDER} # >> ${LOG_FILE}
 if [ $? -ne 0 ]; then
     exit 3
 fi
@@ -60,6 +61,9 @@ echo "${CURRENT_TIME_wo_s}" > last_access
 # convert to DOS end-of-line character
 unix2dos -n ${BOARD_FILE_TEMP} ${BOARD_FILE}
 
+# copy web pages on login node
+scp -i ~/.ssh/id_rsa2 ${WEBPAGE_FOLDER}/aws_german.html login:/var/www/html/aws
+scp -i ~/.ssh/id_rsa2 ${WEBPAGE_FOLDER}/aws_english.html login:/var/www/html/aws
 
 xz ${DATA_FILE_GARDEN}
 xz ${DATA_FILE_ROOF}
