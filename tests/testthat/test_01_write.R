@@ -246,7 +246,7 @@ device_df <- rbind(factor2character(device_df),
 calibration_state_df_new <- data.frame(
   calstate_id = as.integer(c(2, 3)),
   dev_id = device_df$dev_id[length(device_df$dev_id)-c(1,0)],
-  calstate_datetime = as.POSIXct(c(NA, NA)),
+  calstate_datetime = as.POSIXct(c(NA, NA), tz = "UTC"),
   calstate_parameter = as.character(c(NA, NA)),
   calstate_comment = as.character(c(NA, NA)),
   stringsAsFactors = FALSE)
@@ -277,7 +277,8 @@ test_that("dbAdd_device_uncalibrated", {
 calibration_state_df_new <- data.frame(
   calstate_id = c(4, 5),
   dev_id = c(2, 1),
-  calstate_datetime = as.POSIXct(c("2013-01-01 12:15:12", "2013-06-01 12:15:12")),
+  calstate_datetime = as.POSIXct(c("2013-01-01 12:15:12", "2013-06-01 12:15:12"),
+                                 tz = "UTC"),
   calstate_parameter = as.character(c(NA, NA)),
   calstate_comment = as.character(c(NA, NA)),
   stringsAsFactors = FALSE)
