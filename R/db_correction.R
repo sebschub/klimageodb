@@ -157,7 +157,7 @@ dbCheckTable_station_adlershof <- function(conn,
       }
       if (answer_check) {
         dbUpdate_station_adlershof_qf_id(conn, good_data$stadl_id,
-                                         qf_id = rep(qf_id_good, nrow(good_data)))
+                                         qf_id = qf_id_good)
       } else {
         message("Modifing qf_id of good points skipped.")
       }

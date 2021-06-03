@@ -1090,6 +1090,12 @@ dbAddCorrection_station_adlershof <- function(conn,
 dbUpdate_qf_id <- function(conn,
                            table_string, id_string, spname,
                            id, qf_id, overwrite = FALSE) {
+
+  stopifnot(length(qf_id) == length(id) | length(qf_id) == 1)
+
+  # if qf_id is just one value, repeat this value length(id) times
+  if (length(qf_id) == 1) qf_id <- rep(qf_id, length(id))
+
   if (!overwrite) {
     # get stadl_ids out of argument list for which qf_id is null
     id_qf_id_null <-
