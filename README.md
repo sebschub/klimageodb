@@ -1,4 +1,4 @@
-[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active) [![Build Status](https://travis-ci.com/sebschub/klimageodb.svg?branch=master)](https://travis-ci.com/sebschub/klimageodb) [![codecov](https://codecov.io/gh/sebschub/klimageodb/branch/master/graph/badge.svg)](https://codecov.io/gh/sebschub/klimageodb)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active) [![Build Status](https://app.travis-ci.com/sebschub/klimageodb.svg?branch=master)](https://app.travis-ci.com/sebschub/klimageodb) [![codecov](https://codecov.io/gh/sebschub/klimageodb/branch/master/graph/badge.svg)](https://codecov.io/gh/sebschub/klimageodb)
 
 # klimageodb
 
